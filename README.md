@@ -29,3 +29,7 @@ python3 scripts/poll_source.py --list  # Ağ kullanmaz
 **Önemli:** Laboratuvarın 16 İzmir etkinliği ve 7 İstanbul mekânı canlı veri değildir; ayrıca tarihsel UCI restoran puanlarıyla test yapılır. Bu veriler İstanbul'da güncel öneri kalitesi, ziyaret veya rezervasyon sonucu ispatlamaz. MiMo/Laya gerçek API entegrasyonu henüz yoktur.
 
 **Veri politikası:** Ticari otomatik veri toplama yalnız izinli kaynaklardan ve uygun kullanım şartlarıyla yapılmalıdır. Test fixture'ları üretim verisi sayılmaz.
+
+## EVAL-002 · Browser Scout araştırması
+
+[Haiku 5.5 Browser Scout ADR](docs/adr/0003-read-only-browser-scout-experiment.md) ve [deney rehberi](labs/core/docs/SCOUT_BETA_EVAL.md) ile offline karşılaştırma kullanılabilir. Gerçek Haiku SDK bağlantısı **yalnız açıkça tetiklenen, izinli araştırma** için hazırlanmıştır; hiçbir canlı İstanbul sayfası veya ücretli API, CI'da çalışmaz.

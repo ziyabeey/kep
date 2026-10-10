@@ -37,5 +37,7 @@ jobs:
           python scripts/poll_source.py --list
           python scripts/poll_source.py --source izmir_open_events
           python scripts/poll_source.py --source zorlu_psm_events
+          python scripts/haiku_browser_scout.py --source zorlu_psm_events
+          python -m benchmarks.scout_eval
       - name: Reproduce offline benchmarks
         run: python run_all.py
