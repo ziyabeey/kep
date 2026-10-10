@@ -65,3 +65,14 @@ Kaynak ve atıflar `DATA_LICENSES.md`, `data/manifest.json`, `data/uci_manifest.
 ## KEP-SRC-001 (v0.4 araştırma eklemesi)
 
 `python3 scripts/poll_source.py --list` kayıtları gösterir. İstanbul kaynaklarının tamamı izin incelemesinde `pending` durumundadır. İzmir açık verisi yalnız `research_ingest` için onaylıdır; `--fetch` işlemi ayrıca açıkça talep edilmelidir. Bu işlem bir araştırma snapshotı üretir, **canlı etkinlik doğrulaması veya tüketici yayını yapmaz**. Detay için `sources/README.md`.
+
+### EVAL-002 · Browser Scout research (read-only)
+
+The optional Haiku 5.5 browser pilot is NOT used in CI or in the consumer app. The deterministic and hand-authored browser-replay test can be run offline:
+
+```bash
+python -m benchmarks.scout_eval
+python scripts/haiku_browser_scout.py --source zorlu_psm_events
+```
+
+See [SCOUT_BETA_EVAL.md](docs/SCOUT_BETA_EVAL.md) and [ADR-0003](../../docs/adr/0003-read-only-browser-scout-experiment.md). Hand-authored replay is not actual model performance. No Istanbul website is currently approved for automated browser collection.
