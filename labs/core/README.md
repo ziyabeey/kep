@@ -107,3 +107,7 @@ python scripts/audit_source_reliability.py --help  # No live source access
 ```
 
 See [RANDOM_AUDIT_PROTOCOL.md](docs/RANDOM_AUDIT_PROTOCOL.md) and [ADR-0007](../../docs/adr/0007-random-audit-vs-targeted-verification.md). Real Istanbul human adjudications are **not** available and `Issue #9` remains open. No model tokens or browser traffic are incurred.
+
+## KEP-DATA-001 · Overture Places v2 research adapter
+
+`python -m benchmarks.overture_places_eval` is a five-record **synthetic fixture** that tests the new September-2026 schema, coordinate integrity, missing categories, record identity and unmerged possible duplicates. `python scripts/overture_istanbul.py` is offline by default. [Pilot protocol](docs/OVERTURE_PLACES_PILOT.md) and [ADR-0008](../../docs/adr/0008-overture-pinned-places-pilot.md) document the exact `2026-09-23.1` release, separate manual GitHub retrieval, licensing and uncertainty rules. An Overture importer is not an Istanbul live events feed.

@@ -1,0 +1,52 @@
+name: Overture Istanbul Places Research (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      research_confirmation:
+        description: "Type RESEARCH_ONLY to confirm that output is not verified/user-facing"
+        required: true
+        type: string
+      release:
+        description: "Reviewed exact release; changing requires PR to sources/overture_places_pilot.json"
+        required: true
+        default: '2026-09-23.1'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: overture-pilot-manual-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  places-pilot:
+    if: ${{ inputs.research_confirmation == 'RESEARCH_ONLY' && inputs.release == '2026-09-23.1' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: labs/core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install public Overture CLI (manual only)
+        run: python -m pip install --disable-pip-version-check overturemaps
+      - name: Pin STAC and fetch two bounded sample cells
+        env:
+          OUT_PATH: ${{ runner.temp }}/kep-overture-places
+        run: |
+          python scripts/overture_istanbul.py --fetch --output "$OUT_PATH"
+          python -c 'import json,os,pathlib; d=json.loads((pathlib.Path(os.environ["OUT_PATH"])/"manifest.json").read_text()); assert not d["consumer_display_approved"]; print("release:",d["pinned_release"],"places:",d["audit"]["accepted"])'
+      - name: Upload minimized research data and integrity manifest
+        uses: actions/upload-artifact@v4
+        with:
+          name: overture-istanbul-places-research-${{ github.run_id }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/kep-overture-places/places_minimal.json
+            ${{ runner.temp }}/kep-overture-places/manifest.json

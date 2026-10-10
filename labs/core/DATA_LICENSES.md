@@ -63,3 +63,7 @@ Medelln, R. & Serna, J. (2011). Restaurant & consumer data [Dataset]. UCI Machin
 Yalnız `rating_final.csv` alınmıştır; ham dosyaya değişiklik yapılmamış, araç metninden iki GitHub aynasının baytlarıyla aynı olacak şekilde yeniden oluşturulmuştur. Model girdileri üç alana indirgenir, eğitim/test bölmeleri türetilmiş araştırma verisidir. Profil dosyaları alınmadı. Ayrıntılı aynalar ve hashler `data/uci_manifest.json` içinde. UCI ZIP'indeki baytlar bu ortamda doğrudan indirilerek teyit edilemedi.
 
 UCI puanları mevcut İstanbul kültür mekânlarının puanları değildir. Bu paket hiçbir tarihsel çalışma saati veya fiyatı 2026 güncel gerçeği saymaz.
+
+## Overture Places DATA-001 pilot (October 2026)
+
+The **Places** theme has providers under CDLA Permissive 2.0, Apache 2.0 and CC0 1.0. See https://docs.overturemaps.org/attribution/ and https://docs.overturemaps.org/guides/places/ . The experimental importer is pinned to Overture release `2026-09-23.1` and September schema v2 (taxonomy). Source-level provider/license values and exact file SHA-256 are preserved in an acquisition manifest when available. **No real Places GeoJSON bytes were downloaded into the git repository** by this PR. CI fixtures are synthetically manufactured and must never be described as Istanbul businesses. The release and licensing references were reviewed 11 October 2026.
