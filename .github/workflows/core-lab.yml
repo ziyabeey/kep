@@ -1,0 +1,26 @@
+name: Core laboratory tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  core-lab:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: labs/core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check Python syntax
+        run: python -m compileall -q kepcore benchmarks tests
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Rebuild offline lab and benchmark
+        run: python run_all.py

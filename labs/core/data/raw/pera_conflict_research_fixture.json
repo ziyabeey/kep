@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "source_url": "https://www.peramuseum.org/faq",
+    "tool_reference": "turn103517search1",
+    "acquired_date": "2026-10-10",
+    "data_kind": "retrieved_source_snapshot_contradiction_factual_annotation",
+    "license": "NO_OPEN_FEED_LICENSE_ESTABLISHED",
+    "use_scope": "limited_research_fixture_not_production_feed",
+    "notice": "No automated scraping or redistribution license is asserted. Six factual values only; no images or full text. No claim which tariff is current. The search extract showed mixed FAQ/footer prices; a separate opened cache rendered an older consistent 300/150/200 tariff. This is a retrieval/version conflict, not independently confirmed simultaneous live website inconsistency."
+  },
+  "claims": [
+    {
+      "entity_id": "wikipedia:Pera_Museum",
+      "field": "adult_admission_try",
+      "value": 300,
+      "currency": "TRY",
+      "section": "faq_answer",
+      "source_id": "pera_official",
+      "publisher_root": "pera_museum",
+      "source_url": "https://www.peramuseum.org/faq",
+      "source_published_at": null,
+      "source_observed_at": null,
+      "acquired_date": "2026-10-10",
+      "independent_support": false
+    },
+    {
+      "entity_id": "wikipedia:Pera_Museum",
+      "field": "concession_admission_try",
+      "value": 150,
+      "currency": "TRY",
+      "section": "faq_answer",
+      "source_id": "pera_official",
+      "publisher_root": "pera_museum",
+      "source_url": "https://www.peramuseum.org/faq",
+      "source_published_at": null,
+      "source_observed_at": null,
+      "acquired_date": "2026-10-10",
+      "independent_support": false
+    },
+    {
+      "entity_id": "wikipedia:Pera_Museum",
+      "field": "group_admission_try",
+      "value": 200,
+      "currency": "TRY",
+      "section": "faq_answer",
+      "source_id": "pera_official",
+      "publisher_root": "pera_museum",
+      "source_url": "https://www.peramuseum.org/faq",
+      "source_published_at": null,
+      "source_observed_at": null,
+      "acquired_date": "2026-10-10",
+      "independent_support": false
+    },
+    {
+      "entity_id": "wikipedia:Pera_Museum",
+      "field": "adult_admission_try",
+      "value": 450,
+      "currency": "TRY",
+      "section": "page_footer",
+      "source_id": "pera_official",
+      "publisher_root": "pera_museum",
+      "source_url": "https://www.peramuseum.org/faq",
+      "source_published_at": null,
+      "source_observed_at": null,
+      "acquired_date": "2026-10-10",
+      "independent_support": false
+    },
+    {
+      "entity_id": "wikipedia:Pera_Museum",
+      "field": "concession_admission_try",
+      "value": 250,
+      "currency": "TRY",
+      "section": "page_footer",
+      "source_id": "pera_official",
+      "publisher_root": "pera_museum",
+      "source_url": "https://www.peramuseum.org/faq",
+      "source_published_at": null,
+      "source_observed_at": null,
+      "acquired_date": "2026-10-10",
+      "independent_support": false
+    },
+    {
+      "entity_id": "wikipedia:Pera_Museum",
+      "field": "group_admission_try",
+      "value": 300,
+      "currency": "TRY",
+      "section": "page_footer",
+      "source_id": "pera_official",
+      "publisher_root": "pera_museum",
+      "source_url": "https://www.peramuseum.org/faq",
+      "source_published_at": null,
+      "source_observed_at": null,
+      "acquired_date": "2026-10-10",
+      "independent_support": false
+    }
+  ]
+}

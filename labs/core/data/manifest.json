@@ -1,0 +1,75 @@
+{
+  "version": "0.3",
+  "assembled_date": "2026-10-10",
+  "direct_http_download_succeeded": false,
+  "external_llm_calls": 0,
+  "github_changed": false,
+  "data_sets": [
+    {
+      "file": "data/raw/izmir_events_excerpt.json",
+      "kind": "real_open_event_records",
+      "count": 16,
+      "license": "CC-BY-4.0",
+      "sha256_local_fixture": "90ed182adf8ffcd3587d889eace4796425c90e86bcb832619942f1b585041cd2"
+    },
+    {
+      "file": "data/raw/istanbul_places_excerpt.json",
+      "kind": "real_open_place_facts",
+      "count": 7,
+      "license": "per_record_CC0_or_CC-BY-SA-4.0",
+      "sha256_local_fixture": "39bcaa726aee9224626b6900b03860b744c7f8f43e1e4215ab59721e4ff45101"
+    },
+    {
+      "file": "data/raw/pera_conflict_research_fixture.json",
+      "kind": "real_conflict_research_annotation",
+      "count": 6,
+      "license": "not_an_open_feed",
+      "sha256_local_fixture": "1feb9ae2b0b02c8d86b5771e9d2b65b198c6b2cc2717c235ac86adddd7a8a2cb"
+    },
+    {
+      "id": "uci_restaurant_ratings",
+      "canonical_citation": "Medelln, R. & Serna, J. (2011). Restaurant & consumer data [Dataset]. UCI Machine Learning Repository. DOI:10.24432/C5DP41",
+      "canonical_url": "https://archive.ics.uci.edu/dataset/232/restaurant+consumer+data",
+      "license": "CC-BY-4.0",
+      "retrieval_date": "2026-10-10",
+      "acquisition": "Connector text reconstructed locally, then byte-exact Git blob digest verification. Direct UCI ZIP was inaccessible in this environment.",
+      "mirrors": [
+        "https://github.com/tkarim45/Beginner-Data-Science-Projects/blob/531609b007a4053600d1b9fa1113a509cf24e7b0/Recommendation%20Systems/Restaurant%20Recommendation%20System/data/rating_final.csv",
+        "https://github.com/ajaysh2193/Restaurant-Recommender-System/blob/master/rating_final.csv"
+      ],
+      "file": "data/raw/uci/rating_final.csv",
+      "sha256_local_fixture": "fc994ea4e872365fc63e7f0bc970b36f86edeb4e80218d6a674a3d0e51181901",
+      "git_blob_sha1": "d2072b911d10edf52a1b01c4a481e02490e651ca",
+      "rows": 1161,
+      "users": 138,
+      "restaurants": 130,
+      "synthetic": false,
+      "origin_direct_verified": false,
+      "mirror_byte_integrity_verified": true,
+      "scope": "Historical rating prediction research only. Not current menus, opening hours, availability, city events or a representative Istanbul population.",
+      "fields_used": [
+        "userID",
+        "placeID",
+        "rating"
+      ],
+      "fields_not_used": [
+        "food_rating",
+        "service_rating"
+      ],
+      "sensitive_profile_files_not_acquired": true,
+      "no_unrated_negative_labels": true,
+      "timestamp_available": false
+    }
+  ],
+  "blocked_attempts": [
+    {
+      "target": "bulk HTTP downloads / pip",
+      "reason": "working-container external DNS resolution failed"
+    },
+    {
+      "target": "Overture bulk and Istanbul municipal CKAN",
+      "reason": "No actual bulk data downloaded; do not infer absence of data."
+    }
+  ],
+  "scope": "Offline research on real source excerpts. Synthetic corruptions isolated in tests. Not native app or deployed API."
+}

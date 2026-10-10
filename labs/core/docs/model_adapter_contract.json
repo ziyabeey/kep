@@ -1,0 +1,9 @@
+{
+  "status": "INTERFACE_ONLY_NO_LIVE_MIMO_OR_LAYA_CALLS",
+  "principle": "MiMo may explain approved candidates; model output cannot rewrite facts or bypass Core.",
+  "roles": {"laya": "Optional source-navigation/choice adapter after EVREN compatibility validation.","mimo":"Optional reasoning/chat adapter after access, privacy and schema validation."},
+  "tool_input": {"city":"string","at":"ISO8601","kind":"place|event|any","category":"string|null","budget":"number|null","lat":"number|null","lon":"number|null","radius_km":"number|null","open_now":"boolean","quiet":"boolean"},
+  "tool_output": {"action":"DISCOVER|RECOMMEND|REFRESH|CLARIFY|ABSTAIN|SILENT","selected":"array of approved IDs, source URLs, hashes and factual caveats","reasons":"array of machine-readable codes","model_used":false},
+  "output_validation": "kepcore.core.check_model_selection rejects IDs outside the Core-approved set. This is an ID guard, NOT a complete free-text factuality or prompt-injection defense.",
+  "missing_for_production": ["Actual EVREN request/response compatibility","Text claim attribution validation","Per-field permission enforcement","Human review workflow","No evaluation-oracle exposure","Token budgets and model traces"]
+}
