@@ -53,3 +53,7 @@ The command computes a lab report only. **No score is written back to Core, no s
 - Drift detection uses **labels observed after the event**. It identifies that previous assumptions became unreliable; it cannot time-travel to prevent already issued errors.
 - Brier/ECE and ranking metrics should be reported along with coverage, abstention, field counts and unknown statuses, not as one weighted score.
 - Test risk should not be used to adjust the threshold without creating a new untouched holdout period.
+
+## Human-review enforcement (SCI-002B)
+
+Use `docs/REVIEW_INTAKE_PROTOCOL.md` and `scripts/intake_human_reviews.py` before producing `ReviewedClaim` labels. Critical time, venue and cancellation claims need two human ballots; disputes need a separate third adjudicator. Real label export is gated by the research source registry and pinned source snapshot bytes. This is not automatic factual or publisher verification.

@@ -13,6 +13,7 @@ KEP, etkinlik, yemek, mekân ve yerel hizmet keşfi için araştırma aşamasın
 - [İlk geçiş kararı](docs/adr/0001-initial-core-import.md)
 - [KEP-SRC-001 kaynak kayıtları](labs/core/sources/README.md)
 - [Kaynak yönetimi kararı](docs/adr/0002-source-registry-research-ingest.md)
+- [Independent human review intake (SCI-002B)](labs/core/docs/REVIEW_INTAKE_PROTOCOL.md)
 
 ### Yerelde çalıştır
 
