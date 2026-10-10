@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "acquired_date": "2026-10-10",
+    "acquisition_method": "selected_fields_transcribed_from_web_tool",
+    "source_observed_at": null,
+    "origin_live_verified": false,
+    "source_snapshot_notice": "Web tool: crawled about 2 months ago. Exact snapshot date unknown.",
+    "selected_fields_only": true,
+    "source_id": "izmir_open_events",
+    "source_url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+    "catalog_url": "https://acikveri.bizizmir.com/tr/dataset/kultur-sanat-etkinlikleri",
+    "license": "CC-BY-4.0",
+    "license_url": "https://acikveri.bizizmir.com/tr/license",
+    "attribution": "İzmir Büyükşehir Belediyesi Açık Veri Portalı",
+    "source_city": "İzmir",
+    "tool_reference": "turn561805view0"
+  },
+  "records": [
+    {
+      "Id": 6927,
+      "Tur": "SİNEMA",
+      "Adi": "YENİDEN SİNEMATEK AÇIK HAVA YAZ PROGRAMI - BABA ANNE KIZ KARDEŞ ERKEK KARDEŞ",
+      "EtkinlikBaslamaTarihi": "2026-08-10T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-10T21:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "yeniden-sinematek-acik-hava-yaz-programi-baba-anne-kiz-kardes-erkek-kardes",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6949,
+      "Tur": "DİĞER",
+      "Adi": "Müzik Oyunları Çocuk Atölyesi",
+      "EtkinlikBaslamaTarihi": "2026-08-05T11:30:00",
+      "EtkinlikBitisTarihi": "2026-08-12T11:30:00",
+      "EtkinlikMerkezi": "Ahmed Adnan Saygun Sanat Merkezi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "muzik-oyunlari-cocuk-atolyesi-3881",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6948,
+      "Tur": "SİNEMA",
+      "Adi": "GEZİCİ AÇIKHAVA FİLM GÜNLERİ",
+      "EtkinlikBaslamaTarihi": "2026-07-10T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-13T21:00:00",
+      "EtkinlikMerkezi": "İlçelerde Etkinlik Alanları",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "gezici-acikhava-film-gunleri-7957",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6928,
+      "Tur": "SİNEMA",
+      "Adi": " YENİDEN SİNEMATEK AÇIK HAVA YAZ PROGRAMI-JULIA",
+      "EtkinlikBaslamaTarihi": "2026-08-17T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-17T21:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "yeniden-sinematek-acik-hava-yaz-programi-E28093-julia",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6960,
+      "Tur": "KONSER",
+      "Adi": "ZEYTİN ALTINDA ``ÜÇ SAZIN DİLİNDEN GECENİN ŞARKILARI``",
+      "EtkinlikBaslamaTarihi": "2026-08-19T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-19T21:30:00",
+      "EtkinlikMerkezi": "Ahmed Adnan Saygun Sanat Merkezi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "zeytin-altinda-6060uc-sazin-dilinden-gecenin-sarkilari6060",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6929,
+      "Tur": "SİNEMA",
+      "Adi": " YENİDEN SİNEMATEK AÇIK HAVA YAZ PROGRAMI-ADA",
+      "EtkinlikBaslamaTarihi": "2026-08-24T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-24T21:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": false,
+      "EtkinlikUrl": "yeniden-sinematek-acik-hava-yaz-programiE28093ada",
+      "BiletSatisLinki": "http://kultursanat.izmir.bel.tr/Sayfalar/KoltukSecim.aspx?Salon=20&Seans=8697&Etkinlik=6929"
+    },
+    {
+      "Id": 6932,
+      "Tur": "KONSER",
+      "Adi": "Çim Konserleri 2026",
+      "EtkinlikBaslamaTarihi": "2026-07-07T08:00:00",
+      "EtkinlikBitisTarihi": "2026-08-25T08:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "cim-konserleri-2026",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6958,
+      "Tur": "SERGİ",
+      "Adi": "Zamanda Bir Kırışıklık",
+      "EtkinlikBaslamaTarihi": "2026-08-04T16:00:00",
+      "EtkinlikBitisTarihi": "2026-08-30T18:00:00",
+      "EtkinlikMerkezi": "Ahmed Adnan Saygun Sanat Merkezi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "zamanda-bir-kirisiklik",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6957,
+      "Tur": "SERGİ",
+      "Adi": "Meserret - İhtimal",
+      "EtkinlikBaslamaTarihi": "2026-08-07T08:00:00",
+      "EtkinlikBitisTarihi": "2026-08-31T17:30:00",
+      "EtkinlikMerkezi": "Tarihi Bıçakçı Han",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "meserret-ihtimal",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6959,
+      "Tur": "SERGİ",
+      "Adi": "Karşılaşmanın Ardından",
+      "EtkinlikBaslamaTarihi": "2026-08-07T09:00:00",
+      "EtkinlikBitisTarihi": "2026-08-31T18:00:00",
+      "EtkinlikMerkezi": "Tarihi Bıçakçı Han",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "karsilasmanin-ardindan",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6930,
+      "Tur": "SİNEMA",
+      "Adi": " YENİDEN SİNEMATEK AÇIK HAVA YAZ PROGRAMI-MANEVİ DEĞER",
+      "EtkinlikBaslamaTarihi": "2026-08-31T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-31T21:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "yeniden-sinematek-acik-hava-yaz-programi-manevi-deger",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6931,
+      "Tur": "SERGİ",
+      "Adi": "Peaceful Towns (Barışçıl Şehirler) Sergisi",
+      "EtkinlikBaslamaTarihi": "2026-07-01T15:00:00",
+      "EtkinlikBitisTarihi": "2026-08-31T15:00:00",
+      "EtkinlikMerkezi": "Vasıf Çınar Meydanı",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "cocuklarin-gozunden-barisinrenkleri-resim-sergisi",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6925,
+      "Tur": "DİĞER",
+      "Adi": "Kent Tarihi ve Kültürü Yaz Atölyeleri",
+      "EtkinlikBaslamaTarihi": "2026-07-01T08:00:00",
+      "EtkinlikBitisTarihi": "2026-09-01T08:00:00",
+      "EtkinlikMerkezi": "Ahmet Piriştina Kent Arşivi ve Müzesi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "kent-tarihi-ve-kulturu-yaz-atolyeleri-872",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6956,
+      "Tur": "SERGİ",
+      "Adi": "Müziğin Tınısı Fotoğraf Sergisi",
+      "EtkinlikBaslamaTarihi": "2026-08-10T08:00:00",
+      "EtkinlikBitisTarihi": "2026-09-06T18:00:00",
+      "EtkinlikMerkezi": "Ahmed Adnan Saygun Sanat Merkezi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "muzigin-tinisi-fotograf-sergisi",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6583,
+      "Tur": "SERGİ",
+      "Adi": "SERGİ: İzmir Fotoğrafhanesi - Görsel Hafızanın İnşası (1840-1922)",
+      "EtkinlikBaslamaTarihi": "2025-12-11T18:00:00",
+      "EtkinlikBitisTarihi": "2026-12-13T18:00:00",
+      "EtkinlikMerkezi": "Ahmet Piriştina Kent Arşivi ve Müzesi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "sergi-E2809Cizmir-fotografhanesi-gorsel-hafizanin-insasi-1840-1922E2809D",
+      "BiletSatisLinki": null
+    },
+    {
+      "Id": 6835,
+      "Tur": "SERGİ",
+      "Adi": "İzmir Mutfak Müzesinin Tanıtım Sergisi  Göl Gazinosunda Ziyarete Açıldı",
+      "EtkinlikBaslamaTarihi": "2026-04-02T08:00:00",
+      "EtkinlikBitisTarihi": "2026-12-31T17:00:00",
+      "EtkinlikMerkezi": "İlçe Çok Amaçlı Salonlar",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "izmir-mutfak-muzesiE28099nin-tanitim-sergisigol-gazinosuE28099nda-ziyarete-acildi",
+      "BiletSatisLinki": null
+    }
+  ]
+}
