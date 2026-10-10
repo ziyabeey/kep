@@ -43,5 +43,7 @@ jobs:
         run: |
           python scripts/research_intelligence.py > /dev/null
           python -m benchmarks.evidence_value > /dev/null
+      - name: Temporal source calibration (offline, synthetic)
+        run: python -m benchmarks.calibration_eval > /dev/null
       - name: Reproduce offline benchmarks
         run: python run_all.py

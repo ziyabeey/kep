@@ -37,3 +37,7 @@ python3 scripts/poll_source.py --list  # Ağ kullanmaz
 ## KEP-SCI-001 · Kanıtın beklenen karar değeri
 
 [Kanonik bilimsel karar](docs/adr/0004-information-value-research-gate.md) ve [laboratuvar kullanım rehberi](labs/core/docs/SCIENCE_VALUE_LAB.md) ile artık KEP, **araştırma ortamında** hangi eksik olgunun yeniden araştırılmaya değer olduğunu sınayabiliyor. Sadece offline/sentetik Bayes testi; gerçek kalibrasyon, İstanbul saha doğruluğu veya otomatik yayın **yok**. CI iki Python sürümünde tekrar çalıştırır.
+
+### Bilimsel kaynak kalibrasyonu (KEP-SCI-002)
+
+`labs/core/kepcore/calibration.py` kaynak/alan güvenini geçmiş **tarihli ve gerçekten değerlendirilmiş** iddialarla sınamak için bir araştırma katmanıdır. Şu anda yalnız **sentetik** testlerin metodolojisi çalışır; gerçek İstanbul kaynaklarına ait bağımsız hakemli veri yoktur. `python -m benchmarks.calibration_eval` (çalışma dizini `labs/core`) ile tekrar edilebilir. Bu hesap otomatik yayın veya kullanıcı bildirimi oluşturamaz.

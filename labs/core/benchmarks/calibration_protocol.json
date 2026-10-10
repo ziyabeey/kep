@@ -1,0 +1,16 @@
+{
+  "protocol_id": "KEP-SCI-002-v0.1",
+  "status": "RESEARCH_ONLY_SYNTHETIC_FIXTURE",
+  "seed": 20261011,
+  "source_claims": 1350,
+  "origin": "synthetic",
+  "train_calibration_test": "globally chronological; remove entity-field groups shared across splits; late labels excluded",
+  "synthetic_change": "secondary publisher accuracy worsens after calibration; outcome unknown/superseded excluded from binary performance",
+  "training": "shrunken empirical publisher-root+field correctness; not a model truth posterior",
+  "baselines": ["global", "field", "root_field"],
+  "risk_target_for_calibration_only": 0.20,
+  "minimum_calibration_candidates": 25,
+  "metrics": ["Brier", "ECE", "risk-coverage", "Wilson upper error", "label availability", "field support", "source drift"],
+  "protected_operations": ["consumer_publish", "mark_verified", "push_notification", "modify_source_rights", "run_live_scraper"],
+  "limitations": ["No Istanbul source labels", "No independent human annotation", "No calibrated MiMo/Laya scores", "Synthetic source shift", "Wilson assumptions violated under clustering and distribution shift"]
+}
