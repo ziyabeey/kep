@@ -1,0 +1,16 @@
+{
+  "id": "KEP-SCI-001-v0.4",
+  "status": "engineering_protocol_not_academic_preregistration",
+  "hypothesis": "A one-step value-of-sample-information policy can reduce unnecessary research while preserving decision utility under stated evidence assumptions.",
+  "cases_per_regime": 4000,
+  "seed": 20261011,
+  "regimes": ["matched", "source_degradation", "prior_shift"],
+  "policies": ["never", "cheapest", "max_information", "voi"],
+  "decision_utility": {"reward_true": 1.0, "penalty_false": 4.0, "min_probability": 0.8},
+  "per_case_max_checks": 1,
+  "check_budget": 0.12,
+  "primary_metric": "realized_utility_per_case_normalized_not_USD",
+  "secondary_metrics": ["research_calls_per_case", "false_accept_fraction", "accepted_fraction", "brier_score"],
+  "statistical_note": "Paired case-resampling CI conditional on simulated generator; not real user evidence or deployed source calibration.",
+  "prohibited_inferences": ["true probability of an Istanbul event", "real Haiku/Laya/MiMo accuracy", "commercial API savings", "causal lift over competitors", "user-level personalization benefit"]
+}

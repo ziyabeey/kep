@@ -33,3 +33,7 @@ python3 scripts/poll_source.py --list  # Ağ kullanmaz
 ## EVAL-002 · Browser Scout araştırması
 
 [Haiku 5.5 Browser Scout ADR](docs/adr/0003-read-only-browser-scout-experiment.md) ve [deney rehberi](labs/core/docs/SCOUT_BETA_EVAL.md) ile offline karşılaştırma kullanılabilir. Gerçek Haiku SDK bağlantısı **yalnız açıkça tetiklenen, izinli araştırma** için hazırlanmıştır; hiçbir canlı İstanbul sayfası veya ücretli API, CI'da çalışmaz.
+
+## KEP-SCI-001 · Kanıtın beklenen karar değeri
+
+[Kanonik bilimsel karar](docs/adr/0004-information-value-research-gate.md) ve [laboratuvar kullanım rehberi](labs/core/docs/SCIENCE_VALUE_LAB.md) ile artık KEP, **araştırma ortamında** hangi eksik olgunun yeniden araştırılmaya değer olduğunu sınayabiliyor. Sadece offline/sentetik Bayes testi; gerçek kalibrasyon, İstanbul saha doğruluğu veya otomatik yayın **yok**. CI iki Python sürümünde tekrar çalıştırır.

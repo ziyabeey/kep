@@ -76,3 +76,7 @@ python scripts/haiku_browser_scout.py --source zorlu_psm_events
 ```
 
 See [SCOUT_BETA_EVAL.md](docs/SCOUT_BETA_EVAL.md) and [ADR-0003](../../docs/adr/0003-read-only-browser-scout-experiment.md). Hand-authored replay is not actual model performance. No Istanbul website is currently approved for automated browser collection.
+
+## KEP-SCI-001 · Scientific Evidence Value Lab
+
+Yerelde `python scripts/research_intelligence.py` (gerçek kayıtların eksik alanları + ayrı **sentetik** örnek), `python -m benchmarks.evidence_value` (12.000 tamamen sentetik vaka, karar değerine göre araştırma ve sabit baseline karşılaştırması), `python -m unittest discover -s tests -q` (regresyonlar) çalıştırılabilir. [Deney raporu](docs/SCIENCE_VALUE_LAB.md). Bu Bayes sayıları gerçek İstanbul olasılığı değildir; Core'un üretim doğrulama/izin kapılarına bağlanmamıştır.

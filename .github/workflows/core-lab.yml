@@ -39,5 +39,9 @@ jobs:
           python scripts/poll_source.py --source zorlu_psm_events
           python scripts/haiku_browser_scout.py --source zorlu_psm_events
           python -m benchmarks.scout_eval
+      - name: Scientific evidence-value lab (offline, synthetic)
+        run: |
+          python scripts/research_intelligence.py > /dev/null
+          python -m benchmarks.evidence_value > /dev/null
       - name: Reproduce offline benchmarks
         run: python run_all.py
