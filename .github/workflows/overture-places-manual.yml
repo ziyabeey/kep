@@ -34,13 +34,17 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install public Overture CLI (manual only)
-        run: python -m pip install --disable-pip-version-check overturemaps
+        run: python -m pip install --disable-pip-version-check "overturemaps==1.0.2"
       - name: Pin STAC and fetch two bounded sample cells
         env:
           OUT_PATH: ${{ runner.temp }}/kep-overture-places
         run: |
           python scripts/overture_istanbul.py --fetch --output "$OUT_PATH"
           python -c 'import json,os,pathlib; d=json.loads((pathlib.Path(os.environ["OUT_PATH"])/"manifest.json").read_text()); assert not d["consumer_display_approved"]; print("release:",d["pinned_release"],"places:",d["audit"]["accepted"])'
+      - name: Verify minimized release artifact (fail closed)
+        env:
+          OUT_PATH: ${{ runner.temp }}/kep-overture-places
+        run: python scripts/verify_overture_pilot.py --directory "$OUT_PATH" --require-live
       - name: Upload minimized research data and integrity manifest
         uses: actions/upload-artifact@v4
         with:

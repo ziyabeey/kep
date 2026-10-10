@@ -50,3 +50,7 @@ Kanıt toplama ajanlarının **şüpheli kayıtları hedefli incelemesi**, kayna
 ## KEP-DATA-001 · Overture Istanbul Places pilot (research-only)
 
 [GeoJSON v2 import, SHA256 provenance and unbiased audit plan](labs/core/docs/OVERTURE_PLACES_PILOT.md). Offline CI exercises synthetic fixtures; **real Overture POI download is a separately and explicitly triggered GitHub Actions workflow**. No data is displayed to consumers.
+
+## KEP-DATA-002 · Overture snapshot integrity + existence audit
+
+[Research audit protocol](labs/core/docs/OVERTURE_EXISTENCE_AUDIT.md) adds post-download artifact checks, preregistered confidence-band random sampling, private seed replay and a complete dual-human-reviewed estimator. GitHub CI uses synthetic fixtures; **no real Istanbul field labels or verified POIs** are claimed. The source download remains separately/manual-only.
