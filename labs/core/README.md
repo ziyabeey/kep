@@ -21,6 +21,8 @@ Standart kütüphane yeterlidir; ağ ve model anahtarı gerekmez. Saat dilimi ve
 ## Neler var?
 
 - `kepcore/core.py`: sert kullanıcı kısıtları, belirsizlik ve kararlar.
+- `kepcore/radar.py` + `sources/registry.json`: kayıtlı kaynak ve kullanım izni denetimi, sınırlı araştırma toplaması. Varsayılan çevrimdışı.
+- `scripts/poll_source.py`: açıkça istenmedikçe hiçbir ağa bağlanmayan CLI.
 - `kepcore/availability.py`: saat dilimi, tam haftalık açılış aralığı, tarih istisnası ve alan bazlı güncellik.
 - `kepcore/store.py`: yerel SQLite, idempotent kayıt, eski güncelleme koruması ve outbox örneği.
 - `kepcore/preferences.py`: beş klasik gerçek-puan tahmin yöntemi; uygun aday dışına çıkamayan yeniden sıralama.
@@ -59,3 +61,7 @@ Kaynak ve atıflar `DATA_LICENSES.md`, `data/manifest.json`, `data/uci_manifest.
 ## Tekrarlanabilirlik ve üretilen çıktılar
 
 `python3 run_all.py`, git dışı `results/` klasörüne SQLite ve JSON deney çıktılarını yeniden üretir. Üretilen veritabanı/loglar commit edilmez. UCI ham CSV'nin yerel dosya özeti deneyde kontrol edilir. Kaynak fixture dosyalarının atıfları `DATA_LICENSES.md` içerisindedir.
+
+## KEP-SRC-001 (v0.4 araştırma eklemesi)
+
+`python3 scripts/poll_source.py --list` kayıtları gösterir. İstanbul kaynaklarının tamamı izin incelemesinde `pending` durumundadır. İzmir açık verisi yalnız `research_ingest` için onaylıdır; `--fetch` işlemi ayrıca açıkça talep edilmelidir. Bu işlem bir araştırma snapshotı üretir, **canlı etkinlik doğrulaması veya tüketici yayını yapmaz**. Detay için `sources/README.md`.

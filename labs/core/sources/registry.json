@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "izmir_open_events",
+      "url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+      "city": "İzmir",
+      "format": "izmir_event_json",
+      "status": "approved",
+      "approved_uses": ["research_ingest"],
+      "license": "CC-BY-4.0",
+      "rights_evidence_url": "https://acikveri.bizizmir.com/tr/license",
+      "rights_reviewed_at": "2026-10-10",
+      "attribution": "İzmir Büyükşehir Belediyesi Açık Veri Portalı",
+      "min_poll_minutes": 360,
+      "max_poll_minutes": 1440,
+      "daily_request_cap": 4,
+      "max_response_bytes": 2000000
+    },
+    {
+      "id": "zorlu_psm_events",
+      "url": "https://www.zorlupsm.com/etkinlikler",
+      "city": "İstanbul",
+      "format": "website_review_required",
+      "status": "pending",
+      "approved_uses": [],
+      "review_note": "Written permission/partner feed required before commercial automated collection"
+    },
+    {
+      "id": "istanbul_senin",
+      "url": "https://istanbulsenin.istanbul",
+      "city": "İstanbul",
+      "format": "website_review_required",
+      "status": "pending",
+      "approved_uses": [],
+      "review_note": "Verify supported official API/mini-app permissions and data rights"
+    },
+    {
+      "id": "kultur_istanbul",
+      "url": "https://kultur.istanbul/etkinlikler/",
+      "city": "İstanbul",
+      "format": "website_review_required",
+      "status": "pending",
+      "approved_uses": [],
+      "review_note": "Review terms, JavaScript data endpoint, and reuse license"
+    },
+    {
+      "id": "oggusto_istanbul",
+      "url": "https://www.oggusto.com/etkinlik-rehberi/istanbul",
+      "city": "İstanbul",
+      "format": "website_review_required",
+      "status": "pending",
+      "approved_uses": [],
+      "review_note": "Editorial secondary source; obtain permission and preserve original organizer links"
+    },
+    {
+      "id": "pera_museum",
+      "url": "https://www.peramuzesi.org.tr/",
+      "city": "İstanbul",
+      "format": "website_review_required",
+      "status": "pending",
+      "approved_uses": [],
+      "review_note": "Review content copying and deeplink terms; seek permitted events feed"
+    },
+    {
+      "id": "istanbul_modern",
+      "url": "https://www.istanbulmodern.org/",
+      "city": "İstanbul",
+      "format": "website_review_required",
+      "status": "pending",
+      "approved_uses": [],
+      "review_note": "Review content license; confirm official program feed"
+    },
+    {
+      "id": "ibb_kultursanat",
+      "url": "https://kultursanat.istanbul/etkinliklerimiz",
+      "city": "İstanbul",
+      "format": "website_review_required",
+      "status": "pending",
+      "approved_uses": [],
+      "review_note": "Confirm permitted data/API access and commercial display rights"
+    }
+  ]
+}
