@@ -11,6 +11,8 @@ KEP, etkinlik, yemek, mekân ve yerel hizmet keşfi için araştırma aşamasın
 - [Radar mimari taslağı](docs/architecture/KEP_RADAR_v1.md)
 - [Black C'den ölçüm ilkeleri](docs/measurement/KEP_MEASUREMENT_v1.md)
 - [İlk geçiş kararı](docs/adr/0001-initial-core-import.md)
+- [KEP-SRC-001 kaynak kayıtları](labs/core/sources/README.md)
+- [Kaynak yönetimi kararı](docs/adr/0002-source-registry-research-ingest.md)
 
 ### Yerelde çalıştır
 
@@ -21,6 +23,7 @@ cd labs/core
 python3 -m unittest discover -s tests -v
 python3 run_all.py
 python3 query.py --query examples/galata_nearby.json
+python3 scripts/poll_source.py --list  # Ağ kullanmaz
 ```
 
 **Önemli:** Laboratuvarın 16 İzmir etkinliği ve 7 İstanbul mekânı canlı veri değildir; ayrıca tarihsel UCI restoran puanlarıyla test yapılır. Bu veriler İstanbul'da güncel öneri kalitesi, ziyaret veya rezervasyon sonucu ispatlamaz. MiMo/Laya gerçek API entegrasyonu henüz yoktur.

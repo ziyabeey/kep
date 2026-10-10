@@ -1,15 +1,25 @@
-name: Core laboratory tests
+name: KEP Core CI
 
 on:
+  pull_request:
   push:
     branches: [main]
-  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-lab-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   core-lab:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
     defaults:
       run:
         working-directory: labs/core
@@ -17,10 +27,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      - name: Check Python syntax
-        run: python -m compileall -q kepcore benchmarks tests
-      - name: Unit tests
+          python-version: ${{ matrix.python-version }}
+      - name: Compile lab
+        run: python -m compileall -q kepcore benchmarks tests scripts
+      - name: Unit and regression tests
         run: python -m unittest discover -s tests -v
-      - name: Rebuild offline lab and benchmark
+      - name: Radar offline and policy smoke
+        run: |
+          python scripts/poll_source.py --list
+          python scripts/poll_source.py --source izmir_open_events
+          python scripts/poll_source.py --source zorlu_psm_events
+      - name: Reproduce offline benchmarks
         run: python run_all.py

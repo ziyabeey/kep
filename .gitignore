@@ -15,3 +15,7 @@ venv/
 labs/core/results/
 labs/core/data/raw/live_*
 .DS_Store
+# Explicitly fetched research snapshots and local source poll cursors
+labs/core/.local/
+labs/core/data/raw/live_*/
+labs/core/data/raw/live_*.json
