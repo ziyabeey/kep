@@ -51,5 +51,9 @@ jobs:
         run: |
           python -m benchmarks.audit_bias_eval > /dev/null
           python scripts/audit_source_reliability.py --help > /dev/null
+      - name: Overture Places v2 schema and unbiased pilot (offline synthetic)
+        run: |
+          python -m benchmarks.overture_places_eval
+          python scripts/overture_istanbul.py
       - name: Reproduce offline benchmarks
         run: python run_all.py

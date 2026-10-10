@@ -23,3 +23,8 @@ labs/core/data/raw/live_*.json
 # Human-review notes, permitted local source snapshots and audit copies are not versioned
 labs/core/data/reviews_private/
 labs/core/data/source_snapshots_private/
+
+# Opt-in Overture research raw downloads and audit seeds
+labs/core/data/overture_private/
+labs/core/.local/overture*/
+*.audit-seed
