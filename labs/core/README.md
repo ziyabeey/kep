@@ -96,3 +96,14 @@ python scripts/intake_human_reviews.py --help
 ```
 
 All examples in CI are **synthetic mock review records**, not real human labels or an Istanbul calibration set.
+
+## KEP-SCI-003 · Randomized source audit (research only)
+
+Targeted verification is excellent for **finding mistakes**, but cannot estimate the error rate of **all observations** without correcting review selection bias. `kepcore/audit_sampling.py` now separates a frozen, rights-checked, stratified-random audit from the targeted SCI-001/SCI-002B queue. The audit log contains each stratum size, inclusion probability, SHA-256 population hash and a secret-seed commitment; replay verifies that the sample was not changed after labels were observed. Any missing or late label gives **no estimated population error rate**. The completed sample uses stratum weights and a conservative finite-population Hoeffding band; it is not a guarantee under reviewer error or future source drift.
+
+```bash
+python -m benchmarks.audit_bias_eval         # 1,000 SYNTHETIC claims, 40 SRS trials; offline
+python scripts/audit_source_reliability.py --help  # No live source access
+```
+
+See [RANDOM_AUDIT_PROTOCOL.md](docs/RANDOM_AUDIT_PROTOCOL.md) and [ADR-0007](../../docs/adr/0007-random-audit-vs-targeted-verification.md). Real Istanbul human adjudications are **not** available and `Issue #9` remains open. No model tokens or browser traffic are incurred.

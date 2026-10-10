@@ -47,5 +47,9 @@ jobs:
         run: python -m benchmarks.calibration_eval > /dev/null
       - name: Human review intake CLI contract (offline)
         run: python scripts/intake_human_reviews.py --help > /dev/null
+      - name: Randomized source audit bias lab (offline, synthetic)
+        run: |
+          python -m benchmarks.audit_bias_eval > /dev/null
+          python scripts/audit_source_reliability.py --help > /dev/null
       - name: Reproduce offline benchmarks
         run: python run_all.py
