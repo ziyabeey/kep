@@ -8,6 +8,8 @@ import hashlib
 import json
 import tempfile
 import unittest
+import subprocess
+import sys
 
 from kepcore.calibration import (
     ReviewedClaim, aware, validated, load_reviews, review_from_dict, time_split,
@@ -95,6 +97,12 @@ class ReviewSchemaTests(unittest.TestCase):
             p=Path(tmp)/'reviews.jsonl'
             p.write_text('\n'.join(json.dumps(asdict(x)) for x in [b,a])+'\n')
             self.assertEqual(load_reviews(p),[a,b])
+    def test_reviewer_cli_help_runs_without_api(self):
+        root=Path(__file__).resolve().parents[1]
+        proc=subprocess.run([sys.executable,str(root/'scripts/calibrate_source_confidence.py'),'--help'],
+                            cwd=root,capture_output=True,text=True,timeout=10)
+        self.assertEqual(proc.returncode,0,proc.stderr)
+        self.assertIn('--train-end',proc.stdout)
     def test_bad_jsonl_line_is_identified(self):
         with tempfile.TemporaryDirectory() as tmp:
             p=Path(tmp)/'reviews.jsonl';p.write_text('{}\n')
