@@ -55,5 +55,9 @@ jobs:
         run: |
           python -m benchmarks.overture_places_eval
           python scripts/overture_istanbul.py
+      - name: Overture artifact integrity and existence audit (offline, synthetic)
+        run: |
+          python scripts/verify_overture_pilot.py --help > /dev/null
+          python -m benchmarks.overture_audit_eval > /dev/null
       - name: Reproduce offline benchmarks
         run: python run_all.py

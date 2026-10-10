@@ -111,3 +111,9 @@ See [RANDOM_AUDIT_PROTOCOL.md](docs/RANDOM_AUDIT_PROTOCOL.md) and [ADR-0007](../
 ## KEP-DATA-001 · Overture Places v2 research adapter
 
 `python -m benchmarks.overture_places_eval` is a five-record **synthetic fixture** that tests the new September-2026 schema, coordinate integrity, missing categories, record identity and unmerged possible duplicates. `python scripts/overture_istanbul.py` is offline by default. [Pilot protocol](docs/OVERTURE_PLACES_PILOT.md) and [ADR-0008](../../docs/adr/0008-overture-pinned-places-pilot.md) document the exact `2026-09-23.1` release, separate manual GitHub retrieval, licensing and uncertainty rules. An Overture importer is not an Istanbul live events feed.
+
+## KEP-DATA-002 · Source manifest integrity and unbiased POI existence survey
+
+`kepcore/overture_audit.py` checks internally consistent, pinned Overture minimal artifacts, and creates a frozen randomized survey stratified by sample cell and Overture existence score. `scripts/verify_overture_pilot.py` runs offline and never changes Core or consumer records. The manual Overture workflow validates its artifact before upload. `python -m benchmarks.overture_audit_eval` shows **synthetic** sampling bias effects; `tests/test_overture_audit.py` covers corruption, missing reviewers and future dates. See [OVERTURE_EXISTENCE_AUDIT.md](docs/OVERTURE_EXISTENCE_AUDIT.md).
+
+A passing artifact test **does not authenticate Overture upstream**: hashes within an untrusted supplied manifest can be forged. Two reviewer IDs **do not authenticate real reviewer independence**. No actual Istanbul POIs or truth labels have been captured; Issue #13 remains open.
