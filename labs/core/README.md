@@ -80,3 +80,9 @@ See [SCOUT_BETA_EVAL.md](docs/SCOUT_BETA_EVAL.md) and [ADR-0003](../../docs/adr/
 ## KEP-SCI-001 · Scientific Evidence Value Lab
 
 Yerelde `python scripts/research_intelligence.py` (gerçek kayıtların eksik alanları + ayrı **sentetik** örnek), `python -m benchmarks.evidence_value` (12.000 tamamen sentetik vaka, karar değerine göre araştırma ve sabit baseline karşılaştırması), `python -m unittest discover -s tests -q` (regresyonlar) çalıştırılabilir. [Deney raporu](docs/SCIENCE_VALUE_LAB.md). Bu Bayes sayıları gerçek İstanbul olasılığı değildir; Core'un üretim doğrulama/izin kapılarına bağlanmamıştır.
+
+## KEP-SCI-002 · Historical claim calibration (research only)
+
+`python -m benchmarks.calibration_eval` runs deterministic synthetic source-drift experiments using **separate train/calibration/test time periods**. `kepcore/calibration.py` estimates field+publisher-root correctness from dated, independently reviewed outcomes and reports Brier, ECE, risk–coverage and source changes. This is **not** a trained MiMo/Laya calibration model, a verified Istanbul source audit or an automatic publication gate.
+
+For rights-reviewed human labels, see [`docs/CALIBRATION_REVIEW_PROTOCOL.md`](docs/CALIBRATION_REVIEW_PROTOCOL.md) and [`docs/adr/0005-temporal-evidence-calibration.md`](../../docs/adr/0005-temporal-evidence-calibration.md). `python scripts/calibrate_source_confidence.py --help` documents the opt-in, fully offline JSONL evaluation. Do not commit non-public reviewer files.
