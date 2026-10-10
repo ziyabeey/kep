@@ -42,3 +42,7 @@ python3 scripts/poll_source.py --list  # Ağ kullanmaz
 ### Bilimsel kaynak kalibrasyonu (KEP-SCI-002)
 
 `labs/core/kepcore/calibration.py` kaynak/alan güvenini geçmiş **tarihli ve gerçekten değerlendirilmiş** iddialarla sınamak için bir araştırma katmanıdır. Şu anda yalnız **sentetik** testlerin metodolojisi çalışır; gerçek İstanbul kaynaklarına ait bağımsız hakemli veri yoktur. `python -m benchmarks.calibration_eval` (çalışma dizini `labs/core`) ile tekrar edilebilir. Bu hesap otomatik yayın veya kullanıcı bildirimi oluşturamaz.
+
+### KEP SCI-003: tarafsız kaynak kalite denetimi
+
+Kanıt toplama ajanlarının **şüpheli kayıtları hedefli incelemesi**, kaynakların tümünün hata oranını ölçmekle aynı şey değildir. `labs/core/kepcore/audit_sampling.py`, izinli ve zaman damgalı gözlemlerden ayrı bir tabakalı rastgele denetim planı üretir; araştırma raporunu yalnızca tüm örneklem insan tarafından değerlendirildiyse hesaplar. Araştırma kodu ve testler için: [SCI-003 protokolü](labs/core/docs/RANDOM_AUDIT_PROTOCOL.md).
