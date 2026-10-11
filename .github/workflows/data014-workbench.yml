@@ -1,0 +1,33 @@
+name: DATA-014 isolated research workbench
+on:
+  push:
+    branches: [research/data-014-gers-footer-cost]
+    paths: [.github/workflows/data014-workbench.yml]
+permissions:
+  contents: read
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Verify existing offline baseline
+        working-directory: labs/core
+        run: |
+          python -m unittest discover -s tests -q
+          python scripts/reconcile_gers_releases.py --check > "$RUNNER_TEMP/baseline.json"
+      - name: Archive only Git-tracked source for local review
+        run: git archive --format=zip HEAD > "$RUNNER_TEMP/source.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: data014-baseline-source
+          path: |
+            ${{ runner.temp }}/source.zip
+            ${{ runner.temp }}/baseline.json
+          retention-days: 7
+          if-no-files-found: error
