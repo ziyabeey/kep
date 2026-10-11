@@ -15,8 +15,8 @@ CORE-001's strict two-independent-root source support policy avoids some false c
 5. Bayesian assumed current probability p comes from the existing Evidence Lab fuse_roots primitive. For a candidate check with sensitivity s and specificity t:
    - probability of a positive reply q = p*s + (1-p)*(1-t)
    - modeled probability after positive comes from bayes_update
-   - modeled gain before check cost is q * positive-action-utility, where positive-action-utility uses reward=1, false-assertion penalty=4 and minimum modeled p=.8.
-   - net gain = modeled gain - proposed check cost. If no net-positive independent affordable/timely check exists, VOI abstains.
+   - the actual CORE-001 gate corroborates after a positive independent second root, **without** another posterior threshold. Its hypothetical gross payoff is p*s*reward - (1-p)*(1-t)*false_penalty.
+   - net gain = gross payoff - proposed check cost. The frozen utility is reward=1 and false-assertion penalty=4. False positive outcomes are charged even when the modeled posterior would be low. If no net-positive independent affordable/timely check exists, VOI abstains.
 6. The planner only returns PROPOSE_CHECK (or a reason for declining) with authorized_to_fetch=false, consumer_publish=false, model_used=false and accuracy fields null. The subsequent synthetic executor alone reveals the chosen pre-generated response. It charges the normalized cost and re-runs CORE-001 at the **same deadline for every competing policy**.
 
 The assumed probabilities are not calibrated against real Turkish businesses; this is a policy design lab, not physical proof. Two apparently independent sources can agree on an incorrect assertion.
