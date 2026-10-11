@@ -159,3 +159,15 @@ jobs:
           path: ${{ runner.temp }}/core002-${{ matrix.python-version }}.json
           retention-days: 7
           if-no-files-found: error
+
+      - name: CORE-003 causal source trust, synthetic only (offline)
+        run: |
+          python -m unittest tests.test_adaptive_trust tests.test_adaptive_trust_eval -q
+          python -m benchmarks.adaptive_trust_eval > "$RUNNER_TEMP/core003-${{ matrix.python-version }}.json"
+      - name: Preserve CORE-003 synthetic aggregate replay without case labels
+        uses: actions/upload-artifact@v4
+        with:
+          name: core003-synthetic-python-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/core003-${{ matrix.python-version }}.json
+          retention-days: 7
+          if-no-files-found: error
