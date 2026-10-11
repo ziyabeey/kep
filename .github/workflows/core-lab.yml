@@ -147,3 +147,15 @@ jobs:
           path: ${{ runner.temp }}/core001-${{ matrix.python-version }}.json
           retention-days: 7
           if-no-files-found: error
+
+      - name: CORE-002 budgeted synthetic proposal replay (offline only)
+        run: |
+          python -m unittest tests.test_budgeted_verify tests.test_budgeted_core_eval -q
+          python scripts/replay_budgeted_core.py --check > "$RUNNER_TEMP/core002-${{ matrix.python-version }}.json"
+      - name: Preserve CORE-002 aggregate simulation only
+        uses: actions/upload-artifact@v4
+        with:
+          name: core002-synthetic-python-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/core002-${{ matrix.python-version }}.json
+          retention-days: 7
+          if-no-files-found: error

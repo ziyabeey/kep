@@ -1,0 +1,24 @@
+{
+  "study": "KEP-CORE-002",
+  "fixed_before_simulation": true,
+  "seed": 20261013,
+  "cases_per_regime": 400,
+  "regimes": [
+    "matched",
+    "tight_budget",
+    "short_deadline",
+    "quality_degradation",
+    "echo_storm",
+    "rights_and_disputes"
+  ],
+  "policies": [
+    "never",
+    "cheapest",
+    "max_information",
+    "always_strong",
+    "voi"
+  ],
+  "false_assertion_penalty": 4,
+  "paired_draws": 300,
+  "max_checks_per_case": 1
+}
