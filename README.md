@@ -78,3 +78,7 @@ cd labs/core
 python -m benchmarks.overture_delta_eval
 python scripts/overture_release_delta.py
 ```
+
+### KEP-DATA-011 · Gerçek Overture kaynak güven puanı değişimi
+
+Ağustos/Eylül 2026 Overture kaydı üzerine iki-sürümlü, ağsız araştırma tanısı ve **rastgele olmayan** hedefli inceleme kuyruğu: [çalışma rehberi](labs/core/docs/OVERTURE_CONFIDENCE_DRIFT.md). Güven puanı değişimi işletme varlığının doğrulanması anlamına gelmez.
