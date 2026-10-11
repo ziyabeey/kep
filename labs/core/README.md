@@ -234,3 +234,15 @@ Yeni gerçek veri aramıyoruz. CORE-002'nin sentetik dünyasında güvenilir san
     python -m benchmarks.adaptive_trust_eval
 
 Altı önceden sabitlenmiş tamamen sentetik kaynak kalitesi/kayıp/ortak-rumor rejiminde, bağımsız denetim gecikmesi ve kaçırılan doğru fırsatlar dâhil bütçe/fayda sonuçları karşılaştırılır. [Araştırma protokolü](docs/CORE_003_TEMPORAL_TRUST.md), [ADR-0027](../../docs/adr/0027-causal-synthetic-source-calibration.md).
+
+## KEP-QA-001 | Her yeni testten önce yararını ölç
+
+879 test geçmesi, KEP'in kararlarının dünyada doğru olduğu anlamına gelmez. QA-001 test sayısını değil, kasıtlı yazılım hatası yakalama faydasını ölçtü: 12 önceden belirlenmiş mutasyonun 11'i mevcut 52 odaklı testle yakalanırken, yalnızca **bir** yeni hedefli test eksik özgüllük-alt-sınırı güvenlik kararını yakalayıp skoru 12/12 yaptı. Küçük bir 12-test seçimi iki hatayı kaçırdı ve daha hızlı olduğu da güvenilir biçimde gözlenmedi.
+
+Bu oran sadece seçtiğimiz 12 sentetik hata içindir, gerçek üretim hata ihtimali ya da kullanıcı faydası değildir. Yeni test için önce somut karar riski, mevcut testin açığı, maliyeti ve davranışı değiştiren başarısız kontrol tanımlanacak. Mutasyon çalışması **isteğe bağlıdır**, her CI'ya eklenmez.
+
+    cd labs/core
+    python scripts/audit_test_value.py --protocol
+    python scripts/audit_test_value.py --output YENI_RAPOR_DOSYASI.json
+
+[Protokol ve gözlenen sonuçlar](docs/QA_001_TEST_VALUE.md) · [ADR-0028](../../docs/adr/0028-measure-test-value-first.md). Yeni gerçek veri araması yok.
