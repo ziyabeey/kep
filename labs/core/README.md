@@ -210,3 +210,16 @@ The original DATA-003/004/005 blinded-sample and third-review engine is reused u
     python -m benchmarks.temporal_core_eval
 
 Beş önceden belirlenmiş tamamen sentetik rejimde 3.000 örnek, beş politika, gizli sentetik gerçekler ve dürüst kapsam / yanlış olumlu / karar faydası karşılaştırması bulunur. Sonuçlar gerçek İstanbul işletme doğruluğu veya ticari üstünlük değildir; kaynak kalitesinin bozulduğu senaryolar başarısızlıkları da göstermelidir. [Metodoloji](docs/TEMPORAL_SYNTHETIC_KERNEL.md), [ADR-0025](../../docs/adr/0025-temporal-evidence-kernel.md). Önceki FIELD-001 saha kohortu ayrı, etiket bekleyen ve değişmemiştir.
+
+
+## KEP-CORE-002 | Sanal sensörlerin bilgi değeri ve karar bütçesi
+
+**Yeni gerçek veri toplama yok.** CORE-001'in zaman-duyarlı kaynak doğrulamasını ve SCI-001'in varsayımsal bilgi-değeri hesabını birleştiren, sadece araştırma amaçlı bir doğrulama **öneri** motoru. Core hak/fiyat/zaman kararlarını aşamaz; tek kaynaktan kopya gelen tekrarları doğrulama olarak saymaz; maliyet bütçesi ve cevap süresini aşan isteği önermez. Öneri otomatik olarak sensör çağrısı yapmaz; nihai karar yine LAB düzeyindedir.
+
+Çevrimdışı:
+
+    cd labs/core
+    python -m unittest tests.test_budgeted_verify tests.test_budgeted_core_eval -v
+    python -m benchmarks.budgeted_core_eval
+
+Altı tamamen sentetik rejimde 2.400 örnek, beş önceden belirlenmiş maliyet/karar yöntemi, gizli sentetik doğru yanıtlar ve eşlenik senaryolarda karar faydası, yanlış olumlu, kaynak kontrol maliyeti ve kaçan fırsatlar raporlanır. Bu ölçüler gerçek İstanbul kaynağı doğruluğu, model performansı veya API maliyet tasarrufu değildir. [Protokol](docs/CORE_002_BUDGETED_EVIDENCE.md) ve [ADR-0026](../../docs/adr/0026-one-step-budgeted-evidence.md).
