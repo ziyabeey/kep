@@ -151,3 +151,15 @@ Source and sampling caveats: [OVERTURE_REAL_FIRST_RESULTS.md](docs/OVERTURE_REAL
 
 Instructions: [third-review and holdout protocol](docs/OVERTURE_THIRD_REVIEW_AND_HOLDOUT.md).
 Offline check: `python -m unittest tests.test_overture_adjudication -q`; CLI: `python scripts/adjudicate_overture_field.py --help`. No paid API, browser or push actions.
+
+## KEP-DATA-006 · Time-aware source-record delta (NOT business closure)
+
+`kepcore/overture_delta.py` compares two versioned, schema-compatible and SHA-pinned minimalist Overture research snapshots. IDs added/removed, field edits, coordinate changes, missingness and source/confidence changes are distinct. Possible ID replacements are **human-review-only**, never auto-merged. `scripts/overture_release_delta.py` defaults to a test where **the 4,803 records are genuine September data, and October edits are entirely synthetic**. No real second release or real-world closures have been observed.
+
+```bash
+python -m unittest tests.test_overture_delta -v
+python -m benchmarks.overture_delta_eval
+python scripts/overture_release_delta.py
+```
+
+See [OVERTURE_TEMPORAL_DIFF.md](docs/OVERTURE_TEMPORAL_DIFF.md) and [ADR-0013](../../docs/adr/0013-temporal-source-delta-and-identity.md) for the future separately reviewed download contract, licence and holdout expectations. This code does not enable the consumer catalogue or any background polling.

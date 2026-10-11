@@ -69,6 +69,12 @@ açılış/etkinlik/ücret bilgisi yoktur. Kaynak başına atıf ve [deney rapor
 
 `labs/core/kepcore/overture_field_review.py` iki ayrı insanın 60 gerçek Overture POI'si için hazırlanan Excel dosyalarını **çevrimdışı** doğrular. Örneklem ve görünen kaynak iddiaları değiştirilemez; boş, çelişkili veya sonradan girilen cevaplarla kaynak hata oranı yayımlanmaz. Çalıştırma: [saha veri protokolü](labs/core/docs/OVERTURE_FIELD_AUDIT_INTAKE.md). 60 örneğin %95 muhafazakâr hata aralığı yarıçapı yaklaşık **±51,8 yüzde puandır**; gerçek saha doğruluğu hâlâ ölçülmemiştir.
 
-## KEP-DATA-005 · Blind third review and independent holdout
+## KEP-DATA-006 · Overture sürümleri arasında değişim zekâsı
 
-[Third-review protocol](labs/core/docs/OVERTURE_THIRD_REVIEW_AND_HOLDOUT.md) adds offline reconciliation only for conflicting physical-existence evidence, preserving original A/B votes, and a preregisterable sample-size **forecast** for the remaining 4,743 archive records. No third-human work or independent field verification has yet occurred. The sampled source's `open_now`, operational status and coordinate accuracy remain separate unknowns. CI contains no private review files or sampling seed.
+[Zamansal POI karşılaştırma protokolü](labs/core/docs/OVERTURE_TEMPORAL_DIFF.md) ve [ADR-0013](docs/adr/0013-temporal-source-delta-and-identity.md): bir sonraki harita veri sürümünde eklenen, listeden çıkan, sınıflandırması veya koordinatı değişen kayıtları ayrı işle. **Listeden çıkması işletmenin kapandığını kanıtlamaz.** Bugünkü offline örnek 4.803 gerçek Eylül kaydı + **sentetik sonraki sürüm** kullanır; gerçek Ekim değişim sonucu henüz yoktur.
+
+```bash
+cd labs/core
+python -m benchmarks.overture_delta_eval
+python scripts/overture_release_delta.py
+```
