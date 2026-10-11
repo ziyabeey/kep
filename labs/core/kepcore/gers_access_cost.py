@@ -25,7 +25,7 @@ MAX_FOOTER = 2 * 1024 * 1024
 COLUMNS = {'id', 'bbox.xmin', 'bbox.xmax', 'bbox.ymin', 'bbox.ymax',
            'columns_changed.list.element'}
 DATA_DIR = Path(__file__).resolve().parents[1]/'data/real/gers_footer_2026-10-11'
-PINNED_ZIP_SHA256 = None  # Set only after an actual capture and independent byte check.
+PINNED_ZIP_SHA256 = '1cefe054f5b61adfa2117d43e441626ab5355fed1096aa105b397d70f619bf9d'
 
 
 def positive_int(v, label, *, zero=False):
