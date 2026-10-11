@@ -190,6 +190,9 @@ def run(config_override:dict|None=None):
             raise ValueError('Invalid small test settings')
         cfg=json.loads(json.dumps(cfg))
         cfg['experiment'].update(ex)
+        # Contract tests deliberately use a DIFFERENT seed, never the full
+        # preregistered 1,080-case holdout's earliest instances.
+        cfg['experiment']['seed']=20260901
     e=cfg['experiment']
     all_results={}
     for ri,regime in enumerate(REGIMES):
