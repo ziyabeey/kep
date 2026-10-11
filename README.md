@@ -68,3 +68,7 @@ açılış/etkinlik/ücret bilgisi yoktur. Kaynak başına atıf ve [deney rapor
 ## KEP-DATA-004 · Kör saha denetimi Excel içe aktarma
 
 `labs/core/kepcore/overture_field_review.py` iki ayrı insanın 60 gerçek Overture POI'si için hazırlanan Excel dosyalarını **çevrimdışı** doğrular. Örneklem ve görünen kaynak iddiaları değiştirilemez; boş, çelişkili veya sonradan girilen cevaplarla kaynak hata oranı yayımlanmaz. Çalıştırma: [saha veri protokolü](labs/core/docs/OVERTURE_FIELD_AUDIT_INTAKE.md). 60 örneğin %95 muhafazakâr hata aralığı yarıçapı yaklaşık **±51,8 yüzde puandır**; gerçek saha doğruluğu hâlâ ölçülmemiştir.
+
+## KEP-DATA-005 · Blind third review and independent holdout
+
+[Third-review protocol](labs/core/docs/OVERTURE_THIRD_REVIEW_AND_HOLDOUT.md) adds offline reconciliation only for conflicting physical-existence evidence, preserving original A/B votes, and a preregisterable sample-size **forecast** for the remaining 4,743 archive records. No third-human work or independent field verification has yet occurred. The sampled source's `open_now`, operational status and coordinate accuracy remain separate unknowns. CI contains no private review files or sampling seed.

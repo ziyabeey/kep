@@ -34,3 +34,7 @@ labs/core/data/field_reviews_private/
 labs/core/.local/field_review*/
 KEP_Istanbul_Real_Field_Reviewer_*.xlsx
 *PRIVATE_AUDIT_Bundle.zip
+
+# KEP-DATA-005 independent third-human review artifacts
+labs/core/data/field_reviews_private/adjudications/
+*blinded-adjudication-case*.jsonl

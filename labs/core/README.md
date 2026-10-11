@@ -144,3 +144,10 @@ Source and sampling caveats: [OVERTURE_REAL_FIRST_RESULTS.md](docs/OVERTURE_REAL
 - `scripts/intake_overture_field_workbooks.py`: ağsız, model anahtarsız, üretimden ayrılmış komut satırı.
 - `docs/OVERTURE_FIELD_AUDIT_INTAKE.md`: değerlendirme protokolü ve kritik **±51,8 yüzde puan** muhafazakâr yarıçap uyarısı.
 - Bağımsız insan sonucu henüz sıfır; testler sentetik oyları kullanır, gerçek saha sonuçları değildir.
+
+## KEP-DATA-005 · Blind third human review + new holdout size
+
+`kepcore/overture_adjudication.py` handles **only binary physical-existence** disputes between two independently completed worksheets. It emits a C-review template without A/B verdicts, binds any completed third decision to a SHA-256 commitment to the original ballots, and leaves the weighted error estimate unset if any selected record is missing, unknown, or not explicitly adjudicated. Reviewer data and the sampling seed remain **off-repo**. The same module estimates human workload and conservative precision for a NEW sampling frame of the remaining **4,743** POIs, without drawing a new sample or asserting field accuracy.
+
+Instructions: [third-review and holdout protocol](docs/OVERTURE_THIRD_REVIEW_AND_HOLDOUT.md).
+Offline check: `python -m unittest tests.test_overture_adjudication -q`; CLI: `python scripts/adjudicate_overture_field.py --help`. No paid API, browser or push actions.

@@ -63,5 +63,7 @@ jobs:
         run: python scripts/real_overture_replay.py > /dev/null
       - name: Blind Overture field-review intake (offline, no human labels)
         run: python scripts/intake_overture_field_workbooks.py --help > /dev/null
+      - name: Blind third-review and disjoint holdout contract (offline)
+        run: python scripts/adjudicate_overture_field.py --help > /dev/null
       - name: Reproduce offline benchmarks
         run: python run_all.py
