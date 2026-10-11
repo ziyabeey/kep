@@ -65,5 +65,9 @@ jobs:
         run: python scripts/intake_overture_field_workbooks.py --help > /dev/null
       - name: Blind third-review and disjoint holdout contract (offline)
         run: python scripts/adjudicate_overture_field.py --help > /dev/null
+      - name: Overture time-aware source delta (real reference + synthetic later edits)
+        run: |
+          python -m benchmarks.overture_delta_eval > /dev/null
+          python scripts/overture_release_delta.py > /dev/null
       - name: Reproduce offline benchmarks
         run: python run_all.py
