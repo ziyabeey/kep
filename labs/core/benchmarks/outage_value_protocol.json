@@ -1,0 +1,88 @@
+{
+  "study": "KEP-CORE-004A",
+  "locked_before_policy_implementation": true,
+  "new_real_source_reads": 0,
+  "frozen_parent": "b8f54289f36369e9f9aa7b81f75f25d383fe3045",
+  "objective": "Reduce costly over-abstention during a verified synthetic audit outage, WITHOUT blindly accepting assumptions when source quality degrades.",
+  "risk_selection": [
+    {
+      "issue": "audit_outage",
+      "source": "CORE-003 exact pinned experiment",
+      "cases": 160,
+      "conservative_utility": 0.367219,
+      "fixed_voi_utility": 0.585594,
+      "missed_true_conservative": 57,
+      "missed_true_fixed": 17,
+      "utility_gap_per_case": 0.218375,
+      "priority": "first"
+    },
+    {
+      "issue": "shared_rumor",
+      "source": "CORE-003 exact pinned experiment",
+      "cases": 160,
+      "wrong_assertions_all_three_methods": 3,
+      "priority": "later separate study, no new hidden lineage oracle"
+    }
+  ],
+  "user_value_metric": "(correct_assertions - 4*false_assertions - normalized_check_cost) / cases",
+  "false_assertion_penalty": 4,
+  "experiment": {
+    "seed": 2026101204,
+    "cases_per_regime": 180,
+    "regimes": [
+      "outage_stable",
+      "outage_abrupt_drift",
+      "outage_gradual_drift",
+      "healthy",
+      "delayed_reviews",
+      "shared_rumor"
+    ],
+    "comparisons": [
+      "never",
+      "fixed_voi",
+      "conservative",
+      "bounded_grace"
+    ],
+    "chronological_test_truth_hidden_from_planner": true,
+    "prospective_probe_answers_hidden_until_after_plan": true,
+    "background_audits_independent_of_policy": true,
+    "same_case_same_sensors": true,
+    "max_one_check": true,
+    "paired_bootstrap_draws": 200
+  },
+  "proposed_rule_fixed_before_holdout": {
+    "use_old_conservative_core3_first": true,
+    "rescue_only_actions": [
+      "NO_CHECK_INSUFFICIENT_AUDITS",
+      "NO_CHECK_INSUFFICIENT_OR_UNCERTAIN_PROBES"
+    ],
+    "never_override": [
+      "CORE_REFUSED",
+      "HUMAN_REVIEW",
+      "NO_CHECK_UNCERTAIN_ORIGIN",
+      "NO_CHECK_ALREADY_SUPPORTED",
+      "NO_CHECK_POLICY"
+    ],
+    "current_audit_window_hours": 72,
+    "fallback_audit_window_hours": 168,
+    "grace_max_hours_since_last_adjudication": 48,
+    "min_positive_and_negative_independent_audits": 12,
+    "require_lower_sensitivity_and_specificity_each_at_least": 0.62,
+    "only_explicitly_approved_distinct_publisher_roots": true,
+    "check_budget_and_deadline_still_hard": true,
+    "no_fetch_or_publish": true
+  },
+  "go_no_go_frozen": {
+    "main_regime": "outage_stable",
+    "min_gain_utility_per_case_over_conservative": 0.025,
+    "min_gain_utility_per_case_over_never": 0,
+    "max_false_assertions_vs_fixed_voi_outage_stable": 0,
+    "max_drift_utility_regret_vs_fixed_voi_per_case": 0.05,
+    "main_regime_observed_fail_requires_report_not_tuning": true,
+    "synthetic_results_are_not_generalizable": true,
+    "successful_tests_are_not_accuracy_evidence": true
+  },
+  "no_source_ground_truth_claims": true,
+  "avoid_motivated_benchmark_changes": true,
+  "lifecycle": "PROTOCOL_FROZEN_BEFORE_NEW_POLICY_OR_HOLDOUT_RUN"
+}
