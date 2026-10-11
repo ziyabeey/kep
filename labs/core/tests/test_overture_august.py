@@ -171,6 +171,32 @@ class HistoricalBundleTests(unittest.TestCase):
             self.assertEqual(snap.schema,SCHEMA)
             self.assertFalse(m['consumer_publish'])
             self.assertFalse(m['acquisition']['upstream_authenticated_independently'])
+    def test_partial_region_is_rejected_before_bundle_is_written(self):
+        with TemporaryDirectory() as t:
+            sources=temp_sources(t,{'besiktas_center':[]})
+            directory=Path(t)/'august'
+            with self.assertRaisesRegex(ValueError,'pilot cell empty'):
+                prepare_august_bundle(sources,output=directory,stac_bytes=stac(),
+                    observed_at=OBSERVED,acquisition='operator_supplied_local_files')
+            self.assertFalse(directory.exists())
+
+    def test_historical_download_after_september_is_a_valid_release_comparison(self):
+        with TemporaryDirectory() as t:
+            inputs=temp_sources(t)
+            root=Path(t)/'august'
+            observed='2026-10-11T06:00:00Z'  # later than real September acquisition
+            manifest=prepare_august_bundle(inputs,output=root,stac_bytes=stac(),
+                observed_at=observed,acquisition='operator_supplied_local_files')
+            report=compare_august_september(root,
+                expected_sha256=manifest['normalized_sha256'],
+                expected_manifest_sha256=manifest['manifest_sha256'],
+                expected_stac_sha256=sha256(stac()).hexdigest(),
+                expected_observed_at=observed)
+            self.assertTrue(report['acquisition_chronology']['acquisition_order_reversed'])
+            self.assertEqual(report['old_release'],AUGUST)
+            self.assertEqual(report['new_release'],'2026-09-23.1')
+            self.assertFalse(report['may_infer_business_openings_closures'])
+
     def test_cannot_claim_august_observed_before_release(self):
         with TemporaryDirectory() as t:
             with self.assertRaises(ValueError):prepare_august_bundle(temp_sources(t),output=Path(t)/'august',
