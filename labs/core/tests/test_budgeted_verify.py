@@ -176,5 +176,18 @@ class BudgetedPlanContracts(unittest.TestCase):
         self.assertFalse(r.consumer_publish)
 
 
+    def test_expected_gain_matches_actual_two_root_gate(self):
+        """A positive second root triggers lab support even at low modeled p.
+
+        The planner must charge the *actual* payoff if that occurs, not
+        quietly assume a separate min-probability gate exists in CORE-001.
+        """
+        option=channel(sens=.51,spec=.51,cost=.09)
+        p=plan(prior=.002,options=[option],policy='cheapest')
+        self.assertEqual(p.action,'PROPOSE_CHECK')
+        self.assertLess(p.assumed_expected_net_gain,-.09)
+        self.assertFalse(p.authorized_to_fetch)
+
+
 if __name__=='__main__':
     unittest.main()
