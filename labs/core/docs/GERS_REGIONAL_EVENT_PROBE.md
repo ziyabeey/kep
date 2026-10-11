@@ -31,6 +31,18 @@ It requires the already pinned `footers.zip`, validates the original canonical m
 
 The public receipt contains only aggregate event counts, a reproducibility fingerprint, timing/byte costs, and abstention reasons. **No raw IDs, private human reviews, seeds, customer data, source secrets or predicted business labels** should be written to GitHub. Attribution to Overture and upstream providers remains necessary. No consumer use.
 
+## Real bounded acquisition and source receipt (2026-10-11)
+
+[Experimental source job 38153722714](https://github.com/ziyabeey/kep/actions/runs/38153722714) succeeded **at the source read** but its subsequent GitHub commit step failed because an overbroad key-name check mistakenly rejected the harmless `complete_for_all_union_ids` field. The exact successful JSON was preserved by `upload-artifact`; its outer ZIP SHA-256 matched GitHub's `3bb653cee8d6d244c1278687d2a8895718c01b4e79d62102cedc16e1cb98a411`. The inner canonical JSON SHA-256 is **`8796914fb07117ddd5551c7480def866d17e8e7c8b04df8ed42af52d79598a10`**. The receipt was pinned in Git without re-requesting source bytes. A failed post-read reporting gate is NOT a successful whole-workflow result.
+
+Actual `2026-09-23.0` Places GERS `added` and `removed` row group scan: **207,733** source rows scanned; **218 added** and **67 removed**, **285 distinct regional IDs**, **285** also in the union of previously captured August/September local place IDs; no conflicting IDs and no duplicates in the captured bounded projection. Reading used **14 HTTP Range requests**, **8,022,067 application-response-body bytes**, **7.998247 seconds**, under the fixed **16 MiB**/128 requests cap. Column chunk metadata predicted 7,890,995 compressed bytes. The 8MB is measured read traffic, **not** all network traffic (Arrow install and response headers excluded). No raw IDs or contact data were published. These are *publisher changelog rows* for bounded geometry, NOT verified independent business events or complete all-ID history.
+
+Local snapshot diff remains **222 locally newly-listed IDs / 69 locally no-longer-listed IDs**. The observed 218/67 GERS rows do **not** establish 218/222 or 67/69 official membership agreement: patch predecessor unverified, bbox membership differs, and 1,236 excluded row groups cannot be ruled out by ID. The already stored `official_membership_agreement_fraction` remains `null`, not a computed rate. Neither the metadata read nor the 285 observed rows establishes physical openings/closures. This experiment is research-only.
+
+Source capture preceding this success initially stopped at zero body bytes on `'size'` / `object_bytes` field mismatch. A synthetic-plus-pinned-metadata regression was introduced first and the minimal source adapter fixed; no budget increase. Retain both failed-run and successful-read audit records.
+
+The committed `reports/KEP_DATA_015_REGIONAL_EVENTS.json` is **aggregate-only and byte-pinned**; `python scripts/review_gers_region_events.py --check` checks its digest and guard invariants fully offline, but does NOT re-download or independently reconstruct source rows. Any new GERS event reading is a separately approved study. The temporary push-triggered source workbench is removed before PR merge.
+
 ## Reproduction and tests
 
 ```bash
