@@ -10,6 +10,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from random import Random
+from decimal import Decimal, ROUND_HALF_EVEN
 from hashlib import sha256
 import copy
 import json
@@ -192,13 +193,33 @@ def execute(trial:Trial,policy:str)->dict:
     }
 
 
+_SIX_PLACES=Decimal('0.000001')
+
+
+def _rounded6(value:Decimal)->float:
+    """Fixed decimal rounding, invariant across Python float sum order."""
+    return float(value.quantize(_SIX_PLACES,rounding=ROUND_HALF_EVEN))
+
+
+def _case_value(trial:Trial,out:dict,false_penalty:float)->Decimal:
+    """The simulator's predeclared utility, calculated without float ties."""
+    if out['accepted']:
+        reward=Decimal('1') if trial.truth else -Decimal(str(false_penalty))
+    else:
+        reward=Decimal('0')
+    return reward-Decimal(str(out['check_cost_utility_units']))
+
+
 def summarize(trials:list[Trial],results:list[dict],false_penalty:float)->dict:
-    n=len(trials); asserted=sum(x['accepted'] for x in results)
+    n=len(trials)
+    asserted=sum(x['accepted'] for x in results)
     wrong=sum(x['false_assertion'] for x in results)
     correct=sum(x['correct_assertion'] for x in results)
     checks=sum(x['checked'] for x in results)
-    spent=sum(x['check_cost_utility_units'] for x in results)
-    value=correct-false_penalty*wrong-spent
+    spent=sum((Decimal(str(x['check_cost_utility_units']))
+               for x in results),Decimal('0'))
+    value=sum((_case_value(t,out,false_penalty)
+               for t,out in zip(trials,results)),Decimal('0'))
     return {
         'cases':n,'assertions':asserted,'correct_assertions':correct,
         'false_assertions':wrong,'missed_true':sum(c.truth and not r['accepted']
@@ -207,23 +228,23 @@ def summarize(trials:list[Trial],results:list[dict],false_penalty:float)->dict:
         'false_fraction_given_assertion':round(wrong/asserted,6) if asserted else None,
         'checks':checks,'checks_per_case':round(checks/n,6),
         'human_review_proposals':sum(x['human_review'] for x in results),
-        'total_check_cost_utility_units':round(spent,6),
-        'utility_per_case':round(value/n,6),
+        'total_check_cost_utility_units':_rounded6(spent),
+        'utility_per_case':_rounded6(value/Decimal(n)),
     }
 
 
 def _paired(trials,aa,bb,penalty,seed,draws):
-    def value(trial,out):
-        return ((1 if trial.truth else -penalty) if out['accepted'] else 0)-out['check_cost_utility_units']
-    differences=[value(t,a)-value(t,b) for t,a,b in zip(trials,aa,bb)]
+    differences=[_case_value(t,a,penalty)-_case_value(t,b,penalty)
+                 for t,a,b in zip(trials,aa,bb)]
     rng=Random(seed)
-    sims=sorted(sum(rng.choices(differences,k=len(differences)))/len(differences)
-                for _ in range(draws))
+    sims=sorted(sum(rng.choices(differences,k=len(differences)),Decimal('0'))
+                /Decimal(len(differences)) for _ in range(draws))
     return {
-        'mean_voi_minus_never':round(sum(differences)/len(differences),6),
+        'mean_voi_minus_never':_rounded6(
+            sum(differences,Decimal('0'))/Decimal(len(differences))),
         'conditional_bootstrap_95':[
-            round(sims[int(.025*draws)],6),
-            round(sims[min(draws-1,int(.975*draws))],6)],
+            _rounded6(sims[int(.025*draws)]),
+            _rounded6(sims[min(draws-1,int(.975*draws))])],
         'draws':draws,
         'caution':'Synthetic matched-case bootstrap, not independent real-user confidence.'
     }
