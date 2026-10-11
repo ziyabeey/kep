@@ -50,3 +50,28 @@ Ordinary Python 3.11/3.13 CI runs those checks without internet, optional data a
 ## Rollback
 
 Revert only the new temporal pipeline module, simulator/benchmark, tests, fixed config, protocol, ADR-0025 and CI step. Leave older Core algorithms, all pinned real Overture archives, original simulated studies and FIELD-001 private coordinator/reviewer files untouched. No production/database/push migration.
+
+
+## Initial frozen simulator result (October 11, 2026)
+
+The exact **3,000-scenario** simulator output reproduced byte-identically on GitHub Actions Python **3.11 and 3.13**, before the checksum was frozen. Canonical SHA-256 of the complete sorted output is:
+
+    1907d98db2cc142f20b393092eca9bfd81f03724ea91e0dfd7ea03629294b2ea
+
+To verify this regression boundary offline, run:
+
+    python scripts/replay_temporal_core.py --check
+
+The checksum is an engineering guard. It is not external validation or real-business evidence. It deliberately fails if an updated source algorithm, generator assumption or configuration changes output; then a researcher must inspect what changed instead of silently changing the benchmark.
+
+| Wholly synthetic regime | Temporal root asserted / 600 | False / asserted | Temporal utility per case | Raw-message utility | Single-root utility |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| matched | 350 | 7 / 350 (2.0%) | 0.525 | 0.535 | 0.483333 |
+| mirror_attack | 248 | 1 / 248 (0.40%) | 0.405 | 0.638333 | 0.63 |
+| delivery_lag | 183 | 0 / 183 (0%) | 0.305 | 0.556667 | 0.498333 |
+| source_degradation | 209 | 21 / 209 (10.05%) | 0.173333 | 0.218333 | 0.156667 |
+| rights_blocked | 256 | 3 / 256 (1.17%) | 0.401667 | 0.376667 | 0.37 |
+
+**The conservative policy does NOT win every synthetic metric.** In mirror and delivery-lag scenarios, a permissive one-root or raw-message control can earn more normalized utility by asserting more true cases, even while risking more false assertions. Under degraded source quality, the two-root kernel still makes **21 false assertions** of its 209 total. If we naively optimized this benchmark after seeing results, the holdout would be contaminated. We keep these adverse observations visible and propose separate next experiments, not a new claim of superiority.
+
+None of these rates is Istanbul venue correctness, real model performance, verified shop closures, a production risk ceiling or a confidence interval for humans. The simulator's label distribution, sensor reliability, delay and utility are **invented by design**. The deferred/human-review outcomes should eventually connect to an authorized source-evidence workflow using new independent calibration, not be silently converted to acceptance.
