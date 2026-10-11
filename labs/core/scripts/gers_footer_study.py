@@ -4,11 +4,10 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from hashlib import sha256
-import io
 import json
 from pathlib import Path
 import sys
-from threading import Lock
+from threading import Lock, Event
 from time import perf_counter
 import urllib.parse
 import urllib.request
@@ -34,22 +33,34 @@ class Reader:
         self.budget=cost.BodyBudget()
         self.body_bytes=0
         self.lock=Lock()
+        self.stopped=Event()
 
     def read(self,url,*,maximum,headers=None):
         if not url.startswith(S3):
             raise ValueError('Only reviewed public S3 endpoint allowed')
+        if self.stopped.is_set():
+            raise ValueError('Source access stopped after a previous failure')
         self.budget.reserve(maximum)
         request=urllib.request.Request(url,headers={'Accept-Encoding':'identity',**(headers or {})})
         opener=urllib.request.build_opener(NoRedirect())
-        with opener.open(request,timeout=15) as r:
-            content_length=r.headers.get('Content-Length')
-            if content_length is None or not content_length.isdigit() or int(content_length)>maximum:
-                raise ValueError('Missing or oversized response length')
-            raw=r.read(maximum)
-            with self.lock:self.body_bytes+=len(raw)
-            if len(raw)!=int(content_length):
-                raise ValueError('Truncated metadata response')
-            return raw,dict(r.headers),r.status
+        try:
+            with opener.open(request,timeout=15) as r:
+                is_range=bool(headers and 'Range' in headers)
+                if r.status != (206 if is_range else 200) or r.headers.get('Content-Encoding','identity')!='identity':
+                    raise ValueError('Unexpected metadata response status or encoding')
+                length=r.headers.get('Content-Length')
+                if length is not None and (not length.isdigit() or int(length)>maximum):
+                    raise ValueError('Oversized or invalid response length')
+                if length is None and is_range:
+                    raise ValueError('Range response requires an exact length')
+                raw=r.read(maximum)
+                with self.lock:self.body_bytes+=len(raw)
+                if (length is not None and len(raw)!=int(length)) or (length is None and len(raw)>=maximum):
+                    raise ValueError('Truncated or over-budget metadata response')
+                return raw,dict(r.headers),r.status
+        except Exception:
+            self.stopped.set()
+            raise
 
     def range(self,item,start,end):
         raw,h,status=self.read(S3+item['key'],maximum=end-start+1,
@@ -149,11 +160,15 @@ def capture(output):
         items=listed_objects(reader)
         report['listed_objects']=len(items)
         def work(item):
-            if reader.range(item,0,3)!=b'PAR1':raise ValueError('Unsupported Parquet header')
-            tail=reader.range(item,item['size']-8,item['size']-1)
-            start,end=cost.footer_span(tail,item['size'])
-            footer=reader.range(item,start,end)+tail
-            return decode_footer(item,footer),footer
+            try:
+                if reader.range(item,0,3)!=b'PAR1':raise ValueError('Unsupported Parquet header')
+                tail=reader.range(item,item['size']-8,item['size']-1)
+                start,end=cost.footer_span(tail,item['size'])
+                footer=reader.range(item,start,end)+tail
+                return decode_footer(item,footer),footer
+            except Exception:
+                reader.stopped.set()
+                raise
         with ThreadPoolExecutor(max_workers=4) as pool:
             for obj,raw in pool.map(work,items):
                 report['objects'].append(obj);footers[obj['footer_member']]=raw
