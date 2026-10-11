@@ -103,6 +103,8 @@ def _bounded_duckdb_extract(temporary: Path) -> dict[str, Path]:
                     features.append(_minimal_feature(row))
                     if len(features)>MAX_FEATURES:
                         raise ValueError('Historical window exceeded predefined record limit')
+            if not features:
+                raise ValueError(f'Historical region {cell} returned zero source rows; no partial dataset')
             body=canonical({'type':'FeatureCollection','features':features})
             if not 0<len(body)<=MAX_INPUT_BYTES:
                 raise ValueError('Historical source extract empty or oversized; stop, do not fabricate')
