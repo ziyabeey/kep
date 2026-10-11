@@ -192,14 +192,20 @@ def check_core_publish_gate(directory: Path | str = DATA_DIR) -> dict:
 def prepare_private_audit(directory: Path | str, *, budget: int,
                           seed: str, sampled_at: str) -> dict:
     """Draw a genuine random sample over real records (not a truth survey)."""
-    load_archive(directory)
-    from tempfile import TemporaryDirectory
-    doc, manifest, _ = load_archive(directory, verify=False)
-    with TemporaryDirectory(prefix='kep-real-audit-') as tmp:
-        path=Path(tmp)
-        (path/'places_minimal.json').write_bytes(canonical(doc))
-        (path/'manifest.json').write_bytes(canonical(manifest))
-        plan=design_existence_audit(path,budget=budget,seed=seed,sampled_at=sampled_at)
+    # ONE complete, integrity-and-license-checked archive decode per call.
+    # An earlier implementation verified, decoded again, wrote temporary JSON,
+    # then verified a second time. The pure sampling routine receives ONLY
+    # this already-validated in-memory frame and its pinned manifest.
+    doc, manifest, meta = load_archive(directory, verify=True)
+    from .overture_audit import _design_from_verified_frame
+    frame = {
+        'source_acquisition_claim':manifest['acquisition']['method'],
+        'release':meta['release'],
+        'population_sha256':manifest['population_sha256'],
+        'manifest_sha256':meta['manifest_sha256'],
+    }
+    plan=_design_from_verified_frame(doc['records'],frame,manifest['acquisition'],
+                                      budget=budget,seed=seed,sampled_at=sampled_at)
     record_by_id={r['overture_id']:r for r in doc['records']}
     # The review sheet is unlabelled and does not declare any place verified.
     sheet=[{
@@ -215,4 +221,5 @@ def prepare_private_audit(directory: Path | str, *, budget: int,
         'physical_existence_label':'UNREVIEWED',
     } for s in plan['selected']]
     return {'plan':plan,'unlabeled_review_sheet':sheet,
+            'source_run_url':meta['original_actions_run_url'],
             'research_only':True,'observed_label_count':0}

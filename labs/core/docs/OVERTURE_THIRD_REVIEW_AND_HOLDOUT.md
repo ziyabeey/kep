@@ -57,3 +57,12 @@ Conservative per-stratum Hoeffding union bounds can be very wide. Without indepe
 ## Future observations
 
 `physical_existence`, `currently_operating`, `open_now`, and `coordinate_correct` are separate research labels requiring separate protocols. An archived listing present in the dataset does not imply open now, and disappearance from a later release does not imply real-world closure. A second Overture release should be pinned, hashed and replayed in another PR when published.
+
+## Integrity versus performance
+
+Each command validates the frozen Overture archive afresh, including the
+compressed snapshot hash and the independent source-use safety checks. Within
+a command, sampling and review parsing reuse the already checked in-memory
+frame. Neither previous results nor a global process cache can authorize
+changed bytes. Unit tests compare the fast and independently verified sampling
+paths and explicitly corrupt a source archive to ensure denial.
