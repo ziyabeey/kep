@@ -5,6 +5,7 @@ from hashlib import sha256
 from unittest.mock import patch
 from kepcore.gers_access_cost import DATA_DIR, PINNED_ZIP_SHA256, load_capture
 from kepcore.gers_index_audit import CompactFooter, evaluate, audit_index_capabilities
+from scripts.audit_gers_index import stable_projection
 
 def u(n):
     out=bytearray()
@@ -96,5 +97,5 @@ class PinnedOriginalFooterTests(unittest.TestCase):
         self.assertEqual(self.r['data_page_response_bytes'],0)
     def test_golden_report(self):
         p=Path(__file__).resolve().parents[1]/'reports/KEP_DATA_017_INDEX_AUDIT.json'
-        self.assertEqual(self.r,json.loads(p.read_text()))
+        self.assertEqual(stable_projection(self.r),json.loads(p.read_text()))
 if __name__=='__main__':unittest.main()
