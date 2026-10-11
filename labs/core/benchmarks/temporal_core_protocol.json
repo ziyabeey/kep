@@ -1,0 +1,22 @@
+{
+  "study": "KEP-CORE-001",
+  "fixed_before_simulation": true,
+  "seed": 20261011,
+  "n_per_regime": 600,
+  "regimes": [
+    "matched",
+    "mirror_attack",
+    "delivery_lag",
+    "source_degradation",
+    "rights_blocked"
+  ],
+  "policies": [
+    "core_only",
+    "count_raw_messages",
+    "single_root",
+    "temporal_root",
+    "always_abstain"
+  ],
+  "false_assertion_penalty": 4,
+  "paired_bootstrap_draws": 300
+}
