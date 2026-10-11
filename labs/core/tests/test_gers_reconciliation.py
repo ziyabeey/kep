@@ -109,7 +109,7 @@ class SyntheticReconciliationTests(unittest.TestCase):
         self.assertEqual(x['routing']['property_review_ids'],0)
 
     def test_source_only_is_metadata_not_an_independent_vote(self):
-        a,b = pair([poi(1)],[poi(1,source_provenance=[{'dataset':'Meta','license':'CDLA-Permissive-2.0'}])])
+        a,b = pair([poi(1)],[poi(1,source_provenance=[{'provider':'Meta','license':'CDLA-Permissive-2.0','dataset':'Synthetic-provider-fixture'}])])
         x = run(a,b,bundle(a,b,[event(1,'unchanged')]))
         self.assertEqual(x['routing']['metadata_only_ids'],1)
         self.assertEqual(x['independent_business_evidence_count'],0)

@@ -1,0 +1,289 @@
+{
+  "performance": {
+    "memory_scope": "Python allocation peak inside each method, NOT total RSS or input storage",
+    "methodology": "3 warm untraced timings; 1 separate tracemalloc run; input loading excluded",
+    "methods": {
+      "kep_deterministic": {
+        "repeats": 3,
+        "separate_run_peak_python_allocation_bytes": 24952797,
+        "warm_max_seconds": 0.477602,
+        "warm_median_seconds": 0.384074,
+        "warm_min_seconds": 0.375601
+      },
+      "kep_reconciliation": {
+        "repeats": 3,
+        "separate_run_peak_python_allocation_bytes": 24952957,
+        "warm_max_seconds": 1.096615,
+        "warm_median_seconds": 1.069195,
+        "warm_min_seconds": 1.061815
+      },
+      "naive_removal_as_closure": {
+        "repeats": 3,
+        "separate_run_peak_python_allocation_bytes": 426688,
+        "warm_max_seconds": 0.004114,
+        "warm_median_seconds": 0.004076,
+        "warm_min_seconds": 0.003929
+      }
+    },
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "python": "3.13.5",
+    "speed_comparison_is_not_quality_comparison": true
+  },
+  "stable_results": {
+    "human_labels": 0,
+    "methods": {
+      "kep_deterministic": {
+        "business_event_accuracy": null,
+        "identity_review_candidates": 3,
+        "official_changelog_evidence_used": false,
+        "source_record_delta": {
+          "confidence_only_revised_ids": 3337,
+          "field_change_counts": {
+            "address": 122,
+            "basic_category": 36,
+            "confidence": 3513,
+            "geometry": 63,
+            "locality": 20,
+            "name": 42,
+            "source_provenance": 9,
+            "taxonomy_primary": 62
+          },
+          "field_or_geometry_revised_ids": 198,
+          "newly_listed_ids": 222,
+          "no_longer_listed_ids": 69,
+          "retained_ids": 4581,
+          "unchanged_ids": 1046
+        },
+        "unsupported_closure_assertion_count": 0
+      },
+      "kep_reconciliation": {
+        "business_event_accuracy": null,
+        "identity_review_candidates": 4,
+        "official_event_reconciliation_complete": false,
+        "release_chain_compatibility_checked": true,
+        "unsupported_closure_assertion_count": 0
+      },
+      "naive_removal_as_closure": {
+        "assertions_independently_proven_false": null,
+        "business_event_accuracy": null,
+        "consumer_publish": false,
+        "new_ids": 4803,
+        "newly_listed_ids": 222,
+        "no_longer_listed_ids": 69,
+        "old_ids": 4650,
+        "retained_ids": 4581,
+        "unsupported_closure_assertion_count": 69
+      }
+    },
+    "offline_replay_network_calls": 0,
+    "paid_api_calls": 0,
+    "real_source_releases": [
+      "2026-08-19.0",
+      "2026-09-23.1"
+    ],
+    "reconciliation": {
+      "after_normalized_sha256": "700be7afce6ecf024dbb10c7d340962fcc4a1705fb4e8a000c54ed60a0d37848",
+      "after_population_sha256": "26f93817e44e9e94062bcecb26dc60b47e5a6e0e18f8af6a62a6c5f52e010123",
+      "after_release": "2026-09-23.1",
+      "before_normalized_sha256": "ba22c8d7e52c7d6e7067fb67b16e623932dfbbf301b28bf55dd8d9e0e07a1664",
+      "before_population_sha256": "b310c7c4ce43d4d4fe63e61bf2375e99edccefe150e0861ce25455a9b6c182de",
+      "before_release": "2026-08-19.0",
+      "business_event_accuracy": null,
+      "changelog_compatibility": {
+        "capture_attempt": {
+          "artifact_id": 11703950496,
+          "artifact_zip_sha256": "0151e6d502c7a5d9c566fcfa498b72e55463ec44c31310a9197be2739124fb5a",
+          "budget_bytes": 268435456,
+          "bytes_transferred": 268294121,
+          "failure_observation": "HTTP 503 from bounded proxy near body budget; exact rejection detail not retained",
+          "failure_type": "HTTPException",
+          "http_requests": 203,
+          "object_counts_by_release": {
+            "2026-09-23.0": 64,
+            "2026-09-23.1": 64
+          },
+          "official_event_rows": 0,
+          "original_receipt_sha256": "a8408c46954de59e33f4ec8e92dc99078d67c8beff66417fe3dc399249089cc6",
+          "query_scope": "bbox_and_id_union_not_global",
+          "retrieved_at": "2026-10-11T13:20:21.032833+00:00",
+          "status": "INCOMPLETE_CAPTURE",
+          "workflow_run_id": 38142687481
+        },
+        "catalog_raw_sha256": {
+          "2026-09-23.0": "a9798b7f08d1679eee34b8b428c8f127acc9aa13c248bc75a269a1740ab8d46e",
+          "2026-09-23.1": "2cb87fbd6ab8fdf8272d8a3c5cbaf6b1f3b7aedebffe9ba122670138308d6946"
+        },
+        "complete_event_capture_available": false,
+        "direct_pair_comparison_allowed": false,
+        "global_capture_available": false,
+        "release_chain": [
+          "2026-08-19.0",
+          "2026-09-23.0",
+          "2026-09-23.1"
+        ],
+        "same_publisher_not_independent_evidence": true,
+        "status": "REQUIRES_INTERMEDIATE_RELEASE"
+      },
+      "confidence_is_truth_probability": false,
+      "conflict_count": 0,
+      "consumer_publish": false,
+      "drift_summary": {
+        "business_moves": null,
+        "category_semantics_comparable": false,
+        "confidence_abs_change_p50": 0.008741,
+        "confidence_abs_change_p90": 0.041753,
+        "confidence_abs_change_p99": 0.156956,
+        "confidence_abs_delta_over_0_01": 1618,
+        "confidence_abs_delta_over_0_05": 256,
+        "confidence_abs_delta_over_0_10": 73,
+        "confidence_changed_count": 3513,
+        "confidence_missing_in_pair": 0,
+        "confidence_only_abs_delta_over_0_05": 217,
+        "confidence_only_abs_delta_over_0_10": 47,
+        "confidence_only_revisions": 3337,
+        "consumer_publish": false,
+        "field_revision_counts_nonexclusive": {
+          "address": 122,
+          "basic_category": 36,
+          "geometry": 63,
+          "locality": 20,
+          "name": 42,
+          "source_provenance": 9,
+          "taxonomy_primary": 62
+        },
+        "human_truth_labels": 0,
+        "newly_listed_ids": 222,
+        "no_longer_listed_ids": 69,
+        "paired_confidence_count": 4581,
+        "paired_confidence_delta_mean": -0.006943,
+        "physical_closures": null,
+        "physical_openings": null,
+        "policy": "KEP-DATA-011-TRIAGE-v1",
+        "research_only": true,
+        "retained_ids": 4581,
+        "retained_ids_by_new_cell": {
+          "besiktas_center": 1775,
+          "karakoy_center": 2806
+        },
+        "retained_ids_no_changes": 1046,
+        "schema_only_revisions_cross_version_not_truth": 36,
+        "score_and_field_changes_overlap": 176,
+        "score_calibrated_truth_probability": false,
+        "source_field_revisions_excluding_schema_only": 162,
+        "source_fields_revised": 198,
+        "source_ids_new": 4803,
+        "source_ids_old": 4650,
+        "study_scope": "TWO_OVERTURE_SOURCE_RELEASES_NOT_REAL_WORLD_BUSINESS_EVENTS",
+        "triage_queue_is_unbiased_audit": false
+      },
+      "identity_review": {
+        "automatic_merge": false,
+        "candidate_pairs": 4,
+        "candidate_recall_measured": false,
+        "candidate_sha256": "e0d3de0abb045ad25213c1dd586ecd501c75aef6f5555d3cf72d0e62b34f6a8d",
+        "category_used_as_identity_evidence": false,
+        "publisher_supersession_link_available": false,
+        "truncated": false
+      },
+      "independent_business_evidence_count": 0,
+      "legacy_identity_hint_count": 3,
+      "naive_definition": "EXPANDED_ID_TO_OPENING_OR_CLOSURE_HYPOTHESIS",
+      "official": {
+        "duplicate_rows_collapsed": 0,
+        "independent_publisher_authentication": false,
+        "membership_agreement_fraction": null,
+        "membership_comparable_ids": 0,
+        "missing_union_ids": 4872,
+        "observed_unique_ids": 0,
+        "outcome_counts": {},
+        "publisher_root": "overturemaps",
+        "source_capture_sha256": null,
+        "status": "NOT_AVAILABLE",
+        "unobserved_columns": []
+      },
+      "physical_closures": null,
+      "physical_openings": null,
+      "research_only": true,
+      "review_queue_count": 489,
+      "review_queue_is_unbiased_audit": false,
+      "review_queue_sha256": "5e552a0facc50dc0c046462bf8c14247aea15283045aa66b7120089c71a758dd",
+      "routing": {
+        "membership_review_ids": 291,
+        "metadata_only_ids": 3337,
+        "property_review_ids": 162,
+        "schema_only_ids": 36,
+        "unchanged_local_ids": 1046
+      },
+      "sampling_coverage": {
+        "bounds_are_cells_not_districts": true,
+        "by_cell": {
+          "besiktas_center": {
+            "added": 97,
+            "new": 1872,
+            "old": 1806,
+            "removed": 31
+          },
+          "karakoy_center": {
+            "added": 125,
+            "new": 2931,
+            "old": 2844,
+            "removed": 38
+          }
+        },
+        "global_membership_inferred_from_local_absence": false,
+        "same_frozen_rectangles": true
+      },
+      "schema": {
+        "absence_of_local_change_proves_full_feature_unchanged": false,
+        "excluded_from_official_comparison": [
+          "confidence",
+          "sources"
+        ],
+        "normalization_note": "Primary name and first address only; raw categories not retained.",
+        "not_semantically_comparable": [
+          "basic_category",
+          "categories",
+          "taxonomy"
+        ],
+        "partially_observed_top_level_columns": [
+          "addresses",
+          "names"
+        ],
+        "raw_after_schema": "Places v2.0",
+        "raw_before_schema": "Places v1.18"
+      },
+      "source_origin": "PINNED_REAL_SOURCE_ARCHIVES",
+      "source_record_delta": {
+        "confidence_only_revised_ids": 3337,
+        "field_change_counts": {
+          "address": 122,
+          "basic_category": 36,
+          "confidence": 3513,
+          "geometry": 63,
+          "locality": 20,
+          "name": 42,
+          "source_provenance": 9,
+          "taxonomy_primary": 62
+        },
+        "field_or_geometry_revised_ids": 198,
+        "newly_listed_ids": 222,
+        "no_longer_listed_ids": 69,
+        "retained_ids": 4581,
+        "unchanged_ids": 1046
+      },
+      "study": "KEP-DATA-013",
+      "unsupported_naive_business_assertions": 291,
+      "unsupported_removal_as_closure_assertions": 69
+    },
+    "review_policy_ablation": {
+      "actually_unnecessary_inspections_measured": null,
+      "all_changed_or_membership_ids": 3826,
+      "definition": "Separate all-changes review-everything policy, NOT the removal-only naive method",
+      "metadata_only_ids": 3337,
+      "no_claim_that_queued_cases_are_true_errors": true,
+      "source_membership_or_property_review_ids": 453,
+      "technical_schema_only_ids": 36
+    },
+    "study": "KEP-DATA-013"
+  }
+}

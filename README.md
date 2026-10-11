@@ -86,3 +86,7 @@ Ağustos/Eylül 2026 Overture kaydı üzerine iki-sürümlü, ağsız araştırm
 ## KEP-DATA-012 · Real August preservation beyond artifact retention
 
 The exact [August 2026 historical research ZIP](labs/core/data/real/overture_istanbul_2026-08-19.0/original_actions_artifact.zip) is now pinned in Git. [Reproduce the two real Overture release comparison offline](labs/core/docs/OVERTURE_DURABLE_AUGUST_REPLAY.md): `cd labs/core && python scripts/replay_pinned_august.py`. No transient GitHub artifact or network is required. These are *source* changes, not verified business openings/closures.
+
+## KEP-DATA-013 · GERS source reconciliation and compatibility
+
+[Offline replay and scientific boundaries](labs/core/docs/GERS_RECONCILIATION.md). The two real archives are unchanged. Actual STAC evidence requires the intermediate `2026-09-23.0` release; the bounded official-event capture is incomplete, so no official membership agreement or business opening/closure accuracy is claimed. Run `python scripts/reconcile_gers_releases.py --check` from `labs/core`. Ordinary CI remains offline.

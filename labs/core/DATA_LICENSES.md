@@ -93,3 +93,7 @@ sonra silinebilir; bu nedenle küçültülmüş kopyası repoda saklanır.
 açık olduğunun, fiyatlarının veya etkinliklerinin doğruluğunun ispatı değildir.
 `confidence` alanı tekil olay doğrulaması veya kalibre edilmiş yayım yetkisi değildir.
 Bu arşiv yalnız araştırma içindir; KEP tüketici yayını kapalıdır.
+
+## DATA-013 access evidence, not new business truth
+
+`data/real/gers_access_2026-10-11/` preserves the exact two public STAC catalogs and a compressed original public-S3 research failure receipt. No completed GERS event rows or full Parquet data were retained. Existing Places provider attribution remains attached to the original two-release archives. Sources: https://docs.overturemaps.org/attribution/ , https://docs.overturemaps.org/gers/changelog/ , https://stac.overturemaps.org/catalog.json . See `docs/GERS_RECONCILIATION.md` for provenance, hashes and the incomplete capture. No reviewer material, audit seeds, customer data or new consumer publication permission is included.

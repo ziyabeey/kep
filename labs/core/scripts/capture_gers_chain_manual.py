@@ -35,7 +35,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-def capture(output: Path) -> None:
+def capture(output: Path) -> dict:
     import duckdb  # Separately installed pinned dependency; offline lab never needs it.
     if output.exists():
         raise ValueError('Capture output must not already exist')
@@ -67,9 +67,11 @@ def capture(output: Path) -> None:
         try:
             req = urllib.request.Request(url, method=method, headers=headers or {})
             with opener.open(req, timeout=15) as response:
-                body = response.read(maximum+1) if method!='HEAD' else b''
+                if headers and 'Range' in headers and response.status!=206:
+                    raise ValueError('Server ignored range request')
+                body = response.read(maximum) if method!='HEAD' else b''
                 consumed = len(body)
-                if consumed>maximum:
+                if method!='HEAD' and not (headers and 'Range' in headers) and consumed==maximum:
                     raise ValueError('Per-request byte budget exhausted')
                 if headers and 'Range' in headers and response.status!=206:
                     raise ValueError('Server ignored range request')
@@ -193,6 +195,7 @@ def capture(output: Path) -> None:
         print(json.dumps({k:v for k,v in report.items() if k not in {'transitions','objects'}},indent=2))
         for edge in report['transitions']:
             print(edge['before_release'],edge['after_release'],len(edge['rows']),edge['all_partitions_scanned'])
+    return report
 
 
 def main():
@@ -205,7 +208,9 @@ def main():
         print(json.dumps({'status':'OFFLINE_DEFAULT','network_calls':0,'paid_api_calls':0}));return
     if args.research_confirmation!='RESEARCH_ONLY' or args.output is None:
         p.error('Explicit RESEARCH_ONLY confirmation and fresh output path required')
-    capture(args.output)
+    result=capture(args.output)
+    if result['status']!='CAPTURED_SPATIALLY_BOUNDED_NOT_GLOBAL':
+        raise SystemExit(3)
 
 
 if __name__=='__main__':
