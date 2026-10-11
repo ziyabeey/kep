@@ -194,5 +194,45 @@ class AuditTimeContracts(unittest.TestCase):
             estimate_sources([],as_of=T.isoformat(),approved_roots=('origin',),
                              window_hours=0)
 
+
+    def test_conservative_rejects_high_sensitivity_zero_specificity_probe(self):
+        """High recall is useless when a sensor accepts EVERY false place.
+
+        QA-001 real mutation experiment showed the preceding 52 focused tests
+        missed a bug using sensitivity's Wilson bound for specificity too.
+        This synthetic, decision-level case must reject that dangerous check.
+        """
+        c=trial();v=c.view
+        original=next(s for s in v.signals if s.publisher_root=='origin')
+        one=replace(v,signals=(replace(original,supports=True),))
+        deep=next(x for x in v.probes if x.channel.id=='deep')
+        history=[]
+        for i in range(80):
+            truth=i<40
+            history.append(feedback(i,'origin',truth=truth,support=truth))
+            # This sensor is perfectly sensitive but accepts *every* false
+            # venue too: specificity = zero, regardless of its sensitivity.
+            history.append(feedback(i,'deep_root',truth=truth,support=True))
+        root=estimate_sources(
+            history,as_of=T.isoformat(),
+            approved_roots=('origin','deep_root'),min_class_n=12)['deep_root']
+        self.assertEqual(root.status,'READY')
+        self.assertEqual(root.positive_truth_n,40)
+        self.assertEqual(root.negative_truth_n,40)
+        self.assertGreater(root.sensitivity_lower,.85)
+        self.assertEqual(root.specificity_lower,0.0)
+        decision=plan_adaptive(
+            [one.record],one.query,one.signals,(deep,),
+            observed_channels=one.observed_sources,
+            approved_roots=one.approved_roots,prior=one.prior,
+            budget=one.budget,max_wait_minutes=one.max_wait_minutes,
+            audits=history,mode='conservative')
+        self.assertEqual(decision.action,
+                         'NO_CHECK_INSUFFICIENT_OR_UNCERTAIN_PROBES')
+        self.assertIsNone(decision.probe_id)
+        self.assertFalse(decision.authorized_to_fetch)
+        self.assertFalse(decision.consumer_publish)
+
+
 if __name__=='__main__':
     unittest.main()
