@@ -75,7 +75,7 @@ jobs:
           PY
       - name: Commit original minimized archive, remove one-time workflow
         env:
-          ORIGINAL_ZIP: ${ runner.temp }}/kep-original-august.zip
+          ORIGINAL_ZIP: ${{ runner.temp }}/kep-original-august.zip
         shell: bash
         run: |
           set -euo pipefail
