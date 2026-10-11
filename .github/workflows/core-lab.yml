@@ -80,3 +80,6 @@ jobs:
         run: |
           python -m unittest tests.test_overture_change_triage -q
           python scripts/overture_confidence_drift.py > /dev/null
+
+      - name: Freeze-check original real August ZIP and September replay (offline)
+        run: python scripts/replay_pinned_august.py > /dev/null
