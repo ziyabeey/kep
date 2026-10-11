@@ -18,7 +18,7 @@ from .audit_sampling import _allocated
 from .calibration import aware
 from .overture_audit import confidence_band
 from .overture_field_review import read_review_sheet, conservative_precision_budget
-from .overture_real import DATA_DIR, load_archive, prepare_private_audit
+from .overture_real import DATA_DIR, prepare_private_audit
 
 DIMENSION = 'physical_existence'
 VERDICTS = frozenset({'exists', 'does_not_exist', 'unknown'})
@@ -59,19 +59,24 @@ def _load_context(*, reviewer_a: str | Path, reviewer_b: str | Path,
                                   sampled_at=plan['sampled_at'])
     if plan != frozen['plan']:
         raise ValueError('Frozen pilot sampling plan changed')
-    doc, _, metadata = load_archive(directory, verify=False)
-    index = {row['overture_id']: row for row in doc['records']}
+    # The 60 reviewed records are taken straight from the verified immutable
+    # frame produced above. No second unverified archive read, and no cached
+    # object across calls that could silently ignore on-disk modifications.
+    index = {
+        row['overture_id']:{**row,'basic_category':row['category']}
+        for row in frozen['unlabeled_review_sheet']
+    }
     first = read_review_sheet(reviewer_a, role='A', plan=plan, frozen=index,
-                              source_run_url=metadata['original_actions_run_url'])
+                              source_run_url=frozen['source_run_url'])
     second = read_review_sheet(reviewer_b, role='B', plan=plan, frozen=index,
-                               source_run_url=metadata['original_actions_run_url'])
+                               source_run_url=frozen['source_run_url'])
     a, b = first['votes'],second['votes']
     counts = {state: 0 for state in ('missing','unknown','conflict','concordant')}
     for rid in a:
         counts[_state(a[rid],b[rid],asof=evaluation_asof)] += 1
     base = {
         'study':'KEP-DATA-005','research_only':True,'consumer_publish':False,
-        'source_release':metadata['release'],'population_n':len(index),
+        'source_release':plan['source_release'],'population_n':plan['population_n'],
         'selected_n':len(a),'sampled_n_by_stratum':plan['strata'],
         'design_precision_forecast':conservative_precision_budget(plan),
         'reviewer_a_completed':first['completed'],

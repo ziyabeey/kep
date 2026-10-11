@@ -215,6 +215,33 @@ class FrozenThirdReviewTests(unittest.TestCase):
         self.assertNotIn('verified_true',r)
         self.assertFalse(r['survey_label_truth_verified_independently'])
 
+    def test_corrupted_archive_rejected_despite_previous_frozen_context(self):
+        # A cached/previously valid sample must NEVER authorize later modified
+        # archive bytes. This guards the optimized single-pass verified loader.
+        import shutil
+        copy=self.path/'pinned';copy.mkdir()
+        for filename in ('places_minimal.json.gz','manifest.json','archive_metadata.json'):
+            shutil.copy2(DATA_DIR/filename, copy/filename)
+        data=copy/'places_minimal.json.gz'
+        payload=bytearray(data.read_bytes());payload[-24]^=0x01
+        data.write_bytes(payload)
+        with self.assertRaisesRegex(ValueError, 'SHA-256'):
+            reconcile(**self.context(),directory=copy)
+
+    def test_pinned_sampling_matches_independent_verified_artifact(self):
+        # The fast path MUST generate the exact same commitments as the public
+        # standalone design_existence_audit that independently verifies JSON.
+        from kepcore.overture_audit import design_existence_audit
+        from kepcore.overture_places import canonical
+        from kepcore.overture_real import load_archive
+        doc, manifest, _=load_archive(DATA_DIR)
+        p=self.path/'source';p.mkdir()
+        (p/'places_minimal.json').write_bytes(canonical(doc))
+        (p/'manifest.json').write_bytes(canonical(manifest))
+        independently_verified=design_existence_audit(
+            p,budget=60,seed=SEED,sampled_at=AT)
+        self.assertEqual(independently_verified,self.plan)
+
 
 class HoldoutDesignTests(unittest.TestCase):
     @classmethod

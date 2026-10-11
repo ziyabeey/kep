@@ -22,6 +22,19 @@ Six source-area × Overture-confidence strata. Bonferroni + Hoeffding union-boun
 
 A smaller/cheaper but less conservative estimator may be considered in a separate preregistered simulation with explicit assumptions. Do not silently reduce budget by inspecting the pilot outcomes.
 
+## Verification cost and safety invariants
+
+The originally implemented third-review tests repeatedly decoded the 4,803-place
+archive. The audited code now verifies the signed-off local manifest, normalized
+SHA-256, research-only source rights and full feature schema **once per audit
+invocation**, and reuses only that validated in-memory frame to reconstruct the
+same seeded stratified selection. It does **not** cache previously validated
+files across invocations. Regression tests require exact plan parity against
+the independently verified standalone sampler and verify that a subsequently
+corrupted compressed archive still fails closed. The 30 dedicated unit tests
+run in about 11 seconds locally rather than 25 seconds for the older 28-test
+prototype. These times are diagnostics, not an SLA.
+
 ## Rollback
 
 Delete the new `overture_adjudication.py` and its CLI, docs/tests/CI smoke line. No production DB writes, source-rights changes, user-visible publication or model API calls. Pilot A/B workbooks and seed remain unchanged.

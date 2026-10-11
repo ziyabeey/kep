@@ -250,9 +250,23 @@ def design_existence_audit(directory: str | Path, *, budget: int, seed: str, sam
     """Freeze stratified sample by bbox and confidence; seed remains private."""
     if not isinstance(seed,str) or len(seed)<16:
         raise ValueError('Off-repo 16+ char private seed required')
-    freeze_at=aware(sampled_at)
     records,frame=_frame(directory)
     acquisition=json.loads((Path(directory)/'manifest.json').read_bytes()).get('acquisition',{})
+    return _design_from_verified_frame(records, frame, acquisition, budget=budget,
+                                       seed=seed, sampled_at=sampled_at)
+
+
+def _design_from_verified_frame(records: list[dict], frame: dict, acquisition: dict, *,
+                                budget: int, seed: str, sampled_at: str) -> dict:
+    """Internal deterministic draw from a frame already fully verified.
+
+    Callers MUST first validate the actual bytes with `verify_artifact` or
+    `load_archive(verify=True)`. Do not expose this as a general input path:
+    untrusted dicts would bypass the cryptographic and rights checks.
+    """
+    if not isinstance(seed,str) or len(seed)<16:
+        raise ValueError('Off-repo 16+ char private seed required')
+    freeze_at=aware(sampled_at)
     if acquisition.get('method')=='manual_overturemaps_cli_stac_pinned' and aware(acquisition['downloaded_at_utc'])>freeze_at:
         raise ValueError('Cannot freeze audit draw before acquisition')
     if not records:
