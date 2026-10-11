@@ -194,8 +194,13 @@ def _candidate_id_churn(removed:list[dict],added:list[dict],limit:int) -> tuple[
 
 
 def compare_snapshots(before:ResearchSnapshot,after:ResearchSnapshot,*,
-                      max_detail:int=80,max_churn_hints:int=250)->dict[str,Any]:
-    """Report record and field churn only, with *no* real-world closure inference."""
+                      max_detail:int=80,max_churn_hints:int=250,
+                      allow_historical_backfill:bool=False)->dict[str,Any]:
+    """Report source churn. Release order need not equal historical download order.
+
+    Acquisition-time reversal is only permitted for the exact August->September
+    research backfill. The default policy for other comparisons stays strict.
+    """
     if not isinstance(before,ResearchSnapshot) or not isinstance(after,ResearchSnapshot):
         raise TypeError('Expected validated research snapshots')
     # Dataclass is frozen, but nested record dicts can still be altered by a caller.
@@ -203,9 +208,18 @@ def compare_snapshots(before:ResearchSnapshot,after:ResearchSnapshot,*,
     for snapshot in (before,after):
         if sha256(canonical(list(snapshot.records))).hexdigest()!=snapshot.population_sha256:
             raise ValueError('Snapshot records changed after integrity verification')
-    if (_release_key(before.release)>=_release_key(after.release)
-        or aware(before.observed_at)>=aware(after.observed_at)):
+    if type(allow_historical_backfill) is not bool:
+        raise ValueError('Historical backfill flag must be a boolean')
+    if _release_key(before.release)>=_release_key(after.release):
         raise ValueError('Cannot compare unordered, identical or backwards releases')
+    if aware(before.observed_at)>=aware(after.observed_at):
+        exact_backfill = (allow_historical_backfill
+            and before.release=='2026-08-19.0'
+            and after.release=='2026-09-23.1'
+            and before.origin=='operator_supplied_research'
+            and after.origin=='pinned_real_archive')
+        if not exact_backfill:
+            raise ValueError('Cannot compare unordered, identical or backwards releases')
     if before.sampling_cells!=after.sampling_cells or before.schema!=after.schema:
         raise ValueError('Incomparable release schema/sampling coverage')
     if (type(max_detail)!=int or max_detail<0 or max_detail>1000 or

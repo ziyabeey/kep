@@ -171,6 +171,32 @@ class HistoricalBundleTests(unittest.TestCase):
             self.assertEqual(snap.schema,SCHEMA)
             self.assertFalse(m['consumer_publish'])
             self.assertFalse(m['acquisition']['upstream_authenticated_independently'])
+    def test_partial_region_is_rejected_before_bundle_is_written(self):
+        with TemporaryDirectory() as t:
+            sources=temp_sources(t,{'besiktas_center':[]})
+            directory=Path(t)/'august'
+            with self.assertRaisesRegex(ValueError,'pilot cell empty'):
+                prepare_august_bundle(sources,output=directory,stac_bytes=stac(),
+                    observed_at=OBSERVED,acquisition='operator_supplied_local_files')
+            self.assertFalse(directory.exists())
+
+    def test_historical_download_after_september_is_a_valid_release_comparison(self):
+        with TemporaryDirectory() as t:
+            inputs=temp_sources(t)
+            root=Path(t)/'august'
+            observed='2026-10-11T06:00:00Z'  # later than real September acquisition
+            manifest=prepare_august_bundle(inputs,output=root,stac_bytes=stac(),
+                observed_at=observed,acquisition='operator_supplied_local_files')
+            report=compare_august_september(root,
+                expected_sha256=manifest['normalized_sha256'],
+                expected_manifest_sha256=manifest['manifest_sha256'],
+                expected_stac_sha256=sha256(stac()).hexdigest(),
+                expected_observed_at=observed)
+            self.assertTrue(report['acquisition_chronology']['acquisition_order_reversed'])
+            self.assertEqual(report['old_release'],AUGUST)
+            self.assertEqual(report['new_release'],'2026-09-23.1')
+            self.assertFalse(report['may_infer_business_openings_closures'])
+
     def test_cannot_claim_august_observed_before_release(self):
         with TemporaryDirectory() as t:
             with self.assertRaises(ValueError):prepare_august_bundle(temp_sources(t),output=Path(t)/'august',
@@ -256,5 +282,71 @@ class HistoricalFetchContractTests(unittest.TestCase):
                          capture_output=True,text=True,cwd=root,timeout=15)
         self.assertEqual(p.returncode,0,p.stderr)
         self.assertIn('--august-sha256',p.stdout)
+
+class ProvisionalAfterCaptureTests(unittest.TestCase):
+    """All remote data in these tests are SYNTHETIC fixture rows, not observed August."""
+    def setUp(self):
+        from scripts.provisional_august_delta import build_provisional_report
+        from kepcore.overture_historical_probe import PINNED_PREFIX
+        self.builder=build_provisional_report
+        self.prefix=PINNED_PREFIX
+
+    def make_extraction(self, directory, method='historical_duckdb_public_s3'):
+        root=Path(directory)
+        inp=temp_sources(root)
+        bundle=root/'august'
+        outcome=prepare_august_bundle(inp,output=bundle,stac_bytes=stac(),
+            observed_at='2026-10-11T06:00:00Z',acquisition=method)
+        receipt={
+            'study':'KEP-DATA-008','exact_release':AUGUST,
+            's3_prefix':self.prefix,'one_parquet_head_verified':True,
+            'all_release_parts_verified':False,
+            'regional_istanbul_download_completed':False,
+            'consumer_publish_approved':False,
+            'normalized_sha256':outcome['normalized_sha256'],
+            'manifest_sha256':outcome['manifest_sha256'],
+        }
+        (bundle/'historical_public_preflight.json').write_bytes(canonical(receipt))
+        return bundle,receipt
+
+    def test_offline_provisional_report_bound_to_both_real_release_names(self):
+        with TemporaryDirectory() as t:
+            root,_=self.make_extraction(t)
+            report=self.builder(root)
+            self.assertEqual((report['old_release'],report['new_release']),
+                             ('2026-08-19.0','2026-09-23.1'))
+            self.assertEqual(report['evidence_status'],
+                'PROVISIONAL_INTERNAL_HASH_CHECK_NOT_INDEPENDENT_SOURCE_VERIFICATION')
+            self.assertTrue(report['acquisition_chronology']['acquisition_order_reversed'])
+            self.assertEqual(report['old_population_n'],2)
+            self.assertEqual(report['new_population_n'],4803)
+            self.assertFalse(report['may_infer_business_openings_closures'])
+            self.assertFalse(report['consumer_publish'])
+
+    def test_modified_preflight_receipt_is_rejected(self):
+        with TemporaryDirectory() as t:
+            root,receipt=self.make_extraction(t)
+            receipt['manifest_sha256']='0'*64
+            (root/'historical_public_preflight.json').write_bytes(canonical(receipt))
+            with self.assertRaisesRegex(ValueError,'mismatch'):
+                self.builder(root)
+
+    def test_operator_supplied_data_cannot_impersonate_automated_capture(self):
+        with TemporaryDirectory() as t:
+            root,_=self.make_extraction(t,method='operator_supplied_local_files')
+            with self.assertRaisesRegex(ValueError,'mismatch'):
+                self.builder(root)
+
+    def test_noncanonical_and_false_s3_probe_are_rejected(self):
+        with TemporaryDirectory() as t:
+            root,receipt=self.make_extraction(t)
+            receipt['one_parquet_head_verified']=False
+            (root/'historical_public_preflight.json').write_bytes(canonical(receipt))
+            with self.assertRaisesRegex(ValueError,'preflight'):
+                self.builder(root)
+            (root/'historical_public_preflight.json').write_text(' {"fake":true}')
+            with self.assertRaisesRegex(ValueError,'canonical'):
+                self.builder(root)
+
 
 if __name__=='__main__':unittest.main()

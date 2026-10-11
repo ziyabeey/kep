@@ -84,3 +84,44 @@ Offline CI mocks GET/HEAD. It does not spend network bandwidth or retrieve
 any new historical data. If public retention expires or an object cannot
 be accessed, the project must report `HISTORICAL_DATA_UNAVAILABLE` and use
 a later **genuinely acquired** release rather than filling the gap synthetically.
+
+
+## DATA-009: historical backfill order and provisional two-release result
+
+**Corrected comparison contract:** a release's publication date and its local
+acquisition timestamp are different clocks. The 19 August source can be obtained
+on 11 October **after** the September source was obtained, yet the correct
+comparison remains August → September. The comparator allows reversed
+*acquisition* timestamps only when the exact Aug 19 operator-research snapshot is
+compared to the pinned Sep 23 frozen archive. Reversed release dates, all other
+origins, and default snapshot comparisons still fail closed.
+
+**Completeness:** both original bounded pilot cells must contain at least one
+valid extracted August source row. A missing, empty or entirely rejected cell
+stops the manual capture rather than creating thousands of false "removed IDs".
+The resulting manifest contains per-cell rows-read and valid-row counts. These
+are counts within fixed rectangles, not borough administrative districts.
+
+**New manual result:** on a *successful* August workflow, the same job now
+performs an offline comparison with the existing 4,803 September records.
+The seven-day artifact includes a fourth file, \`source_delta_provisional.json\`,
+alongside \`places_minimal.json\`, \`manifest.json\`, and
+\`historical_public_preflight.json\`. The report records release and separate
+download timestamps, category migration uncertainty, by-cell coverage, source
+record churn and human-review hints.
+
+**Evidence gate:** the immediate comparison checks internally supplied manifest
+and receipt hashes, not independently authenticated S3 source bytes.
+\`evidence_status=PROVISIONAL_INTERNAL_HASH_CHECK_NOT_INDEPENDENT_SOURCE_VERIFICATION\`
+is compulsory. Zero independently verified business closures/openings are
+inferred. No historical POI data is automatically committed or published.
+
+**Capture remains user-triggered:** GitHub Actions → Overture August 2026
+preservation (manual research) → Run workflow on \`main\`, with exact
+\`research_confirmation=RESEARCH_ONLY\` and \`release=2026-08-19.0\`.
+No regular CI job makes external requests. Run soon if the historical Parquet
+objects remain available; failure, empty cells or schema mismatch must be
+reported instead of estimated or patched with synthetic rows. After download,
+separately review report digests, Overture attribution/retention permissions,
+GERS changelog and independent field labels before any scientific interpretation
+or long-term storage.
