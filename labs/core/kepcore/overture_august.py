@@ -85,6 +85,7 @@ def ingest_august_files(paths: dict[str, str | Path]) -> dict:
     by_id = {}
     rejected = Counter()
     flags = Counter()
+    per_cell = {cell: {'rows_read': 0, 'valid_rows': 0} for cell in sorted(PILOT)}
     rows_seen = 0
     identical = 0
     for cell in sorted(PILOT):
@@ -98,6 +99,7 @@ def ingest_august_files(paths: dict[str, str | Path]) -> dict:
         source_files.append({'cell': cell, 'sha256': sha256(raw).hexdigest(), 'bytes': len(raw)})
         for feature in content['features']:
             rows_seen += 1
+            per_cell[cell]['rows_read'] += 1
             if rows_seen > MAX_FEATURES:
                 raise ValueError('Raw feature count exceeded, do not silently truncate')
             try:
@@ -105,6 +107,7 @@ def ingest_august_files(paths: dict[str, str | Path]) -> dict:
             except ValueError as err:
                 rejected[str(err)] += 1
                 continue
+            per_cell[cell]['valid_rows'] += 1
             existing = by_id.get(row['overture_id'])
             if existing is not None:
                 if {k:v for k,v in existing.items() if k!='cell'} != {k:v for k,v in row.items() if k!='cell'}:
@@ -134,6 +137,7 @@ def ingest_august_files(paths: dict[str, str | Path]) -> dict:
         },
         'audit': {
             'rows_read': rows_seen, 'accepted': len(records),
+            'per_cell': per_cell,
             'rejected': dict(sorted(rejected.items())),
             'duplicate_identical_ids': identical,
             'potential_duplicate_pairs': duplicates,
@@ -155,6 +159,8 @@ def prepare_august_bundle(paths: dict[str, str | Path], *, output: Path,
     stac = validate_august_stac(stac_bytes)
     after = validate_august_stac(stac_bytes if stac_after_bytes is None else stac_after_bytes)
     result = ingest_august_files(paths)
+    if any(counts['valid_rows'] == 0 for counts in result['audit']['per_cell'].values()):
+        raise ValueError('Historical pilot cell empty or entirely rejected; partial snapshot forbidden')
     data = {'dataset':'KEP-DATA-007', 'release': AUGUST, 'study_only': True,
             'records': result['records']}
     data_bytes = canonical(data)
@@ -260,7 +266,13 @@ def compare_august_september(directory: Path | str, *, expected_sha256: str,
         expected_manifest_sha256=expected_manifest_sha256,
         expected_stac_sha256=expected_stac_sha256, expected_observed_at=expected_observed_at)
     sep = snapshot_from_frozen_archive() if september_dir is None else snapshot_from_frozen_archive(september_dir)
-    report = compare_snapshots(old, sep)
+    report = compare_snapshots(old, sep, allow_historical_backfill=True)
+    report['acquisition_chronology'] = {
+        'august_acquired_at': old.observed_at,
+        'september_acquired_at': sep.observed_at,
+        'release_order_is_not_acquisition_order': True,
+        'acquisition_order_reversed': aware(old.observed_at) >= aware(sep.observed_at),
+    }
     # A missing old taxonomy is not evidence of a real category change.
     aug = {r['overture_id']:r for r in old.records}
     september = {r['overture_id']:r for r in sep.records}
