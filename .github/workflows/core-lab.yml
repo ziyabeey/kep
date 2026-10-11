@@ -151,7 +151,7 @@ jobs:
       - name: CORE-002 budgeted synthetic proposal replay (offline only)
         run: |
           python -m unittest tests.test_budgeted_verify tests.test_budgeted_core_eval -q
-          python -m benchmarks.budgeted_core_eval > "$RUNNER_TEMP/core002-${{ matrix.python-version }}.json"
+          python scripts/replay_budgeted_core.py --check > "$RUNNER_TEMP/core002-${{ matrix.python-version }}.json"
       - name: Preserve CORE-002 aggregate simulation only
         uses: actions/upload-artifact@v4
         with:
