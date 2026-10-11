@@ -7,7 +7,8 @@ permissions:
   contents: write
 jobs:
   metadata-capture:
-    if: github.event.head_commit.message == 'experiment(data-014): authorize one bounded metadata-only capture'
+    if: >-
+      github.event.head_commit.message == 'experiment(data-014): authorize one bounded metadata-only capture'
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
