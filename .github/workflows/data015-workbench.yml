@@ -63,3 +63,5 @@ jobs:
           git diff --cached --check
           git commit -m "data(data-015): preserve bounded real regional membership observations"
           git push origin HEAD:refs/heads/research/data-015-regional-gers-events
+
+# Next bounded attempt: plan adapter regression fixed, same 16 MiB/128 request limits.
