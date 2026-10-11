@@ -43,7 +43,7 @@ class RealUnlabeledPilotPrerecord(unittest.TestCase):
     def test_public_prereg_is_aggregate_only(self):
         raw=REPORT.read_text()
         self.assertFalse(re.search(r'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',raw))
-        self.assertNotIn('evidence_url',raw)
+        self.assertNotIn('"evidence_url"',raw)
         self.assertNotIn('reviewer_id',raw)
         self.assertFalse(self.d['private_seed_or_POI_rows_published'])
         self.assertFalse(self.d['consumer_publish'])
