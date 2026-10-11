@@ -246,3 +246,7 @@ Bu oran sadece seçtiğimiz 12 sentetik hata içindir, gerçek üretim hata ihti
     python scripts/audit_test_value.py --output YENI_RAPOR_DOSYASI.json
 
 [Protokol ve gözlenen sonuçlar](docs/QA_001_TEST_VALUE.md) · [ADR-0028](../../docs/adr/0028-measure-test-value-first.md). Yeni gerçek veri araması yok.
+
+## KEP-CORE-004A | NO-GO, test değeri kapısı işe yaradı
+
+Denetim kesintisinde gereksiz çekimserliğin önceki sentetik çalışmada yüksek maliyetli olduğu saptandı. Bu sorunu çözmek için yeni bir **48 saatlik geçmiş denetim toleransı** önceden kaydedildi ve 6 x 180 = 1.080 tamamen yeni sentetik vakada denendi. Önceden konan en az +0,025 fayda puanı artış şartı sağlanmadı: mevcut temkinli çekirdekle yeni adayın sonuçları **aynı**, kazanç **0**. Bu yüzden modül, testleri çalışsa bile, `main` koduna eklenmedi. Yalnız [ön kayıt](benchmarks/outage_value_protocol.json), [NO-GO raporu](reports/KEP_CORE_004A_NO_GO.json), [gerekçe](docs/CORE_004A_NO_GO.md) ve [ADR-0029](../../docs/adr/0029-rejected-audit-grace.md) saklandı. Gerçek veri araması yok; normal CI test sayısı değişmiyor.
