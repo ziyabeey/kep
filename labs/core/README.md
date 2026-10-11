@@ -178,3 +178,7 @@ python -m unittest tests.test_overture_durable_original -v
 ```
 
 Source-record changes are NOT human-reviewed business events. [Protocol](docs/OVERTURE_DURABLE_AUGUST_REPLAY.md).
+
+## KEP-DATA-013 · GERS source reconciliation and compatibility
+
+[Offline replay and scientific boundaries](docs/GERS_RECONCILIATION.md). The two real archives are unchanged. Actual STAC evidence requires the intermediate `2026-09-23.0` release; the bounded official-event capture is incomplete, so no official membership agreement or business opening/closure accuracy is claimed. Run `python scripts/reconcile_gers_releases.py --check` from `labs/core`. Ordinary CI remains offline.

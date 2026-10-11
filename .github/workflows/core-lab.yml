@@ -83,3 +83,13 @@ jobs:
 
       - name: Freeze-check original real August ZIP and September replay (offline)
         run: python scripts/replay_pinned_august.py > /dev/null
+
+      - name: GERS compatibility and measured real replay (offline, no official events invented)
+        run: python scripts/reconcile_gers_releases.py --check --benchmark > "$RUNNER_TEMP/data013-${{ matrix.python-version }}.json"
+      - name: Preserve aggregate DATA-013 CI measurements (no queues or reviewer files)
+        uses: actions/upload-artifact@v4
+        with:
+          name: data013-replay-python-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/data013-${{ matrix.python-version }}.json
+          retention-days: 7
+          if-no-files-found: error
