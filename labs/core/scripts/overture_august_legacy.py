@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from kepcore.overture_places import PILOT, MAX_INPUT_BYTES, MAX_FEATURES, canonical
 from kepcore.overture_august import (AUGUST, STAC_URL, S3_PREFIX,
     validate_august_stac, prepare_august_bundle)
+from kepcore.overture_historical_probe import confirm_public_parquet_object
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / 'sources/overture_august_research.json'
@@ -124,6 +125,7 @@ def run(output: Path) -> dict:
     if output.exists():
         raise ValueError('Output directory already exists; never overwrite')
     before=_catalog()
+    preflight=confirm_public_parquet_object()
     with TemporaryDirectory(prefix='kep-overture-august-') as tmp:
         paths=_bounded_duckdb_extract(Path(tmp))
         after=_catalog()
@@ -135,6 +137,12 @@ def run(output: Path) -> dict:
     report['stac_catalog_sha256_before']=sha256(before).hexdigest()
     report['stac_catalog_sha256_after']=sha256(after).hexdigest()
     report['upstream_raw_parquet_preserved']=False
+    # Persist the proof of ONE remote object's availability, not a whole-source
+    # authenticity certificate or a business-existence claim. Never overwrite.
+    receipt = dict(preflight)
+    receipt['normalized_sha256'] = report['normalized_sha256']
+    receipt['manifest_sha256'] = report['manifest_sha256']
+    (output/'historical_public_preflight.json').write_bytes(canonical(receipt))
     return report
 
 
@@ -142,7 +150,14 @@ def main() -> None:
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--fetch',action='store_true',help='Explicit public-S3 historical research download')
     p.add_argument('--output',type=Path,help='New research-only output directory')
+    p.add_argument('--probe',action='store_true',help='Explicit small public STAC+S3 GET/HEAD probe, no Parquet download')
     args=p.parse_args()
+    if args.fetch and args.probe:
+        p.error('Choose --fetch or --probe')
+    if args.probe:
+        _catalog()
+        print(json.dumps(confirm_public_parquet_object(),sort_keys=True,ensure_ascii=False,indent=2))
+        return
     if not args.fetch:
         print(json.dumps({'mode':'OFFLINE', 'network_calls':0,
             'release':AUGUST,'schema':'v1.18.0','s3_prefix':S3_PREFIX,

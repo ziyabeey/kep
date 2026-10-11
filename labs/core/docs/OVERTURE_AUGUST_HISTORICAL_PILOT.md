@@ -49,3 +49,38 @@ Run comparison August → September, *not* the inverse. The output distinguishes
 - An ID removed from Overture may represent dataset coverage, merge, filtering or deduplication, **not a physical closure**.
 - Official GERS changelog and independently labeled field evidence will be needed for real-world interpretations.
 - Do not assume case studies or 60-person labels can establish accuracy for all of Istanbul.
+
+## DATA-008: historical S3 preflight (11 October 2026)
+
+The upstream STAC child *lists* `2026-08-19.0` and an unauthenticated S3
+ListObjectsV2 query under the exact historical Places prefix returned one
+`part-*.zstd.parquet` key. **This is not the August Istanbul data extract.**
+No real August region has been retained in this study yet.
+
+Before the expensive historical DuckDB query, `--fetch` now checks that the
+public S3 prefix lists exactly one object when `max-keys=1`, then performs a
+HEAD request for that **exact old-release Parquet object**. The GET list and HEAD
+ETag/content length must agree. No body is downloaded in the probe. If the
+object is inaccessible, the job fails before the DuckDB work. There is no
+redirect, host substitution, credential upload, or fallback to `latest`.
+
+Explicit connectivity probe only, not the full download:
+
+```bash
+cd labs/core
+python scripts/overture_august_legacy.py --probe
+```
+
+The manually triggered GitHub workflow still performs the full extract only
+after successful preflight and uploads three research files:
+`places_minimal.json`, `manifest.json`, and `historical_public_preflight.json`.
+The receipt hashes the two data files and records **one** public object's
+reported HEAD/listing metadata. It does *not* authenticate every S3 part,
+establish original raw-file SHA-256, prove a region was fully extracted,
+verify any physical business, or authorize consumer display. In particular,
+S3 ETags (including multipart ETags) are **not** content SHA-256 hashes.
+
+Offline CI mocks GET/HEAD. It does not spend network bandwidth or retrieve
+any new historical data. If public retention expires or an object cannot
+be accessed, the project must report `HISTORICAL_DATA_UNAVAILABLE` and use
+a later **genuinely acquired** release rather than filling the gap synthetically.
