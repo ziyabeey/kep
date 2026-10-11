@@ -1,0 +1,149 @@
+{
+  "study": "KEP-QA-001",
+  "preregistration": "12 exact, authored executable regressions; fixed before seeing any detection outcome",
+  "baseline_commit": "d65cb9da2c5232a2848cae5b09ce6e6d5a9942bf",
+  "origin": "SOURCE_CODE_MUTATIONS_NOT_REAL_DEFECTS",
+  "network_access": false,
+  "source_data_downloads": 0,
+  "evaluation_suites": {
+    "sentinel": [
+      "tests.test_temporal_pipeline.TemporalContractTests.test_future_delivery_is_not_known_early",
+      "tests.test_temporal_pipeline.TemporalContractTests.test_unapproved_root_and_source_rights_never_count",
+      "tests.test_temporal_pipeline.TemporalContractTests.test_one_root_many_echoes_never_independent",
+      "tests.test_temporal_pipeline.TemporalContractTests.test_across_root_disagreement_never_source_majority_winner",
+      "tests.test_budgeted_verify.BudgetedPlanContracts.test_budget_and_deadline_hard_gate",
+      "tests.test_budgeted_verify.BudgetedPlanContracts.test_free_low_cost_unapproved_or_same_root_denied",
+      "tests.test_budgeted_verify.BudgetedPlanContracts.test_voi_rejects_fictional_low_value_despite_budget",
+      "tests.test_adaptive_trust.AuditTimeContracts.test_future_adjudications_never_change_old_decision",
+      "tests.test_adaptive_trust.AuditTimeContracts.test_syndicated_duplicate_does_not_create_new_audits",
+      "tests.test_adaptive_trust.AuditTimeContracts.test_pessimistic_guard_blocks_degraded_history",
+      "tests.test_adaptive_trust.AuditTimeContracts.test_class_conditional_rates_and_unbiased_denominators",
+      "tests.test_budgeted_verify.BudgetedPlanContracts.test_expected_gain_matches_actual_two_root_gate"
+    ],
+    "focused": [
+      "tests.test_temporal_pipeline",
+      "tests.test_budgeted_verify",
+      "tests.test_adaptive_trust"
+    ]
+  },
+  "evaluation_intent": "Compare sentinel-vs-focused defect detection and runtime; no claim that selected faults represent real-world defect rates.",
+  "risk_weights_note": "1..5 are editorial priority weights, NOT measured fault probabilities.",
+  "risk_mutations": [
+    {
+      "id": "M01_FUTURE_DELIVERY",
+      "category": "time_leak",
+      "priority": 5,
+      "file": "kepcore/temporal_pipeline.py",
+      "needle": "if observed>cutoff or available>cutoff or observed<minimum:",
+      "replacement": "if observed>cutoff or observed<minimum:",
+      "why": "A claim arriving after decision time could influence that decision"
+    },
+    {
+      "id": "M02_UNLICENSED_EVENT",
+      "category": "rights_bypass",
+      "priority": 5,
+      "file": "kepcore/temporal_pipeline.py",
+      "needle": "if event.rights_scope!='research_ingest' or event.publisher_root not in roots:",
+      "replacement": "if event.publisher_root not in roots:",
+      "why": "Unapproved source assertions could count as corroboration"
+    },
+    {
+      "id": "M03_SINGLE_ROOT_AS_TWO",
+      "category": "copied_evidence",
+      "priority": 5,
+      "file": "kepcore/temporal_pipeline.py",
+      "needle": "elif len(positive)>=2:",
+      "replacement": "elif len(positive)>=1:",
+      "why": "One publisher root could falsely corroborate itself"
+    },
+    {
+      "id": "M04_IGNORED_DISAGREEMENT",
+      "category": "contradiction",
+      "priority": 5,
+      "file": "kepcore/temporal_pipeline.py",
+      "needle": "if contradictory or (positive and negative):",
+      "replacement": "if contradictory:",
+      "why": "Cross-root contradiction might be ignored"
+    },
+    {
+      "id": "M05_SAME_ROOT_PROBE",
+      "category": "copied_evidence",
+      "priority": 5,
+      "file": "kepcore/budgeted_verify.py",
+      "needle": "ch.publisher_root in used or ch.cost>budget or",
+      "replacement": "False or ch.cost>budget or",
+      "why": "A cheap mirror could be selected as an independent sensor"
+    },
+    {
+      "id": "M06_OVER_BUDGET_CHECK",
+      "category": "cost_bound",
+      "priority": 4,
+      "file": "kepcore/budgeted_verify.py",
+      "needle": "ch.cost>budget or",
+      "replacement": "False or",
+      "why": "Planner could spend outside explicitly set allowance"
+    },
+    {
+      "id": "M07_AFTER_DEADLINE_CHECK",
+      "category": "deadline",
+      "priority": 4,
+      "file": "kepcore/budgeted_verify.py",
+      "needle": "option.latency_minutes>max_wait_minutes):",
+      "replacement": "False):",
+      "why": "Planner could choose a check whose answer misses user's deadline"
+    },
+    {
+      "id": "M08_NEGATIVE_NET_CHECK",
+      "category": "decision_value",
+      "priority": 3,
+      "file": "kepcore/budgeted_verify.py",
+      "needle": "if gain<=1e-12:",
+      "replacement": "if False:",
+      "why": "Planner could spend on a negative expected-value check"
+    },
+    {
+      "id": "M09_FUTURE_AUDIT_LABEL",
+      "category": "label_leak",
+      "priority": 5,
+      "file": "kepcore/adaptive_trust.py",
+      "needle": "if verified>cutoff or t>cutoff or t<window_start:",
+      "replacement": "if t>cutoff or t<window_start:",
+      "why": "Future independent verification might contaminate historical trust"
+    },
+    {
+      "id": "M10_SYNDICATED_TRAINING",
+      "category": "copied_training",
+      "priority": 4,
+      "file": "kepcore/adaptive_trust.py",
+      "needle": "key=(a.publisher_root,a.entity_id)",
+      "replacement": "key=(a.publisher_root,a.audit_id)",
+      "why": "Repeated same-case audits might masquerade as independent samples"
+    },
+    {
+      "id": "M11_WRONG_SPECIFICITY_BOUND",
+      "category": "calibration",
+      "priority": 4,
+      "file": "kepcore/adaptive_trust.py",
+      "needle": "lower_t=_wilson_lower(tn,len(no))",
+      "replacement": "lower_t=_wilson_lower(tp,len(yes))",
+      "why": "Trust lower bound for false reports could use the wrong truth class"
+    },
+    {
+      "id": "M12_SKIP_CONSERVATIVE_ORIGIN",
+      "category": "risk_gate",
+      "priority": 5,
+      "file": "kepcore/adaptive_trust.py",
+      "needle": "if mode=='conservative' and min(seed.sensitivity_lower,seed.specificity_lower)<LOWER_ROOT_GATE:",
+      "replacement": "if False:",
+      "why": "Poorly calibrated first source may bypass conservative abstention"
+    }
+  ],
+  "strict_boundaries": [
+    "No actual source module in checked-out repository may be changed",
+    "Every mutation occurs only in a temporary local copy",
+    "Baseline suite must pass before mutants count",
+    "Syntax-invalid mutants excluded with explicit error",
+    "No web/API/model calls",
+    "Mutation detection means only authored fault sensitivity"
+  ]
+}
