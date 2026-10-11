@@ -1,0 +1,136 @@
+{
+  "study": "KEP-CORE-004A",
+  "verdict": "NO_GO",
+  "origin": "FIRST_PREREGISTERED_SYNTHETIC_HOLDOUT",
+  "research_only": true,
+  "baseline_main": "b8f54289f36369e9f9aa7b81f75f25d383fe3045",
+  "experiment_commit": "e802d04bf7a33476e5af8e96e18d893f6894bc09",
+  "run_url": "https://github.com/ziyabeey/kep/actions/runs/38180120019",
+  "run_conclusion": "success",
+  "python_versions": [
+    "3.11",
+    "3.13"
+  ],
+  "independent_full_json_equal": true,
+  "original_canonical_result_sha256": "f00c4d2da46f35ad63f1da671171db3b69dfb67abf85ad1318d8207e1b337a46",
+  "original_artifact_zip_sha256": {
+    "python_311": "7552ec844388da4f4d9e9550998fa90bbef8a43b9d05c0b3eab7ab00836b7d18",
+    "python_313": "0e28b08055ca21ff8403e7f757a8c9d1a678b99666c1788ed5162c30f482e8ca"
+  },
+  "preregistered_settings": {
+    "seed": 2026101204,
+    "regimes": [
+      "outage_stable",
+      "outage_abrupt_drift",
+      "outage_gradual_drift",
+      "healthy",
+      "delayed_reviews",
+      "shared_rumor"
+    ],
+    "cases_per_regime": 180,
+    "simulated_cases": 1080,
+    "methods": [
+      "never",
+      "fixed_voi",
+      "conservative",
+      "bounded_grace"
+    ],
+    "false_assertion_penalty": 4,
+    "max_fallback_audit_age_hours": 48,
+    "rolling_audit_window_hours": 72,
+    "historical_fallback_window_hours": 168,
+    "min_class_n": 12,
+    "min_wilson_lower_each": 0.62,
+    "no_test_truth_visible_to_policy": true
+  },
+  "frozen_gate_results": {
+    "outage_utility_gain_over_conservative": false,
+    "outage_utility_gain_over_never": true,
+    "outage_false_assertions_not_above_fixed": true,
+    "outage_abrupt_drift_bounded_regret_vs_fixed": true,
+    "outage_gradual_drift_bounded_regret_vs_fixed": true
+  },
+  "primary_failure": {
+    "regime": "outage_stable",
+    "existing_conservative_utility_per_case": 0.344167,
+    "bounded_grace_utility_per_case": 0.344167,
+    "fixed_voi_utility_per_case": 0.517972,
+    "minimum_required_gain_over_conservative": 0.025,
+    "observed_gain_over_conservative": 0,
+    "existing_conservative_missed_true": 53,
+    "bounded_grace_missed_true": 53,
+    "fixed_voi_missed_true": 17,
+    "all_three_false_assertions": 0,
+    "bounded_grace_extra_check_proposals_over_conservative": 0
+  },
+  "per_regime": [
+    {
+      "regime": "outage_stable",
+      "utility_never": 0.088889,
+      "utility_fixed_voi": 0.517972,
+      "utility_conservative": 0.344167,
+      "utility_bounded_grace": 0.344167,
+      "checks_grace": 70,
+      "false_assertions_grace": 0,
+      "missed_true_grace": 53
+    },
+    {
+      "regime": "outage_abrupt_drift",
+      "utility_never": -0.011111,
+      "utility_fixed_voi": 0.135667,
+      "utility_conservative": 0.183694,
+      "utility_bounded_grace": 0.183694,
+      "checks_grace": 69,
+      "false_assertions_grace": 4,
+      "missed_true_grace": 68
+    },
+    {
+      "regime": "outage_gradual_drift",
+      "utility_never": 0.05,
+      "utility_fixed_voi": 0.276083,
+      "utility_conservative": 0.26125,
+      "utility_bounded_grace": 0.26125,
+      "checks_grace": 55,
+      "false_assertions_grace": 0,
+      "missed_true_grace": 76
+    },
+    {
+      "regime": "healthy",
+      "utility_never": 0.027778,
+      "utility_fixed_voi": 0.434833,
+      "utility_conservative": 0.434833,
+      "utility_bounded_grace": 0.434833,
+      "checks_grace": 102,
+      "false_assertions_grace": 1,
+      "missed_true_grace": 24
+    },
+    {
+      "regime": "delayed_reviews",
+      "utility_never": 0.072222,
+      "utility_fixed_voi": 0.424806,
+      "utility_conservative": 0.372639,
+      "utility_bounded_grace": 0.372639,
+      "checks_grace": 95,
+      "false_assertions_grace": 2,
+      "missed_true_grace": 34
+    },
+    {
+      "regime": "shared_rumor",
+      "utility_never": -0.011111,
+      "utility_fixed_voi": 0.306028,
+      "utility_conservative": 0.306028,
+      "utility_bounded_grace": 0.306028,
+      "checks_grace": 121,
+      "false_assertions_grace": 8,
+      "missed_true_grace": 24
+    }
+  ],
+  "conclusion": "Do NOT merge the candidate fallback policy: the fixed predeclared main-outage gain threshold failed. The other criteria passing does not override NO_GO. Never tune on exposed same holdout.",
+  "real_business_accuracy": null,
+  "independent_production_truth_labels": 0,
+  "new_real_data_downloads": 0,
+  "production_actions": 0,
+  "intentional_normal_ci_additional_unit_tests": 0,
+  "candidate_policy_merged": false,
+  "experiment_reproducibility": "The first-run candidate and synthetic generator exist in historical branch commit e802d04...; final main tree retains only preregistration, negative results and decision documentation, not the rejected implementation."
+}
