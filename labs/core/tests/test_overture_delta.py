@@ -166,6 +166,32 @@ class DeltaTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'unordered'):
             compare_snapshots(later_old,a)
 
+    def test_exact_historical_backfill_allows_later_download_not_reversed_release(self):
+        september=self.reference_short()
+        august=replace(september,release='2026-08-19.0',
+            observed_at='2026-10-11T06:00:00Z',origin='operator_supplied_research')
+        with self.assertRaisesRegex(ValueError,'unordered'):
+            compare_snapshots(august,september)
+        report=compare_snapshots(august,september,allow_historical_backfill=True)
+        self.assertEqual(report['old_release'],'2026-08-19.0')
+        self.assertEqual(report['new_release'],'2026-09-23.1')
+        self.assertEqual(report['source_record_churn']['retained_ids'],len(august.records))
+        with self.assertRaisesRegex(ValueError,'unordered'):
+            compare_snapshots(september,august,allow_historical_backfill=True)
+
+    def test_backfill_exception_is_exact_and_cannot_accept_other_release_or_origin(self):
+        september=self.reference_short()
+        other=replace(september,release='2026-09-20.0',
+            observed_at='2026-10-11T06:00:00Z',origin='operator_supplied_research')
+        with self.assertRaisesRegex(ValueError,'unordered'):
+            compare_snapshots(other,september,allow_historical_backfill=True)
+        actual=replace(september,release='2026-08-19.0',
+            observed_at='2026-10-11T06:00:00Z',origin='pinned_real_archive')
+        with self.assertRaisesRegex(ValueError,'unordered'):
+            compare_snapshots(actual,september,allow_historical_backfill=True)
+        with self.assertRaisesRegex(ValueError,'boolean'):
+            compare_snapshots(actual,september,allow_historical_backfill=1)
+
     def test_future_source_record_before_release_date_rejected(self):
         b=self.reference_short()
         with self.assertRaisesRegex(ValueError,'before release'):
