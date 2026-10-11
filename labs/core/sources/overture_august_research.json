@@ -1,0 +1,15 @@
+{
+  "study": "KEP-DATA-007",
+  "release": "2026-08-19.0",
+  "schema": "v1.18.0",
+  "normalized_schema": "Overture Places schema 2.0 (taxonomy / basic_category)",
+  "cells": {
+    "besiktas_center": [29.002, 41.04, 29.01, 41.0455],
+    "karakoy_center": [28.97, 41.02, 28.981, 41.0275]
+  },
+  "research_only": true,
+  "consumer_display_approved": false,
+  "license_evidence_url": "https://docs.overturemaps.org/attribution/",
+  "retention_policy_url": "https://docs.overturemaps.org/release-calendar/",
+  "caution": "This is a fixed historical release study. Never silently request 'latest'; category schema migration must not invent equivalences."
+}
