@@ -4,7 +4,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from scripts.probe_gers_region import RemoteFile,RemoteRanges,MAX_READ_BODY
+from scripts.probe_gers_region import RemoteFile,RemoteRanges,MAX_READ_BODY,source_item
 
 class FakeHeaders(dict):
     def get(self,k,default=None):return super().get(k,default)
@@ -22,6 +22,15 @@ class SourceReadTests(unittest.TestCase):
     def setUp(self):
         self.obj={'key':'changelog/2026-09-23.0/theme=places/type=place/change_type=added/part-00000-abc.parquet',
                   'etag':'"etag"','size':50}
+
+    def test_actual_pinned_plan_item_can_open_remote_ranges(self):
+        from kepcore.gers_access_cost import DATA_DIR,PINNED_ZIP_SHA256,load_capture
+        from kepcore.gers_region_probe import regional_plan
+        manifest=load_capture(DATA_DIR/'footers.zip',PINNED_ZIP_SHA256)
+        item=next(x for x in regional_plan(manifest)['selected'] if x['change_type']=='added')
+        normalized=source_item(item)
+        self.assertEqual(normalized['size'],item['object_bytes'])
+        self.assertEqual(RemoteFile(RemoteRanges(),normalized).seek(-8,2),item['object_bytes']-8)
 
     def test_hard_cap_and_canonical_byte_spans(self):
         with patch('urllib.request.OpenerDirector.open') as mocked:
