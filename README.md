@@ -82,3 +82,7 @@ python scripts/overture_release_delta.py
 ### KEP-DATA-011 · Gerçek Overture kaynak güven puanı değişimi
 
 Ağustos/Eylül 2026 Overture kaydı üzerine iki-sürümlü, ağsız araştırma tanısı ve **rastgele olmayan** hedefli inceleme kuyruğu: [çalışma rehberi](labs/core/docs/OVERTURE_CONFIDENCE_DRIFT.md). Güven puanı değişimi işletme varlığının doğrulanması anlamına gelmez.
+
+## KEP-DATA-012 · Real August preservation beyond artifact retention
+
+The exact [August 2026 historical research ZIP](labs/core/data/real/overture_istanbul_2026-08-19.0/original_actions_artifact.zip) is now pinned in Git. [Reproduce the two real Overture release comparison offline](labs/core/docs/OVERTURE_DURABLE_AUGUST_REPLAY.md): `cd labs/core && python scripts/replay_pinned_august.py`. No transient GitHub artifact or network is required. These are *source* changes, not verified business openings/closures.

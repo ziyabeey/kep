@@ -167,3 +167,14 @@ See [OVERTURE_TEMPORAL_DIFF.md](docs/OVERTURE_TEMPORAL_DIFF.md) and [ADR-0013](.
 ## KEP-DATA-011 · Gerçek sürümlerde kaynak puanı değişimi
 
 `python scripts/overture_confidence_drift.py --august-zip .local/august-original.zip` sadece **orijinal SHA-pinned** Ağustos GitHub Actions ZIP'iyle çalışır; Eylül'ün repodaki sabit arşivini yeniden denetler. Tekil kayıt bilgisi içermeyen toplu rapor `reports/` altında; 60 adaylık **hedefli** inceleme kuyruğu yalnız `.local` altında yaratılır ve SCI-003 rastgele denetimiyle karıştırılmaz. [Protokol](docs/OVERTURE_CONFIDENCE_DRIFT.md).
+
+## KEP-DATA-012 · Permanent two-release source replay
+
+The exact August Actions research ZIP is preserved under `data/real/overture_istanbul_2026-08-19.0/`; source bytes and Git hashes are checked by `kepcore/overture_archive_artifact.py`.
+
+```bash
+python scripts/replay_pinned_august.py
+python -m unittest tests.test_overture_durable_original -v
+```
+
+Source-record changes are NOT human-reviewed business events. [Protocol](docs/OVERTURE_DURABLE_AUGUST_REPLAY.md).
