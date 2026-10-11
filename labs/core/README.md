@@ -223,3 +223,14 @@ Beş önceden belirlenmiş tamamen sentetik rejimde 3.000 örnek, beş politika,
     python -m benchmarks.budgeted_core_eval
 
 Altı tamamen sentetik rejimde 2.400 örnek, beş önceden belirlenmiş maliyet/karar yöntemi, gizli sentetik doğru yanıtlar ve eşlenik senaryolarda karar faydası, yanlış olumlu, kaynak kontrol maliyeti ve kaçan fırsatlar raporlanır. Bu ölçüler gerçek İstanbul kaynağı doğruluğu, model performansı veya API maliyet tasarrufu değildir. [Protokol](docs/CORE_002_BUDGETED_EVIDENCE.md) ve [ADR-0026](../../docs/adr/0026-one-step-budgeted-evidence.md).
+
+
+## KEP-CORE-003 | Sanal tarihsel kaynak güveni ve belirsizlik
+
+Yeni gerçek veri aramıyoruz. CORE-002'nin sentetik dünyasında güvenilir sandığımız kaynakların kalite kaybını, sadece daha önce tamamlanmış **bağımsız sanal denetimlerden** öğreniyoruz. Kaynağın duyarlılığı/özgüllüğü ayrı tutulur; geç sonuçlanan bir etiket geçmiş kararı değiştiremez. Yetersiz denetim ve zayıf alt-güven sınırı yeni sorgu önerisini durdurur. Kullanıcı yayını, gerçek doğruluk, otomatik web araması veya üretim kapısı YOK.
+
+    cd labs/core
+    python -m unittest tests.test_adaptive_trust tests.test_adaptive_trust_eval -v
+    python -m benchmarks.adaptive_trust_eval
+
+Altı önceden sabitlenmiş tamamen sentetik kaynak kalitesi/kayıp/ortak-rumor rejiminde, bağımsız denetim gecikmesi ve kaçırılan doğru fırsatlar dâhil bütçe/fayda sonuçları karşılaştırılır. [Araştırma protokolü](docs/CORE_003_TEMPORAL_TRUST.md), [ADR-0027](../../docs/adr/0027-causal-synthetic-source-calibration.md).

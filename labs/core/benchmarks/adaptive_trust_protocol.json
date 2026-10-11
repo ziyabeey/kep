@@ -1,0 +1,26 @@
+{
+  "study": "KEP-CORE-003",
+  "fixed_before_simulation": true,
+  "seed": 20261015,
+  "cases_per_regime": 160,
+  "regimes": [
+    "stable",
+    "abrupt_degradation",
+    "gradual_degradation",
+    "late_adjudication",
+    "audit_outage",
+    "correlated_failure"
+  ],
+  "policies": [
+    "never",
+    "fixed_voi",
+    "cheapest",
+    "posterior_mean",
+    "conservative"
+  ],
+  "false_assertion_penalty": 4,
+  "paired_draws": 240,
+  "audit_window_hours": 72,
+  "audit_label_delay_hours": 3,
+  "per_hour_background_audits": 3
+}
