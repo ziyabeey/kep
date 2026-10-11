@@ -1,0 +1,37 @@
+{
+  "all_id_events_observed": false,
+  "consumer_publish": false,
+  "covered_release_paths": [
+    "2026-09-23.0",
+    "2026-09-23.1"
+  ],
+  "data_page_response_bytes": 0,
+  "full_id_one_release_fits_prior_budget": false,
+  "http_requests": 0,
+  "id_bloom_filter_usable": false,
+  "id_page_index_usable": false,
+  "id_union_query_sha256": "38b248b344cb66a87228c713e74e55ec5f24124f383a3e2c077fc11ddfc73804",
+  "membership_one_release_fits_prior_budget": false,
+  "non_indexed_id_scan_bytes_all_release_paths": 3323200846,
+  "non_indexed_id_scan_bytes_membership_one_release": 203288875,
+  "non_indexed_id_scan_bytes_one_release": 1661600423,
+  "official_membership_agreement_fraction": null,
+  "origin": "pinned_real_GERS_Parquet_footers",
+  "publisher_changelog_comparison_baseline": null,
+  "source_footer_zip_sha256": "1cefe054f5b61adfa2117d43e441626ab5355fed1096aa105b397d70f619bf9d",
+  "study": "KEP-DATA-017",
+  "totals": {
+    "object_count": 128,
+    "row_groups": 1244,
+    "column_chunks": 7464,
+    "id_column_chunks": 1244,
+    "page_column_indexes": 0,
+    "page_offset_indexes": 0,
+    "bloom_filters": 0,
+    "id_page_column_indexes": 0,
+    "id_page_offset_indexes": 0,
+    "id_bloom_filters": 0,
+    "id_full_index_pairs": 0,
+    "declared_sorted_row_groups": 0
+  }
+}

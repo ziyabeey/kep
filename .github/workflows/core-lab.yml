@@ -122,3 +122,13 @@ jobs:
           path: ${{ runner.temp }}/data016-${{ matrix.python-version }}.json
           retention-days: 7
           if-no-files-found: error
+
+      - name: DATA-017 original REAL Parquet index audit (offline, no Arrow, zero data reads)
+        run: python scripts/audit_gers_index.py --check > "$RUNNER_TEMP/data017-${{ matrix.python-version }}.json"
+      - name: Preserve only aggregated DATA-017 original-index capability and cost plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: data017-replay-python-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/data017-${{ matrix.python-version }}.json
+          retention-days: 7
+          if-no-files-found: error
