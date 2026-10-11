@@ -1,0 +1,136 @@
+{
+  "observed_capture": {
+    "accounted_body_allowance": 2063202,
+    "body_bytes_read": 1072094,
+    "budget_bytes": 16777216,
+    "byte_scope": "application response bodies; headers, TLS and optional package installation excluded",
+    "capture_seconds": 17.202505,
+    "pyarrow_version": "21.0.0",
+    "release_chain": [
+      "2026-08-19.0",
+      "2026-09-23.0",
+      "2026-09-23.1"
+    ],
+    "request_count": 392,
+    "retrieved_at": "2026-10-11T15:14:39.181273+00:00"
+  },
+  "stable_results": {
+    "bbox_excluded_but_id_candidate_groups": 1236,
+    "bounds": {
+      "besiktas_center": [
+        29.002,
+        41.04,
+        29.01,
+        41.0455
+      ],
+      "karakoy_center": [
+        28.97,
+        41.02,
+        28.981,
+        41.0275
+      ]
+    },
+    "business_event_accuracy": null,
+    "by_partition": {
+      "2026-09-23.0/added": {
+        "bbox_groups": 1,
+        "groups": 74,
+        "id_groups": 74,
+        "objects": 16
+      },
+      "2026-09-23.0/data_changed": {
+        "bbox_groups": 1,
+        "groups": 512,
+        "id_groups": 512,
+        "objects": 16
+      },
+      "2026-09-23.0/removed": {
+        "bbox_groups": 1,
+        "groups": 16,
+        "id_groups": 16,
+        "objects": 16
+      },
+      "2026-09-23.0/unchanged": {
+        "bbox_groups": 1,
+        "groups": 20,
+        "id_groups": 20,
+        "objects": 16
+      },
+      "2026-09-23.1/added": {
+        "bbox_groups": 1,
+        "groups": 74,
+        "id_groups": 74,
+        "objects": 16
+      },
+      "2026-09-23.1/data_changed": {
+        "bbox_groups": 1,
+        "groups": 512,
+        "id_groups": 512,
+        "objects": 16
+      },
+      "2026-09-23.1/removed": {
+        "bbox_groups": 1,
+        "groups": 16,
+        "id_groups": 16,
+        "objects": 16
+      },
+      "2026-09-23.1/unchanged": {
+        "bbox_groups": 1,
+        "groups": 20,
+        "id_groups": 20,
+        "objects": 16
+      }
+    },
+    "can_claim_business_openings_or_closures": false,
+    "consumer_publish": false,
+    "cost_definition": "sum of projected compressed column chunks, not measured HTTP transfer; headers, indexes, readahead and retries excluded",
+    "data_page_bytes_read": 0,
+    "matched_ids": null,
+    "membership_agreement_fraction": null,
+    "metadata_matches_are_not_observed_ids": true,
+    "metadata_objects": 128,
+    "metadata_row_groups": 1244,
+    "metadata_source_rows": 165169686,
+    "official_event_rows_read": 0,
+    "policies": {
+      "bbox": {
+        "candidate_groups": 8,
+        "candidate_rows": 951164,
+        "complete_for_id_union": false,
+        "id_chunk_bytes": 19065862,
+        "projected_chunk_bytes": 35805264,
+        "unknown_statistics_groups": 0
+      },
+      "bbox_and_id": {
+        "candidate_groups": 8,
+        "candidate_rows": 951164,
+        "complete_for_id_union": false,
+        "id_chunk_bytes": 19065862,
+        "projected_chunk_bytes": 35805264,
+        "unknown_statistics_groups": 0
+      },
+      "id_union": {
+        "candidate_groups": 1244,
+        "candidate_rows": 165169686,
+        "complete_for_id_union": true,
+        "id_chunk_bytes": 3323200846,
+        "projected_chunk_bytes": 5789190970,
+        "unknown_statistics_groups": 0
+      },
+      "no_pruning": {
+        "candidate_groups": 1244,
+        "candidate_rows": 165169686,
+        "complete_for_id_union": true,
+        "id_chunk_bytes": 3323200846,
+        "projected_chunk_bytes": 5789190970,
+        "unknown_statistics_groups": 0
+      }
+    },
+    "query_id_count": 4872,
+    "query_ids_sha256": "38b248b344cb66a87228c713e74e55ec5f24124f383a3e2c077fc11ddfc73804",
+    "same_publisher_not_independent_evidence": true,
+    "source_object_bytes": 5791082150,
+    "status": "METADATA_COMPLETE",
+    "study": "KEP-DATA-014"
+  }
+}
