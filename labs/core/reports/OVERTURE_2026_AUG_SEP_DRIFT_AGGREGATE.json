@@ -1,0 +1,95 @@
+{
+  "august_original_zip_sha256": "cb9ee86c128b4839a00722e1b192f460691c0f33e358f0b0b9ae458ea403ef05",
+  "august_population_sha256": "b310c7c4ce43d4d4fe63e61bf2375e99edccefe150e0861ce25455a9b6c182de",
+  "business_existence_accuracy_measured": false,
+  "business_moves": null,
+  "category_schema_transition_warning": "August v1.18 -> September v2.0. Supplier category semantics not assumed equivalent.",
+  "category_semantics_comparable": false,
+  "confidence_abs_change_p50": 0.008741,
+  "confidence_abs_change_p90": 0.041753,
+  "confidence_abs_change_p99": 0.156956,
+  "confidence_abs_delta_over_0_01": 1618,
+  "confidence_abs_delta_over_0_05": 256,
+  "confidence_abs_delta_over_0_10": 73,
+  "confidence_changed_count": 3513,
+  "confidence_missing_in_pair": 0,
+  "confidence_only_abs_delta_over_0_05": 217,
+  "confidence_only_abs_delta_over_0_10": 47,
+  "confidence_only_revisions": 3337,
+  "consumer_publish": false,
+  "data_release_order_different_from_capture_order": true,
+  "field_revision_counts_nonexclusive": {
+    "address": 122,
+    "basic_category": 36,
+    "geometry": 63,
+    "locality": 20,
+    "name": 42,
+    "source_provenance": 9,
+    "taxonomy_primary": 62
+  },
+  "human_truth_labels": 0,
+  "independent_upstream_attestation": false,
+  "method": "Deterministic paired comparison of minimized, SHA-pinned Overture source records; not city-world ground truth.",
+  "newer_data_retrieved_at": "2026-10-10T23:47:38.503435+00:00",
+  "newly_listed_ids": 222,
+  "no_longer_listed_ids": 69,
+  "older_data_retrieved_at": "2026-10-11T07:20:18.945415+00:00",
+  "original_august_actions_artifact": 11695042455,
+  "original_august_actions_run": 38121005943,
+  "paired_confidence_count": 4581,
+  "paired_confidence_delta_mean": -0.006943,
+  "physical_closures": null,
+  "physical_openings": null,
+  "policy": "KEP-DATA-011-TRIAGE-v1",
+  "releases": [
+    "2026-08-19.0",
+    "2026-09-23.1"
+  ],
+  "research_only": true,
+  "retained_ids": 4581,
+  "retained_ids_by_new_cell": {
+    "besiktas_center": 1775,
+    "karakoy_center": 2806
+  },
+  "retained_ids_no_changes": 1046,
+  "schema_only_revisions_cross_version_not_truth": 36,
+  "score_and_field_changes_overlap": 176,
+  "score_calibrated_truth_probability": false,
+  "september_original_zip_sha256": "f4f8efa7cd1b25856a855ee8271a4e10330179e2afddc77a7764afd173ed9dff",
+  "september_population_sha256": "26f93817e44e9e94062bcecb26dc60b47e5a6e0e18f8af6a62a6c5f52e010123",
+  "source_field_revisions_excluding_schema_only": 162,
+  "source_fields_revised": 198,
+  "source_ids_new": 4803,
+  "source_ids_old": 4650,
+  "source_release_comparison_only": true,
+  "study": "KEP-DATA-011",
+  "study_scope": "TWO_OVERTURE_SOURCE_RELEASES_NOT_REAL_WORLD_BUSINESS_EVENTS",
+  "targeted_not_random_review_queue": {
+    "can_estimate_source_error_rate": false,
+    "counts": {
+      "confidence_only_over_0_10": {
+        "available": 47,
+        "selected": 12
+      },
+      "newly_listed": {
+        "available": 222,
+        "selected": 12
+      },
+      "no_longer_listed": {
+        "available": 69,
+        "selected": 12
+      },
+      "property_or_location": {
+        "available": 162,
+        "selected": 16
+      },
+      "schema_only": {
+        "available": 36,
+        "selected": 8
+      }
+    },
+    "quota_policy": "KEP-DATA-011-TRIAGE-v1",
+    "total": 60
+  },
+  "triage_queue_is_unbiased_audit": false
+}

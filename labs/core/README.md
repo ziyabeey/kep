@@ -163,3 +163,7 @@ python scripts/overture_release_delta.py
 ```
 
 See [OVERTURE_TEMPORAL_DIFF.md](docs/OVERTURE_TEMPORAL_DIFF.md) and [ADR-0013](../../docs/adr/0013-temporal-source-delta-and-identity.md) for the future separately reviewed download contract, licence and holdout expectations. This code does not enable the consumer catalogue or any background polling.
+
+## KEP-DATA-011 · Gerçek sürümlerde kaynak puanı değişimi
+
+`python scripts/overture_confidence_drift.py --august-zip .local/august-original.zip` sadece **orijinal SHA-pinned** Ağustos GitHub Actions ZIP'iyle çalışır; Eylül'ün repodaki sabit arşivini yeniden denetler. Tekil kayıt bilgisi içermeyen toplu rapor `reports/` altında; 60 adaylık **hedefli** inceleme kuyruğu yalnız `.local` altında yaratılır ve SCI-003 rastgele denetimiyle karıştırılmaz. [Protokol](docs/OVERTURE_CONFIDENCE_DRIFT.md).

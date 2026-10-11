@@ -75,3 +75,8 @@ jobs:
           python scripts/overture_august_legacy.py > /dev/null
       - name: Reproduce offline benchmarks
         run: python run_all.py
+
+      - name: Empirical supplier drift and private triage contract (offline)
+        run: |
+          python -m unittest tests.test_overture_change_triage -q
+          python scripts/overture_confidence_drift.py > /dev/null
