@@ -1,0 +1,61 @@
+name: Overture August 2026 preservation (manual research)
+
+on:
+  workflow_dispatch:
+    inputs:
+      research_confirmation:
+        description: "Type RESEARCH_ONLY for bounded historical source research"
+        required: true
+        type: string
+      release:
+        description: "Exact approved historical release, no latest fallback"
+        required: true
+        default: '2026-08-19.0'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: overture-august-manual-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  historical-places:
+    if: ${{ inputs.research_confirmation == 'RESEARCH_ONLY' && inputs.release == '2026-08-19.0' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: labs/core
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Pinned historical query dependency
+        run: python -m pip install --disable-pip-version-check 'duckdb==1.4.1'
+      - name: Check STAC-listed historical version and query public S3
+        env:
+          AUGUST_OUT: ${{ runner.temp }}/kep-overture-august
+        run: |
+          python scripts/overture_august_legacy.py --fetch --output "$AUGUST_OUT"
+          python - "$AUGUST_OUT" <<'PY'
+          import json,sys,pathlib,hashlib
+          root=pathlib.Path(sys.argv[1]); data=(root/'places_minimal.json').read_bytes()
+          m=json.loads((root/'manifest.json').read_text())
+          assert m['source_release']=='2026-08-19.0'
+          assert m['acquisition']['method']=='historical_duckdb_public_s3'
+          assert m['normalized_sha256']==hashlib.sha256(data).hexdigest()
+          assert not m['consumer_display_approved'] and not m['consumer_publish']
+          print('historical source records:', len(json.loads(data)['records']))
+          PY
+      - name: Upload minimized, explicitly unverified research extraction
+        uses: actions/upload-artifact@v4
+        with:
+          name: overture-august-2026-research-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/kep-overture-august/places_minimal.json
+            ${{ runner.temp }}/kep-overture-august/manifest.json
