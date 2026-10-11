@@ -132,3 +132,6 @@ jobs:
           path: ${{ runner.temp }}/data017-${{ matrix.python-version }}.json
           retention-days: 7
           if-no-files-found: error
+
+      - name: KEP-FIELD-001 preregistered blind audit (offline, no reviewer files)
+        run: python scripts/evaluate_field_pilot.py --protocol > /dev/null

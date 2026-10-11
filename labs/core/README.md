@@ -186,3 +186,15 @@ Source-record changes are NOT human-reviewed business events. [Protocol](docs/OV
 ## KEP-DATA-016 · Cross-patch regional GERS event fingerprint
 
 [Research evidence and boundaries](docs/GERS_PATCH_REGIONAL_EQUIVALENCE.md). The original September .0 and separately captured September .1 geographically selected added/removed GERS row sets have identical canonical fingerprints (218 added, 67 removed; 285 regional IDs), but this **does not** prove full Parquet equality, the patch changelog generation baseline, all-ID agreement or physical business events. The exact original aggregate receipts are SHA-256 pinned. Replay without network: `python scripts/review_gers_patch.py --check`.
+
+## KEP-FIELD-001 | 60 genuine Istanbul source records, private blind field review
+
+The next bottleneck is **real-world validity**, not source-byte optimization. We have frozen a NEW random 60-place source sample, with secret seed/individual review sheets kept outside GitHub, and preregistered the naive-assert versus KEP-abstain claim-coverage comparison. **Actual independent human labels: 0**. No citywide or business-change accuracy claim.
+
+```bash
+cd labs/core
+python scripts/evaluate_field_pilot.py --protocol
+python -m unittest tests.test_field_pilot tests.test_field_prereg_real -v
+```
+
+The original DATA-003/004/005 blinded-sample and third-review engine is reused unchanged. The first 60 reviews are a process pilot: the existing conservative nominal 95% Hoeffding design half-width is about **51.75 percentage points**, not a measured error rate. A proper prospective change-prediction holdout is a separate future experiment. See [field pilot protocol](docs/REAL_FIELD_PILOT_001.md) and [ADR-0024](../../docs/adr/0024-real-field-pilot-evaluation.md). Neither private seed, reviewer workbooks, real case IDs nor field evidence are tracked in Git.
