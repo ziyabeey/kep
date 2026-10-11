@@ -1,0 +1,80 @@
+{
+  "complete_id_union_scan": false,
+  "consumer_publish": false,
+  "data_pages_read": 0,
+  "estimated_candidate_column_bytes": 17902632,
+  "excluded_row_groups_across_both_releases": 1236,
+  "max_application_body_bytes": 33554432,
+  "metadata_release_paths": [
+    "2026-09-23.0",
+    "2026-09-23.1"
+  ],
+  "official_membership_agreement_fraction": null,
+  "patch_provenance": {
+    "may_sum_september_changelogs_as_independent_hops": false,
+    "one_publisher_cannot_vote_twice": true,
+    "patch_release": "2026-09-23.1",
+    "patch_scope_guarantees_unchanged_places": false,
+    "places_explicitly_named_as_patch_target": false,
+    "publisher_url": "https://docs.overturemaps.org/blog/2026/09/23/release-notes/",
+    "stated_patch_targets": [
+      "base",
+      "building_parts"
+    ],
+    "verified_changelog_comparison_baseline": null
+  },
+  "real_business_truth": null,
+  "scope": "bbox_intersecting_events_only_not_global_id_union",
+  "selected": [
+    {
+      "change_type": "added",
+      "estimated_compressed_column_bytes": 5184952,
+      "etag": "\"cedc2f763a805a0d8774c1cca0cd85ca\"",
+      "footer_sha256": "1ecf274228b84a0bec28aad47dfa9ce3c798f4bf411caf54932b1537fa9296b2",
+      "key": "changelog/2026-09-23.0/theme=places/type=place/change_type=added/part-00008-a4265666-07bf-59e7-a999-af3b9febd95f-c000.zstd.parquet",
+      "metadata_statistics_unknown": false,
+      "object_bytes": 19889344,
+      "row_group": 3,
+      "rows": 146663
+    },
+    {
+      "change_type": "data_changed",
+      "estimated_compressed_column_bytes": 3916477,
+      "etag": "\"3fed6ca119fefb8fa47d7849eb6afd13-3\"",
+      "footer_sha256": "fb45bb42f2296f0d3ddd385f37b985f0504476e82279e89a99b3351909cf417d",
+      "key": "changelog/2026-09-23.0/theme=places/type=place/change_type=data_changed/part-00008-4d2f73a4-7d72-5b59-809f-2506b75031c2-c000.zstd.parquet",
+      "metadata_statistics_unknown": false,
+      "object_bytes": 152920598,
+      "row_group": 26,
+      "rows": 128077
+    },
+    {
+      "change_type": "removed",
+      "estimated_compressed_column_bytes": 2706043,
+      "etag": "\"5829bfb78ce1617862ef4a378f33d5f9\"",
+      "footer_sha256": "d7db03974c1349ee01fdd440411d1530576516dab620531a574ec750e897dd59",
+      "key": "changelog/2026-09-23.0/theme=places/type=place/change_type=removed/part-00008-7d6ffd8c-8a99-59bb-8a15-0bc14b07f83e-c000.zstd.parquet",
+      "metadata_statistics_unknown": false,
+      "object_bytes": 2708267,
+      "row_group": 0,
+      "rows": 61070
+    },
+    {
+      "change_type": "unchanged",
+      "estimated_compressed_column_bytes": 6095160,
+      "etag": "\"8c877f69fdc94fcaa52fbeec875d2169\"",
+      "footer_sha256": "d6a456fcfe30732e09c4aa8a7dc2cf8c4d23817c7c128e158692b394c4c645e8",
+      "key": "changelog/2026-09-23.0/theme=places/type=place/change_type=unchanged/part-00008-32fb3b5a-2c02-5b57-b10d-860bf4ee71da-c000.zstd.parquet",
+      "metadata_statistics_unknown": false,
+      "object_bytes": 6097392,
+      "row_group": 0,
+      "rows": 139772
+    }
+  ],
+  "selected_one_release_groups": 4,
+  "source_manifest_sha256": "4c19d5baf0bac7f06e052c70158895a9b83ab65a3b5f20503c0ad1f909361ae5",
+  "source_zip_sha256": "1cefe054f5b61adfa2117d43e441626ab5355fed1096aa105b397d70f619bf9d",
+  "study": "KEP-DATA-015",
+  "target_release": "2026-09-23.0",
+  "total_row_groups": 1244
+}
