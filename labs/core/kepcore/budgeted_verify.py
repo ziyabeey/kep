@@ -16,7 +16,7 @@ from math import isfinite
 
 from .core import Query
 from .evidence_lab import (EvidenceChannel, Observation, _prob, bayes_update,
-                           expected_information_gain, fuse_roots, action_utility)
+                           expected_information_gain, fuse_roots)
 from .temporal_pipeline import run_pipeline, _validate_roots
 
 POLICY='KEP-CORE-002-ONE-STEP-SYNTHETIC-VOI-v1'
@@ -150,8 +150,13 @@ def plan_research(catalog, q, signals, options, *, observed_channels,
         # two-root gate used by CORE-001. After a negative response we abstain.
         p_yes=p*ch.sensitivity+(1-p)*(1-ch.specificity)
         conditional_yes=bayes_update(p,ch,True)
-        net=p_yes*action_utility(conditional_yes,
-            reward_true=1.,penalty_false=4.,min_probability=.8)[1]-ch.cost
+        # CORE-001 treats a positive second independent root as LAB support
+        # even when a hypothetical posterior is below an assumed threshold.
+        # Therefore we must score that actual transition, including the
+        # possibility it is falsely supported, with NO invented extra veto.
+        gross=p_yes*(conditional_yes*1.-
+                     (1.-conditional_yes)*4.)
+        net=gross-ch.cost
         entropy_gain=expected_information_gain(p,ch)
         candidates.append((option,net,entropy_gain))
     if not candidates:
