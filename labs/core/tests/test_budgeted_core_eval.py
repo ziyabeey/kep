@@ -122,5 +122,17 @@ class BudgetedSimulatorContracts(unittest.TestCase):
         self.assertNotIn('physical_business_closures": 0',raw)
 
 
+    def test_fixed_decimal_half_ties_cross_version(self):
+        from decimal import Decimal
+        from benchmarks.budgeted_core_eval import _rounded6, _case_value
+        self.assertEqual(_rounded6(Decimal('0.4612875')),0.461288)
+        self.assertEqual(_rounded6(Decimal('-0.0360625')),-0.036062)
+        c=generate('matched',21,1)[0]
+        r={'accepted':True,'check_cost_utility_units':0.115}
+        value=_case_value(c,r,4)
+        self.assertEqual(value,
+                         (Decimal('0.885') if c.truth else Decimal('-4.115')))
+
+
 if __name__=='__main__':
     unittest.main()
