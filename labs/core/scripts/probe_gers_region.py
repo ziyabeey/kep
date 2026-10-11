@@ -67,6 +67,15 @@ class RemoteRanges:
             raise
 
 
+def source_item(selected):
+    """Convert a pinned planning record into a range-ready object."""
+    if (not isinstance(selected,dict) or
+            type(selected.get('object_bytes')) is not int or selected['object_bytes']<=12 or
+            'size' in selected):
+        raise ValueError('Malformed immutable row-group object identity')
+    return {**selected,'size':selected['object_bytes']}
+
+
 class RemoteFile(io.RawIOBase):
     """Strictly bounded, synchronous seek/read interface for Arrow ParquetFile."""
     def __init__(self,source,item):
@@ -128,7 +137,7 @@ def run(output):
         def scan():
             nonlocal rows_read
             for item in selected:
-                remote=RemoteFile(reader,item)
+                remote=RemoteFile(reader,source_item(item))
                 parquet=pq.ParquetFile(remote,pre_buffer=False)
                 if parquet.metadata.row_group(item['row_group']).num_rows!=item['rows']:
                     raise ValueError('Parquet metadata row group changed from pinned original')
