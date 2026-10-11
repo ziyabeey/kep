@@ -1,0 +1,105 @@
+name: DATA-013 one-shot public metadata probe
+
+# Temporary research workbench. Removed before merging DATA-013.
+# No ordinary PR, main push, schedule, token or paid API can run this job.
+on:
+  push:
+    branches: [research/data-013-gers-changelog-validation]
+permissions:
+  contents: read
+jobs:
+  probe:
+    if: github.event.head_commit.message == 'chore(data-013): one-shot public metadata probe [gers-metadata-probe]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Bounded public metadata only; no Parquet or August download
+        run: |
+          mkdir -p /tmp/data013-workbench
+          python - <<'PY'
+          import json, pathlib, hashlib, urllib.request, urllib.error, urllib.parse
+          import xml.etree.ElementTree as ET
+          from datetime import datetime, timezone
+          out = pathlib.Path('/tmp/data013-workbench')
+          report = {'research_only': True, 'consumer_publish': False,
+                    'parquet_downloaded': False, 'official_event_rows': 0,
+                    'checked_at': datetime.now(timezone.utc).isoformat(), 'requests': []}
+          budget = 4_000_000
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, *args, **kwargs):
+                  return None
+          opener = urllib.request.build_opener(NoRedirect())
+          def get(url, label, limit=500_000):
+              global budget
+              hosts = {'docs.overturemaps.org','stac.overturemaps.org',
+                       'overturemaps-us-west-2.s3.us-west-2.amazonaws.com'}
+              parsed = urllib.parse.urlsplit(url)
+              if parsed.scheme != 'https' or parsed.hostname not in hosts or parsed.username or parsed.password:
+                  raise ValueError('Unapproved public metadata URL')
+              limit = min(limit,budget)
+              item = {'url': url, 'label': label}
+              report['requests'].append(item)
+              try:
+                  with opener.open(urllib.request.Request(url,headers={'User-Agent':'KEP-DATA-013-read-only-research'}),timeout=12) as response:
+                      body = response.read(limit+1)
+                      item['status'] = response.status
+                  budget -= len(body)
+                  if len(body)>limit:
+                      item['error']='BYTE_LIMIT';return None
+                  item.update(bytes=len(body),sha256=hashlib.sha256(body).hexdigest())
+                  (out/(label+'.raw')).write_bytes(body)
+                  return body
+              except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                  item['status'] = getattr(exc,'code',None)
+                  item['error'] = type(exc).__name__
+                  return None
+          for page in ('gers/changelog','gers/stability','getting-data','attribution'):
+              get('https://docs.overturemaps.org/'+page+'/',page.replace('/','_'),1_000_000)
+          root = get('https://stac.overturemaps.org/catalog.json','stac_root')
+          if root:
+              try:
+                  catalog = json.loads(root)
+                  for link in catalog.get('links',[]):
+                      href = urllib.parse.urljoin('https://stac.overturemaps.org/catalog.json',link.get('href',''))
+                      if link.get('rel')=='child' and '2026-09-23.1' in href:
+                          child = get(href,'stac_september')
+                          if child:
+                              report['september_catalog'] = json.loads(child)
+                          break
+              except (ValueError,TypeError):
+                  report['stac_parse_error']=True
+          ns={'s':'http://s3.amazonaws.com/doc/2006-03-01/'}
+          for kind in ('added','removed','data_changed','unchanged'):
+              prefix='changelog/2026-09-23.1/theme=places/type=place/change_type='+kind+'/'
+              url='https://overturemaps-us-west-2.s3.us-west-2.amazonaws.com/?'+urllib.parse.urlencode({'list-type':'2','prefix':prefix,'max-keys':'100'})
+              body=get(url,'list_'+kind)
+              if body:
+                  try:
+                      if b'<!DOCTYPE' in body.upper() or b'<!ENTITY' in body.upper():
+                          raise ValueError('Unsafe XML')
+                      tree=ET.fromstring(body)
+                      report['requests'][-1]['is_truncated']=tree.findtext('s:IsTruncated',namespaces=ns)
+                      report['requests'][-1]['objects']=[{'key':x.findtext('s:Key',namespaces=ns),
+                          'bytes':x.findtext('s:Size',namespaces=ns),
+                          'etag':x.findtext('s:ETag',namespaces=ns)} for x in tree.findall('s:Contents',ns)]
+                  except (ValueError,ET.ParseError):
+                      report['requests'][-1]['parse_error']=True
+          report['bytes_read']=4_000_000-budget
+          report['meaning']='Metadata access only; no official event or predecessor claim.'
+          (out/'probe.json').write_text(json.dumps(report,indent=2,sort_keys=True))
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+      - name: Export exact tracked research workbench for local offline tests
+        run: git archive --format=tar HEAD > /tmp/data013-workbench/workbench.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: data013-workbench
+          path: /tmp/data013-workbench/
+          retention-days: 2
+          if-no-files-found: error
