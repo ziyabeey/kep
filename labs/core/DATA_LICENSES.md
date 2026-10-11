@@ -67,3 +67,29 @@ UCI puanları mevcut İstanbul kültür mekânlarının puanları değildir. Bu 
 ## Overture Places DATA-001 pilot (October 2026)
 
 The **Places** theme has providers under CDLA Permissive 2.0, Apache 2.0 and CC0 1.0. See https://docs.overturemaps.org/attribution/ and https://docs.overturemaps.org/guides/places/ . The experimental importer is pinned to Overture release `2026-09-23.1` and September schema v2 (taxonomy). Source-level provider/license values and exact file SHA-256 are preserved in an acquisition manifest when available. **No real Places GeoJSON bytes were downloaded into the git repository** by this PR. CI fixtures are synthetically manufactured and must never be described as Istanbul businesses. The release and licensing references were reviewed 11 October 2026.
+## 2026-10-11 · Overture Places real research snapshot (KEP-DATA-003)
+
+**Kaynak:** Overture Maps Foundation Places v2, sürüm `2026-09-23.1`.
+- Sürüm: https://stac.overturemaps.org/catalog.json
+- Kaynak kökenleri ve atıflar: https://docs.overturemaps.org/attribution/
+- Veri kılavuzu: https://docs.overturemaps.org/guides/places/
+- Sabit çalışma kaydı: https://github.com/ziyabeey/kep/actions/runs/38096227796
+- Kaydedilmiş artifact SHA-256: `f4f8efa7cd1b25856a855ee8271a4e10330179e2afddc77a7764afd173ed9dff`
+
+Bu arşiv gerçek Overture POI veri satırlarıdır (iki küçük İstanbul koordinat kutusu,
+4.803 kayıt). Kurum/kaynak katkısı alanlarda belirtilir. Kaynaklara göre lisans
+bildirimleri: **CDLA-Permissive-2.0** (Overture/Meta/Microsoft), **Apache-2.0**
+(Foursquare) ve **CC0-1.0** (AllThePlaces). Ayrıntı için kayıtların `source_provenance`
+alanına ve Overture'ın güncel atıf tablosuna bakınız; bu bir hukukî lisans görüşü değildir.
+
+Yapılan dönüşümler: iki dar bbox filtresi, isim/adres/kategori/konum/temel köken
+alanlarının seçilmesi, telefon/e-posta/sosyal medya/görsel alanlarının bırakılması,
+kararlı JSON formatlama ve deterministik gzip sıkıştırma. Ham GeoJSON dosyaları
+GitHub Actions artifact'ine **dahil edilmemiştir**; orijinal iki ham dosyanın
+manifestte belirtilen hash'leri bağımsız doğrulanmamıştır. ZIP artefaktı 7 gün
+sonra silinebilir; bu nedenle küçültülmüş kopyası repoda saklanır.
+
+**Kanıt sınırı:** Gerçek Overture kaydı fiziksel mekânın hâlen var olduğunun,
+açık olduğunun, fiyatlarının veya etkinliklerinin doğruluğunun ispatı değildir.
+`confidence` alanı tekil olay doğrulaması veya kalibre edilmiş yayım yetkisi değildir.
+Bu arşiv yalnız araştırma içindir; KEP tüketici yayını kapalıdır.

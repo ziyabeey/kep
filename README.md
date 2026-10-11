@@ -54,3 +54,12 @@ Kanıt toplama ajanlarının **şüpheli kayıtları hedefli incelemesi**, kayna
 ## KEP-DATA-002 · Overture snapshot integrity + existence audit
 
 [Research audit protocol](labs/core/docs/OVERTURE_EXISTENCE_AUDIT.md) adds post-download artifact checks, preregistered confidence-band random sampling, private seed replay and a complete dual-human-reviewed estimator. GitHub CI uses synthetic fixtures; **no real Istanbul field labels or verified POIs** are claimed. The source download remains separately/manual-only.
+## İlk gerçek İstanbul Overture mekân arşivi (KEP-DATA-003)
+
+Manuel Overture iş akışı **başarıyla çalıştı** ([run #38096227796](https://github.com/ziyabeey/kep/actions/runs/38096227796)).
+`labs/core/data/real/overture_istanbul_2026-09-23.1/` altında **4.803 gerçek Overture kaydının**
+küçültülmüş, sıkıştırılmış ve SHA-256 ile sabitlenmiş araştırma kopyası bulunuyor.
+Beşiktaş merkezindeki küçük hücrede 1.872, Karaköy çevresindekinde 2.931 kayıt var.
+`python3 labs/core/scripts/real_overture_replay.py` çıktısı açıklayıcı veri kalitesi özetidir.
+Bu kayıtlar **sahada doğrulanmış işletmeler değildir**; `consumer_display_approved=false`, canlı
+açılış/etkinlik/ücret bilgisi yoktur. Kaynak başına atıf ve [deney raporu](labs/core/docs/OVERTURE_REAL_FIRST_RESULTS.md) geçerlidir.

@@ -116,4 +116,23 @@ See [RANDOM_AUDIT_PROTOCOL.md](docs/RANDOM_AUDIT_PROTOCOL.md) and [ADR-0007](../
 
 `kepcore/overture_audit.py` checks internally consistent, pinned Overture minimal artifacts, and creates a frozen randomized survey stratified by sample cell and Overture existence score. `scripts/verify_overture_pilot.py` runs offline and never changes Core or consumer records. The manual Overture workflow validates its artifact before upload. `python -m benchmarks.overture_audit_eval` shows **synthetic** sampling bias effects; `tests/test_overture_audit.py` covers corruption, missing reviewers and future dates. See [OVERTURE_EXISTENCE_AUDIT.md](docs/OVERTURE_EXISTENCE_AUDIT.md).
 
-A passing artifact test **does not authenticate Overture upstream**: hashes within an untrusted supplied manifest can be forged. Two reviewer IDs **do not authenticate real reviewer independence**. No actual Istanbul POIs or truth labels have been captured; Issue #13 remains open.
+A passing artifact test **does not authenticate Overture upstream**: hashes within an untrusted supplied manifest can be forged. Two reviewer IDs **do not authenticate real reviewer independence**. At DATA-002 release time no actual Istanbul POIs were archived. DATA-003 now preserves 4,803 Overture source records; no real-world existence labels yet. Issue #13 remains open.
+## KEP-DATA-003 · Pinned real Istanbul Places replay
+
+The GitHub Actions Overture download **succeeded** on 2026-10-11 Istanbul time, with
+4,803 real source records from two very small sample cells. The source-derived minimal
+archive is now committed as deterministic gzip with a separately pinned original
+manifest and acquisition metadata. This is **real source data, not verified business reality**.
+
+```bash
+python scripts/real_overture_replay.py
+python -m unittest tests.test_overture_real -v
+# A real survey sample requires a private seed kept OFF GitHub and two human reviews per POI:
+python scripts/real_overture_replay.py --audit-seed-file .local/private_seed.txt \
+    --audit-output .local/real-audit-output --audit-budget 60 \
+    --sampled-at 2026-10-11T03:00:00+03:00
+```
+
+The default replay makes no network calls and reads no secrets. Audits do not
+assign existence labels; all rows begin `UNREVIEWED`.
+Source and sampling caveats: [OVERTURE_REAL_FIRST_RESULTS.md](docs/OVERTURE_REAL_FIRST_RESULTS.md).

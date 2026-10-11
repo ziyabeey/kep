@@ -59,5 +59,7 @@ jobs:
         run: |
           python scripts/verify_overture_pilot.py --help > /dev/null
           python -m benchmarks.overture_audit_eval > /dev/null
+      - name: Verify pinned REAL Overture POI archive (offline, non-publishing)
+        run: python scripts/real_overture_replay.py > /dev/null
       - name: Reproduce offline benchmarks
         run: python run_all.py
