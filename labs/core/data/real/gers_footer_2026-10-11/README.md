@@ -1,6 +1,6 @@
 # Actual public GERS footer metadata, 2026-10-11
 
-Research-only access to Overture Maps public changelog partitions for `2026-09-23.0` and `2026-09-23.1`, Places/place. Source: https://docs.overturemaps.org/gers/changelog/ . Attribution and provider-specific licensing: https://docs.overturemaps.org/attribution/ . Existing Places archive attributions in `../../../../DATA_LICENSES.md` are not replaced or broadened.
+Research-only access to Overture Maps public changelog partitions for `2026-09-23.0` and `2026-09-23.1`, Places/place. Source: https://docs.overturemaps.org/gers/changelog/ . Attribution and provider-specific licensing: https://docs.overturemaps.org/attribution/ . Existing Places archive attributions in [DATA_LICENSES.md](../../../DATA_LICENSES.md) are not replaced or broadened.
 
 `footers.zip` contains the exact metadata footer and trailer bytes of 128 listed objects plus a canonical normalized metadata manifest. It contains **no data pages, completed event rows, private review files, or seeds**. Footer statistics include published bounding and identifier ranges; they are not verified individual matches or business facts.
 
@@ -15,4 +15,4 @@ Research-only access to Overture Maps public changelog partitions for `2026-09-2
 
 Raw S3 listing bodies were not retained, only their hashes and returned object metadata. No full object SHA-256 was acquired. All 128 objects have a metadata counterpart across releases (64 pairs with identical footer SHA/ETag/size), which must not be misrepresented as authenticated equality of event contents or independently generated adjacent-hop changelogs.
 
-Offline protocol and limitations: `../../../docs/GERS_FOOTER_COST.md`.
+Offline protocol and limitations: [GERS_FOOTER_COST.md](../../../docs/GERS_FOOTER_COST.md).
