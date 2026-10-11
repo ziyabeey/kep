@@ -67,6 +67,22 @@ jobs:
           assert receipt['manifest_sha256']==hashlib.sha256((root/'manifest.json').read_bytes()).hexdigest()
           print('S3 preflight receipt validated: one old-release object was HEAD verified')
           PYRECEIPT
+      - name: Compare historical August to pinned September (provisional, offline)
+        env:
+          AUGUST_OUT: ${{ runner.temp }}/kep-overture-august
+        run: |
+          python scripts/provisional_august_delta.py \
+            --august-dir "$AUGUST_OUT" \
+            --output "$AUGUST_OUT/source_delta_provisional.json"
+          python - <<'PYREVIEW'
+          import json,os,pathlib
+          report=json.loads((pathlib.Path(os.environ['AUGUST_OUT'])/'source_delta_provisional.json').read_bytes())
+          assert report['evidence_status']=='PROVISIONAL_INTERNAL_HASH_CHECK_NOT_INDEPENDENT_SOURCE_VERIFICATION'
+          assert report['old_release']=='2026-08-19.0' and report['new_release']=='2026-09-23.1'
+          assert report['source_record_delta_not_business_open_close'] is True
+          assert report['consumer_publish'] is False
+          print('Provisional research comparison:',report['old_population_n'],'August vs',report['new_population_n'],'September source records')
+          PYREVIEW
       - name: Upload minimized, explicitly unverified research extraction
         uses: actions/upload-artifact@v4
         with:
@@ -77,3 +93,4 @@ jobs:
             ${{ runner.temp }}/kep-overture-august/places_minimal.json
             ${{ runner.temp }}/kep-overture-august/manifest.json
             ${{ runner.temp }}/kep-overture-august/historical_public_preflight.json
+            ${{ runner.temp }}/kep-overture-august/source_delta_provisional.json
