@@ -57,3 +57,36 @@ No real provider was audited or calibrated. Real human field reviews = 0. No sou
 ## Rollback
 
 Revert CORE-003 adaptive_trust module, the synthetic chronological generator, its tests/config, offline replay/CI addition, this document and ADR-0027. Keep CORE-001, CORE-002, every pinned historical source snapshot, all old test artifacts and FIELD-001 private research files intact. No database, Web Push, production or user-facing migration to undo.
+
+
+## First reproducible outcome (frozen October 11, 2026)
+
+The first complete Python 3.11/3.13 full-run outputs were checked against their separate GitHub Actions artifact SHA-256 digests. The decoded JSON reports were identical. SHA-256 of the FULL canonical JSON object, including protocol and all policy/regime counts:
+
+    c587b34c1e4801847c8bd8b71dc1b05c9ead5ee9cb28eeacab1dea1cd9c89e48
+
+Offline replay gate:
+
+    python scripts/replay_adaptive_trust.py --check
+
+The results below are **real measurements inside an invented-world simulator**, never field data. Entries show average per-case normalized utility across 160 fictitious cases in each regime; higher is better under the chosen reward=1, false-positive penalty=4 and check-cost settings.
+
+| Simulated regime | Original fixed VOI | Adaptive posterior mean | Conservative lower-bound |
+| --- | ---: | ---: | ---: |
+| stable | 0.481000 | 0.481000 | 0.481000 |
+| abrupt_degradation | 0.233875 | **0.320250** | 0.232719 |
+| gradual_degradation | 0.135531 | 0.118969 | **0.153312** |
+| late_adjudication | **0.526688** | 0.490438 | 0.501000 |
+| audit_outage | **0.585594** | 0.457625 | 0.367219 |
+| correlated_failure | 0.453844 | 0.453844 | 0.453844 |
+
+### Mistakes, omissions and tradeoffs recorded rather than hidden
+
+- In the abrupt degradation case, frozen VOI ran **92** simulated checks, made **5 false assertions** among **73** assertions. Adaptive posterior-mean checked **73**, with **2 false assertions** among **68** and increased fictional utility to 0.320250. The conservative method made 2 mistakes out of 53 assertions, but lost coverage and utility, scoring 0.232719. Reduced mistakes do NOT automatically maximize the chosen utility.
+- Under gradual degradation, conservative gated **48** new checks, with **2 false assertions** among 40 total; fixed VOI checked 81, with 6 false out of 61. The posterior-mean strategy was actually worse than fixed VOI on this regime (0.118969 versus 0.135531).
+- During audit outage, the conservative method proposed just **63** checks versus **107** by fixed VOI and made **0** false assertions, but its 0.367219 utility was much WORSE than 0.585594 because it **missed 57 simulated true opportunities** versus 17 for the original fixed policy. The uncertainty gate must not be called a universal improvement.
+- In the correlated-failure scenario, all three methods scored **identically** and each made **3 false assertions**. This shows the proposed learning algorithm does not detect source-root dependence when each individual publisher looks reliable on its own independent background audits.
+- Stable case: all three were identical. Audit delay: fixed VOI outperformed both learners under these assumptions. No unique superior policy was established.
+- The source-audit stream is independently generated and not a policy-selected set of cases, but it comes for free in this simulator: reviewer effort and sample acquisition cost are NOT part of the utility figure. Real-world selection bias and inaccessible ground truth remain unsolved.
+
+This is a locked research artifact for regression detection, not an optimization benchmark to tune repeatedly until it favors CORE-003. If a later policy is changed, test it on a **separate newly frozen synthetic holdout**, explicitly recognizing that current results influenced the next design.

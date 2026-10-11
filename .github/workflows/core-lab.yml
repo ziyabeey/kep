@@ -163,7 +163,7 @@ jobs:
       - name: CORE-003 causal source trust, synthetic only (offline)
         run: |
           python -m unittest tests.test_adaptive_trust tests.test_adaptive_trust_eval -q
-          python -m benchmarks.adaptive_trust_eval > "$RUNNER_TEMP/core003-${{ matrix.python-version }}.json"
+          python scripts/replay_adaptive_trust.py --check > "$RUNNER_TEMP/core003-${{ matrix.python-version }}.json"
       - name: Preserve CORE-003 synthetic aggregate replay without case labels
         uses: actions/upload-artifact@v4
         with:

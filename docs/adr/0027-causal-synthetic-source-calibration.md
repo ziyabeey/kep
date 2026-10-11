@@ -19,3 +19,10 @@ CORE-002's immutable synthetic study demonstrated that **more checking can worse
 ## Rollback
 
 Remove only CORE-003's optional source-calibration modules, synthetic tests/benchmark/protocol, offline CI replay and documentation. No consumer, production, real-source or database migrations. See labs/core/docs/CORE_003_TEMPORAL_TRUST.md.
+
+
+## Observed initial benchmark and status
+
+First full fixed-protocol run: 960 wholly synthetic evaluation cases (6 x 160), 5 predeclared strategies, no real-world data or human audits. Both Python 3.11 and 3.13 decoded CI reports identical; full canonical SHA-256 c587b34c1e4801847c8bd8b71dc1b05c9ead5ee9cb28eeacab1dea1cd9c89e48.
+
+Adaptive posterior mean beats fixed VOI in abrupt degradation (fictional utility/case 0.320250 vs 0.233875); conservative lower bound beats fixed VOI under gradual degradation (0.153312 vs 0.135531). Under feedback outage, however, lower bound loses strongly (0.367219 vs 0.585594), despite both making zero false assertions, because it misses many true opportunities. Under correlated publisher errors all three remain identical at 0.453844 and still make three false assertions each. These findings are **conditional on an authored simulator**, not a calibrated real-world risk bound. No optimization threshold was chosen after viewing the results; future adjustments require a new locked trial design.
