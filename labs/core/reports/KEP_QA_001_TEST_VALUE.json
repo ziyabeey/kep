@@ -1,0 +1,86 @@
+{
+  "study": "KEP-QA-001",
+  "scope": "Offline software test sensitivity to 12 exact authored code mutations; no live data or business accuracy",
+  "base_main_commit": "d65cb9da2c5232a2848cae5b09ce6e6d5a9942bf",
+  "original_scenarios_count": 12,
+  "risk_weights_are": "Ordinal engineering severity, not empirical incident probability",
+  "clean_controls": {
+    "before": {
+      "sentinel": 12,
+      "focused": 52
+    },
+    "after": {
+      "sentinel": 12,
+      "focused": 53
+    }
+  },
+  "before": {
+    "github_workflow_run": 38174495768,
+    "sha_at_run": "4744f6e73f675a1a3502204a4dcfa8f101a81e31",
+    "python311_artifact_zip_sha256": "1d4ef90c84e5e2379fe4abe1f8677191764358b822289126aae83917a7541a07",
+    "python313_artifact_zip_sha256": "b6a264df5dadaf486c48be601e04fbb38471c4dac4a6c968d6b7c3c25a32e013",
+    "sentinel_killed": 10,
+    "focused_killed": 11,
+    "sentinel_survivors": [
+      "M10_SYNDICATED_TRAINING",
+      "M11_WRONG_SPECIFICITY_BOUND"
+    ],
+    "focused_survivors": [
+      "M11_WRONG_SPECIFICITY_BOUND"
+    ],
+    "sentinel_weighted_detection": 0.851852,
+    "focused_weighted_detection": 0.925926
+  },
+  "after": {
+    "github_workflow_run": 38174675518,
+    "sha_at_run": "ca051a24b62115b1a4c24a87b8d08f135f232871",
+    "python311_artifact_zip_sha256": "d261fd89447be727d8d2b6603cc6cc986e4ef8db61f3c194925847cf9f82fd53",
+    "python313_artifact_zip_sha256": "8c05ed7041b401555b1d516930d3921bf692b82db1b5963313bedade66f3618d",
+    "sentinel_killed": 10,
+    "focused_killed": 12,
+    "focused_survivors": [],
+    "sentinel_weighted_detection": 0.851852,
+    "focused_weighted_detection": 1
+  },
+  "targeted_change": {
+    "new_unit_test": "tests.test_adaptive_trust.AuditTimeContracts.test_conservative_rejects_high_sensitivity_zero_specificity_probe",
+    "test_added": 1,
+    "defect_detected_after_addition": "M11_WRONG_SPECIFICITY_BOUND",
+    "original_behavior_modified": false,
+    "why": "A positive sensitive source with zero specificity must never be treated as a safe second corroborating root solely through a mistaken confidence bound."
+  },
+  "existing_test_to_reuse": "tests.test_adaptive_trust.AuditTimeContracts.test_conflicting_same_observation_is_not_training_data",
+  "fast_sentinel_missing_existing_case": "M10_SYNDICATED_TRAINING",
+  "runtime": {
+    "note": "Wall clock is noisy and includes subprocess startup; no reliable speed advantage observed for a smaller selector list.",
+    "python311_before_baseline_seconds": {
+      "sentinel": 0.716,
+      "focused": 0.325
+    },
+    "python313_before_baseline_seconds": {
+      "sentinel": 0.993,
+      "focused": 0.381
+    },
+    "python311_after_baseline_seconds": {
+      "sentinel": 0.211,
+      "focused": 0.203
+    },
+    "python313_after_baseline_seconds": {
+      "sentinel": 0.831,
+      "focused": 0.378
+    }
+  },
+  "decision": "Keep full focused test suite; do not add redundant tests. Require predeclared risk/defect differential and measured cost before new regression tests.",
+  "no_new_real_data": true,
+  "source_downloads": 0,
+  "original_repo_modified_by_injection": false,
+  "scientific_boundaries": {
+    "twelve_faults_were_author_selected": true,
+    "new_test_was_designed_after_observing_gap": true,
+    "this_is_not_independent_generalization": true,
+    "test_suite_real_defect_detection_probability": null,
+    "real_user_value": null,
+    "real_business_accuracy": null,
+    "consumer_publish": false
+  }
+}
