@@ -1,7 +1,6 @@
 name: DATA-013 one-shot public metadata probe
 
-# Temporary research workbench. Removed before merging DATA-013.
-# No ordinary PR, main push, schedule, token or paid API can run this job.
+# Temporary workbench, removed before merge. Explicit commit marker only.
 on:
   push:
     branches: [research/data-013-gers-changelog-validation]
@@ -9,7 +8,7 @@ permissions:
   contents: read
 jobs:
   probe:
-    if: github.event.head_commit.message == 'chore(data-013): one-shot public metadata probe [gers-metadata-probe]'
+    if: contains(github.event.head_commit.message, '[gers-metadata-probe]')
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -95,7 +94,7 @@ jobs:
           (out/'probe.json').write_text(json.dumps(report,indent=2,sort_keys=True))
           print(json.dumps(report,indent=2,sort_keys=True))
           PY
-      - name: Export exact tracked research workbench for local offline tests
+      - name: Export exact tracked workbench for local offline tests
         run: git archive --format=tar HEAD > /tmp/data013-workbench/workbench.tar
       - uses: actions/upload-artifact@v4
         with:
