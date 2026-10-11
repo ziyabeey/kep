@@ -198,3 +198,15 @@ python -m unittest tests.test_field_pilot tests.test_field_prereg_real -v
 ```
 
 The original DATA-003/004/005 blinded-sample and third-review engine is reused unchanged. The first 60 reviews are a process pilot: the existing conservative nominal 95% Hoeffding design half-width is about **51.75 percentage points**, not a measured error rate. A proper prospective change-prediction holdout is a separate future experiment. See [field pilot protocol](docs/REAL_FIELD_PILOT_001.md) and [ADR-0024](../../docs/adr/0024-real-field-pilot-evaluation.md). Neither private seed, reviewer workbooks, real case IDs nor field evidence are tracked in Git.
+
+## KEP-CORE-001 | Sentetik şehir, zaman-duyarlı karar çekirdeği
+
+**Yeni gerçek veri arama veya indirme yok.** Eldeki donmuş arşivleri değiştirmeden Core'un kaynak, hak ve belirsizlik kurallarını tek bir sentetik end-to-end karar akışında test ediyoruz. Tek yayıncının kopyaları iki bağımsız gözlem sayılmaz. Henüz KEP'e ulaşmamış bir kaynak olayı geçmiş bir kararı etkileyemez. Core'un hak/fiyat/zaman kapıları hiçbir model veya kaynak eklemesiyle aşılamaz. Model adapter'a yalnız iki kapıdan da geçen laboratuvar adayları verilir. İki kaynak anlaşsa bile gerçek işletme varlığı kanıtlanmış sayılmaz.
+
+Çevrimdışı tekrar:
+
+    cd labs/core
+    python -m unittest tests.test_temporal_pipeline tests.test_temporal_core_eval -v
+    python -m benchmarks.temporal_core_eval
+
+Beş önceden belirlenmiş tamamen sentetik rejimde 3.000 örnek, beş politika, gizli sentetik gerçekler ve dürüst kapsam / yanlış olumlu / karar faydası karşılaştırması bulunur. Sonuçlar gerçek İstanbul işletme doğruluğu veya ticari üstünlük değildir; kaynak kalitesinin bozulduğu senaryolar başarısızlıkları da göstermelidir. [Metodoloji](docs/TEMPORAL_SYNTHETIC_KERNEL.md), [ADR-0025](../../docs/adr/0025-temporal-evidence-kernel.md). Önceki FIELD-001 saha kohortu ayrı, etiket bekleyen ve değişmemiştir.
