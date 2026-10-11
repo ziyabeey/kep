@@ -61,3 +61,35 @@ GitHub Actions runs both Python 3.11 and 3.13, using no network, credentials, ex
 This is not a provider benchmark, model score, actual monetary saving, real-world opening/closure detection or probability of a real venue being open. The response deadline is a synthetic constraint and the cost is normalized utility, NOT TRY/USD or token pricing. Probe approval here means only allowlisted *simulated research*, not permission to fetch or publish.
 
 Rollback: revert only CORE-002 new module, benchmark/config, tests, aggregate checks, documentation/ADR and offline CI. Leave CORE-001 and all historic real archive and privately frozen FIELD-001 materials unchanged.
+
+
+## First frozen empirical SIMULATION result, October 11, 2026
+
+The following are **synthetic** outcomes from exactly 400 pre-generated scenarios per regime. Python 3.11 and 3.13 JSON reports matched exactly after using deterministic Decimal arithmetic for check costs, realized utility and paired-resample rounding. The initial unpinned run exposed last-digit binary floating differences, which were fixed in code and regression-tested before freezing. Complete canonical-result SHA-256:
+
+    9303794055e45a668abc4d194b64c1b86ce6fb9c9c48e70fdbcac3c5c578d6cc
+
+Research replay:
+
+    python scripts/replay_budgeted_core.py --check
+
+| Simulated regime | Never: assertions / false | VOI: assertions / false | VOI checks | Never utility / case | VOI utility / case |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| matched | 30 / 3 | 232 / 4 | 239 | .037500 | .461288 |
+| tight_budget | 30 / 1 | 206 / 10 | 246 | .062500 | .377700 |
+| short_deadline | 39 / 0 | 215 / 6 | 249 | .097500 | .450050 |
+| quality_degradation | 22 / 1 | 130 / 21 | 195 | .042500 | **.006438** |
+| echo_storm | 34 / 0 | 229 / 1 | 226 | .085000 | .495025 |
+| rights_and_disputes | 21 / 1 | 145 / 2 | 147 | .040000 | .295238 |
+
+The utility is an **invented decision score**, not economic return or real model quality. Positive source agreement means LAB support, not actual existence. This report does not verify any physical shop opening or closure.
+
+### Negative and null findings retained
+
+1. Under source-quality degradation, **VOI loses to NEVER** (.006438 vs .042500) and also loses to CHEAPEST (.052750). The simulated assumed source error rates stayed optimistic while actual generated accuracy declined; more data made incorrect assertions. There were 21 false claims among VOI's 130 synthetic assertions.
+2. In these SIX predeclared regimes VOI happened to choose the **same allowed probes** as MAX_INFORMATION and ALWAYS_STRONG. Their assertions, costs and utility are identical in this design. Thus the experiment does **NOT** demonstrate an efficiency improvement unique to the VOI optimization over those two strategies.
+3. When tight budget or short deadline permits only one sensor, all checking strategies are naturally identical, but check-vs-never remains a useful value comparison.
+4. A separate synthetic low-prior test proves the VOI planner can refuse an expensive low-value check that CHEAPEST would still propose. It is a **contract test**, not a preregistered population-level lift estimate. We did not add a new regime after viewing results to manufacture a favorable benchmark.
+5. Paired bootstrap intervals are conditional on these same fictional events and utility parameters. They do not authorize a real consumer/competitor or commercial inference.
+
+The useful engineering milestone is **deterministic one-step budget/time/root-bound planning**, not evidence that a probabilistic router is calibrated or optimal. The next core-only experiment should stress prior misspecification, uncertain root independence, and smarter deferral, preregistered separately instead of changing this frozen result.
