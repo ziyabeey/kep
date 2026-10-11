@@ -9,8 +9,10 @@ from __future__ import annotations
 import argparse
 from hashlib import sha256
 import json
+import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from kepcore.overture_august import AUGUST, compare_august_september
 from kepcore.overture_historical_probe import PINNED_PREFIX
 from kepcore.overture_places import PILOT, canonical
