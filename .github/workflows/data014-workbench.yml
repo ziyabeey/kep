@@ -18,7 +18,7 @@ jobs:
           python-version: '3.13'
       - name: Offline regression gate before any source access
         working-directory: labs/core
-        run: python -m unittest tests.test_gers_access_cost -v
+        run: python -m unittest tests.test_gers_access_cost tests.test_gers_footer_transport -v
       - name: Install optional pinned metadata reader (not part of source-body budget)
         run: python -m pip install --disable-pip-version-check pyarrow==21.0.0
       - name: Explicitly scoped public metadata experiment, maximum 16 MiB
