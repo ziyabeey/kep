@@ -28,3 +28,9 @@ labs/core/data/source_snapshots_private/
 labs/core/data/overture_private/
 labs/core/.local/overture*/
 *.audit-seed
+
+# Confidential physical field audit reviews; store off-repo
+labs/core/data/field_reviews_private/
+labs/core/.local/field_review*/
+KEP_Istanbul_Real_Field_Reviewer_*.xlsx
+*PRIVATE_AUDIT_Bundle.zip
