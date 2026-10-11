@@ -102,3 +102,13 @@ jobs:
           path: ${{ runner.temp }}/data014-${{ matrix.python-version }}.json
           retention-days: 7
           if-no-files-found: error
+
+      - name: DATA-015 pinned REAL regional GERS aggregate replay (offline, abstention)
+        run: python scripts/review_gers_region_events.py --check > "$RUNNER_TEMP/data015-${{ matrix.python-version }}.json"
+      - name: Preserve DATA-015 aggregate receipt validation, no IDs or reviewer rows
+        uses: actions/upload-artifact@v4
+        with:
+          name: data015-replay-python-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/data015-${{ matrix.python-version }}.json
+          retention-days: 7
+          if-no-files-found: error
