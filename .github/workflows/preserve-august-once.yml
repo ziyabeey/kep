@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 1
       - name: Download exactly one original, pinned research artifact
         env:
-          GH_TOKEN: ${ github.token }}
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
@@ -36,7 +36,7 @@ jobs:
             --output "${RUNNER_TEMP}/kep-original-august.zip"
       - name: Verify all archive bytes and research-only rights
         env:
-          ORIGINAL_ZIP: ${ runner.temp }}/kep-original-august.zip
+          ORIGINAL_ZIP: ${{ runner.temp }}/kep-original-august.zip
         run: |
           python - <<'PY'
           import hashlib,json,os,pathlib,zipfile
