@@ -116,7 +116,8 @@ See [RANDOM_AUDIT_PROTOCOL.md](docs/RANDOM_AUDIT_PROTOCOL.md) and [ADR-0007](../
 
 `kepcore/overture_audit.py` checks internally consistent, pinned Overture minimal artifacts, and creates a frozen randomized survey stratified by sample cell and Overture existence score. `scripts/verify_overture_pilot.py` runs offline and never changes Core or consumer records. The manual Overture workflow validates its artifact before upload. `python -m benchmarks.overture_audit_eval` shows **synthetic** sampling bias effects; `tests/test_overture_audit.py` covers corruption, missing reviewers and future dates. See [OVERTURE_EXISTENCE_AUDIT.md](docs/OVERTURE_EXISTENCE_AUDIT.md).
 
-A passing artifact test **does not authenticate Overture upstream**: hashes within an untrusted supplied manifest can be forged. Two reviewer IDs **do not authenticate real reviewer independence**. At DATA-002 release time no actual Istanbul POIs were archived. DATA-003 now preserves 4,803 Overture source records; no real-world existence labels yet. Issue #13 remains open.
+A passing artifact test **does not authenticate Overture upstream**: hashes within an untrusted supplied manifest can be forged. Two reviewer IDs **do not authenticate real reviewer independence**. That paragraph documents the state at DATA-002 release time. DATA-003 now archives 4,803 **real Overture records**, without ground-truth labels; Issue #13 remains open for physical verification.
+
 ## KEP-DATA-003 · Pinned real Istanbul Places replay
 
 The GitHub Actions Overture download **succeeded** on 2026-10-11 Istanbul time, with
@@ -136,3 +137,10 @@ python scripts/real_overture_replay.py --audit-seed-file .local/private_seed.txt
 The default replay makes no network calls and reads no secrets. Audits do not
 assign existence labels; all rows begin `UNREVIEWED`.
 Source and sampling caveats: [OVERTURE_REAL_FIRST_RESULTS.md](docs/OVERTURE_REAL_FIRST_RESULTS.md).
+
+## KEP-DATA-004: Çift kör insan denetimi alımı
+
+- `kepcore/overture_field_review.py`: mevcut 60-POI örnekleme planını özel seed ile yeniden doğrular, saha Excel dosyalarını (`.xlsx`) standard kütüphaneyle okur, adı/adresi/koordinatı/harita linkini sabitler ve iki insan değerlendirmesi eksikse hata oranını üretmez.
+- `scripts/intake_overture_field_workbooks.py`: ağsız, model anahtarsız, üretimden ayrılmış komut satırı.
+- `docs/OVERTURE_FIELD_AUDIT_INTAKE.md`: değerlendirme protokolü ve kritik **±51,8 yüzde puan** muhafazakâr yarıçap uyarısı.
+- Bağımsız insan sonucu henüz sıfır; testler sentetik oyları kullanır, gerçek saha sonuçları değildir.

@@ -54,6 +54,7 @@ Kanıt toplama ajanlarının **şüpheli kayıtları hedefli incelemesi**, kayna
 ## KEP-DATA-002 · Overture snapshot integrity + existence audit
 
 [Research audit protocol](labs/core/docs/OVERTURE_EXISTENCE_AUDIT.md) adds post-download artifact checks, preregistered confidence-band random sampling, private seed replay and a complete dual-human-reviewed estimator. GitHub CI uses synthetic fixtures; **no real Istanbul field labels or verified POIs** are claimed. The source download remains separately/manual-only.
+
 ## İlk gerçek İstanbul Overture mekân arşivi (KEP-DATA-003)
 
 Manuel Overture iş akışı **başarıyla çalıştı** ([run #38096227796](https://github.com/ziyabeey/kep/actions/runs/38096227796)).
@@ -63,3 +64,7 @@ Beşiktaş merkezindeki küçük hücrede 1.872, Karaköy çevresindekinde 2.931
 `python3 labs/core/scripts/real_overture_replay.py` çıktısı açıklayıcı veri kalitesi özetidir.
 Bu kayıtlar **sahada doğrulanmış işletmeler değildir**; `consumer_display_approved=false`, canlı
 açılış/etkinlik/ücret bilgisi yoktur. Kaynak başına atıf ve [deney raporu](labs/core/docs/OVERTURE_REAL_FIRST_RESULTS.md) geçerlidir.
+
+## KEP-DATA-004 · Kör saha denetimi Excel içe aktarma
+
+`labs/core/kepcore/overture_field_review.py` iki ayrı insanın 60 gerçek Overture POI'si için hazırlanan Excel dosyalarını **çevrimdışı** doğrular. Örneklem ve görünen kaynak iddiaları değiştirilemez; boş, çelişkili veya sonradan girilen cevaplarla kaynak hata oranı yayımlanmaz. Çalıştırma: [saha veri protokolü](labs/core/docs/OVERTURE_FIELD_AUDIT_INTAKE.md). 60 örneğin %95 muhafazakâr hata aralığı yarıçapı yaklaşık **±51,8 yüzde puandır**; gerçek saha doğruluğu hâlâ ölçülmemiştir.
