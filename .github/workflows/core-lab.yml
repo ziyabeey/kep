@@ -112,3 +112,13 @@ jobs:
           path: ${{ runner.temp }}/data015-${{ matrix.python-version }}.json
           retention-days: 7
           if-no-files-found: error
+
+      - name: Verify DATA-016 pinned patch projection and abstention (offline)
+        run: python scripts/review_gers_patch.py --check > "$RUNNER_TEMP/data016-${{ matrix.python-version }}.json"
+      - name: Preserve aggregate DATA-016 source-result integrity only
+        uses: actions/upload-artifact@v4
+        with:
+          name: data016-replay-python-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/data016-${{ matrix.python-version }}.json
+          retention-days: 7
+          if-no-files-found: error

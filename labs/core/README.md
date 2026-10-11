@@ -182,3 +182,7 @@ Source-record changes are NOT human-reviewed business events. [Protocol](docs/OV
 ## KEP-DATA-013 · GERS source reconciliation and compatibility
 
 [Offline replay and scientific boundaries](docs/GERS_RECONCILIATION.md). The two real archives are unchanged. Actual STAC evidence requires the intermediate `2026-09-23.0` release; the bounded official-event capture is incomplete, so no official membership agreement or business opening/closure accuracy is claimed. Run `python scripts/reconcile_gers_releases.py --check` from `labs/core`. Ordinary CI remains offline.
+
+## KEP-DATA-016 · Cross-patch regional GERS event fingerprint
+
+[Research evidence and boundaries](docs/GERS_PATCH_REGIONAL_EQUIVALENCE.md). The original September .0 and separately captured September .1 geographically selected added/removed GERS row sets have identical canonical fingerprints (218 added, 67 removed; 285 regional IDs), but this **does not** prove full Parquet equality, the patch changelog generation baseline, all-ID agreement or physical business events. The exact original aggregate receipts are SHA-256 pinned. Replay without network: `python scripts/review_gers_patch.py --check`.

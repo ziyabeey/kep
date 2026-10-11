@@ -33,7 +33,10 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 class RemoteRanges:
-    def __init__(self):
+    def __init__(self, *, release='2026-09-23.0'):
+        if release not in {'2026-09-23.0','2026-09-23.1'}:
+            raise ValueError('Unreviewed regional GERS release')
+        self.release=release
         self.budget=RangeBudget(limit=MAX_READ_BODY,requests=128)
         self.bytes_read=0
         self.opener=urllib.request.build_opener(NoRedirect())
@@ -41,7 +44,7 @@ class RemoteRanges:
 
     def read(self,item,start,end):
         if self.failed:raise ValueError('Source access stopped after failure')
-        key=item['key'];prefix='changelog/2026-09-23.0/theme=places/type=place/change_type='
+        key=item['key'];prefix=f'changelog/{self.release}/theme=places/type=place/change_type='
         if (not key.startswith(prefix) or '/part-' not in key or '..' in key):
             raise ValueError('Unreviewed public source path')
         if (type(start) is not int or type(end) is not int or

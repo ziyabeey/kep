@@ -97,3 +97,7 @@ Bu arşiv yalnız araştırma içindir; KEP tüketici yayını kapalıdır.
 ## DATA-013 access evidence, not new business truth
 
 `data/real/gers_access_2026-10-11/` preserves the exact two public STAC catalogs and a compressed original public-S3 research failure receipt. No completed GERS event rows or full Parquet data were retained. Existing Places provider attribution remains attached to the original two-release archives. Sources: https://docs.overturemaps.org/attribution/ , https://docs.overturemaps.org/gers/changelog/ , https://stac.overturemaps.org/catalog.json . See `docs/GERS_RECONCILIATION.md` for provenance, hashes and the incomplete capture. No reviewer material, audit seeds, customer data or new consumer publication permission is included.
+
+## DATA-016 bounded GERS cross-patch research evidence
+
+The DATA-016 original aggregate-only September `.1` regional GERS observation at `reports/KEP_DATA_016_PATCH_REGIONAL.json` is pinned by SHA-256 (`a1bfed37f2fa0f83bbd3bf395297cbd01f4a47e054c25b767db37ccf3cf2ea64`). It uses Overture's documented public GERS changelog (https://docs.overturemaps.org/gers/changelog/) with rights/attribution requirements at https://docs.overturemaps.org/attribution/. It is a **same-publisher** secondary path, not an independent verification source or a license for consumer use. Raw IDs, full Parquet data, private labels and audit seeds were not committed. Full lineage and business-world truth remain unverified. See docs/GERS_PATCH_REGIONAL_EQUIVALENCE.md.
