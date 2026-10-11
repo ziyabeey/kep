@@ -26,13 +26,19 @@ ROOTS=('origin','partner')
 
 
 @dataclass(frozen=True)
-class SimCase:
-    """Keep true reality outside the callable policy input."""
-    truth: bool
+class CaseInput:
+    """Policy-visible data. It has NO hidden-world reality/label attribute."""
     record: dict
     signals: tuple[Signal,...]
     query: Query
     regime: str
+
+
+@dataclass(frozen=True)
+class SimCase:
+    """Evaluator-only wrapper; policy_actions accepts CaseInput, not this."""
+    truth: bool
+    view: CaseInput
 
 
 def _draw(truth: bool, sensitivity: float, specificity: float, rng: Random) -> bool:
@@ -96,11 +102,13 @@ def generate(regime: str, seed: int, n: int) -> list[SimCase]:
             stale=NOW-timedelta(hours=72)
             add(f'stale-{i}','partner',reality,stale,stale)
         q=Query(city='İstanbul',kind='place',at=at,limit=1)
-        out.append(SimCase(reality,record,tuple(events),q,regime))
+        out.append(SimCase(reality,CaseInput(record,tuple(events),q,regime)))
     return out
 
 
-def policy_actions(case: SimCase) -> dict[str,bool]:
+def policy_actions(case: CaseInput) -> dict[str,bool]:
+    if not isinstance(case,CaseInput):
+        raise TypeError('Never pass hidden ground-truth wrapper into the policy')
     """Return yes/no research assertions; never modify or inspect case.truth."""
     row=case.record
     core_decision=decide([row],case.query)
@@ -175,7 +183,7 @@ def run(config:dict|None=None)->dict:
         cases=generate(regime,cfg['seed']+j,cfg['n_per_regime'])
         same_scenarios={name:[] for name in POLICIES}
         for case in cases:
-            actions=policy_actions(case)
+            actions=policy_actions(case.view)
             for policy in POLICIES:
                 same_scenarios[policy].append(actions[policy])
         report={p:_summarize(cases,same_scenarios[p],cfg['false_assertion_penalty'])
