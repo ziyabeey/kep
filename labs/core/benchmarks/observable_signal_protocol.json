@@ -1,0 +1,79 @@
+{
+  "study": "KEP-OBS-001",
+  "stage": "PREREGISTRATION_BEFORE_FEATURE_IMPLEMENTATION_OR_HOLDOUT",
+  "source_snapshot": "e6ebe753cf57461c7ab44df233425000476da9c6",
+  "question": "Can observables already accessible to KEP distinguish audit-backlog from deteriorating source correctness well enough to choose a useful lab-only verification strategy?",
+  "motivation": {
+    "source": "KEP-CORE-004A frozen NO_GO",
+    "old_outage_stable_cases": 180,
+    "conservative_utility": 0.344167,
+    "fixed_voi_utility": 0.517972,
+    "regret_per_case": 0.173805,
+    "observer_note": "Audit-age is a telemetry status, NOT proof source claims are right."
+  },
+  "data_scope": "STRICTLY_SYNTHETIC_NO_REAL_SOURCE_RETRIEVAL",
+  "frozen_protocol": {
+    "seed": 202610121015,
+    "cases_per_regime": 160,
+    "regimes": [
+      "stable_outage",
+      "abrupt_outage",
+      "gradual_outage",
+      "healthy",
+      "late_reviews",
+      "correlated_rumor"
+    ],
+    "comparators": [
+      "conservative",
+      "fixed_voi",
+      "audit_age_only",
+      "unlabelled_disagreement"
+    ],
+    "false_assertion_penalty": 4,
+    "paired_bootstrap_draws": 200,
+    "feedback_outage_start_step": 55,
+    "feedback_delay_after_outage_hours": 100000,
+    "query_asof_time_only": true,
+    "raw_observations_available_when_first_observed": true,
+    "telemetry_signal": {
+      "pair_of_publisher_roots": [
+        "origin",
+        "deep_root"
+      ],
+      "observed_vote_lookback_hours": 12,
+      "min_distinct_entities": 18,
+      "disagreement_cutoff_fraction": 0.35,
+      "max_last_completed_review_age_hours": 8,
+      "unknown_or_insufficient_votes": "CONSERVATIVE"
+    },
+    "fallback_decision": "If completed review age <=8h, use conservative. If older AND >=18 eligible paired observations during last 12h AND pair disagreement <= 0.35, use fixed_voi; otherwise conservative.",
+    "audit_age_only_control": "If completed review age >8h, use fixed_voi; otherwise conservative.",
+    "zero_ground_truth_in_feature_inputs": true,
+    "different_cases_for_audit_telemetry_and_current_prediction": true,
+    "expected_pair_counts_same_for_stable_and_degraded": true,
+    "no_model_training": true,
+    "no_threshold_tuning_after_results": true
+  },
+  "precommitted_gate": {
+    "primary_regime": "stable_outage",
+    "minimum_utility_lift_over_conservative": 0.025,
+    "minimum_utility_lift_over_audit_age_only": 0,
+    "maximum_false_assertions_over_fixed_voi_in_stable": 0,
+    "maximum_utility_regret_vs_conservative_for_each_degraded_regime": 0.05,
+    "maximum_extra_false_assertions_vs_conservative_in_correlated_rumor": 0,
+    "minimum_abrupt_drift_alert_recall_after_step_85": 0.5,
+    "maximum_stable_outage_false_alert_rate_after_step_85": 0.25,
+    "unsuccessful_study": "NO_GO_KEEP_ONLY_REPORT_AND_PROTOCOL",
+    "all_checks_required": true
+  },
+  "design_warnings": [
+    "AuditFeedback includes simulated true labels, but policy-visible ObservedVote and ReviewPulse MUST NOT include truth or future outcomes",
+    "Observational availability of a raw synthetic source vote at observed_at is an invented simplifying assumption, not external data proof",
+    "False or agreeing publisher roots can still be dependent; correlated rumor regime must be included even if it worsens performance",
+    "If source-degraded and stable worlds have equal telemetry, using audit-age alone cannot identify correctness",
+    "Only authored simulators and preselected comparators are measured. A passed threshold is not evidence of real provider performance",
+    "No policy or candidate module merges to main unless the experiment is GO and separately reviewed; NO_GO retains only report/protocol"
+  ],
+  "test_value_rule": "New tests only for observable time/label leakage, duplicate pair control, and preregistered refusal; avoid duplicating 880 prior tests.",
+  "original_main_untouched": true
+}
