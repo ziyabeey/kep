@@ -1,0 +1,107 @@
+{
+  "study": "KEP-OBS-001",
+  "verdict": "GO_FOR_FURTHER_RESEARCH_ONLY",
+  "disposition": "NO_PRODUCT_ALGORITHM_OR_NEW_TEST_SUITE_ADMITTED",
+  "experiment_status": "FIRST_PREREGISTERED_SYNTHETIC_HOLDOUT_COMPLETED",
+  "prereg_commit": "1876912a654e7aac8affe6c544687311b266de2c",
+  "first_executable_run_commit": "e25ce70c14a644a73fcd299e51e8e8b28a658578",
+  "first_workflow_run": "https://github.com/ziyabeey/kep/actions/runs/38203661808",
+  "python_311_artifact_sha256": "88c3661d3a86b62975196c7cce6b88f796ddb45f6e4b5cd15d5daf76509b048d",
+  "python_313_artifact_sha256": "31d3ea027a4ef1a78f596bb53824e25aa21fc9564ef91b5e322b08662013353b",
+  "full_decoded_json_identical_across_pythons": true,
+  "canonical_full_json_sha256": "3b5730287025f394f0f6a7453d833069e7c0aad38842f3c9e013f9efe1e2f27d",
+  "new_holdout_cases": 960,
+  "cases_per_regime": 160,
+  "policies": [
+    "conservative",
+    "fixed_voi",
+    "audit_age_only",
+    "unlabelled_disagreement"
+  ],
+  "primary_method": "unlabelled_disagreement",
+  "binary_alert_criterion": "Last completed audit older than 8h, >=18 independent past raw matched pairs in the last 12h, pair disagreement >0.35",
+  "recovery_rule": "When audit age >8h with enough raw pairs and pair disagreement <=0.35 use old fixed_voi; else use old conservative; otherwise do not fetch or publish",
+  "primary_main_outage": {
+    "utility_conservative": 0.362188,
+    "utility_fixed": 0.519719,
+    "utility_audit_age_only": 0.519719,
+    "utility_disagreement": 0.519719,
+    "gain_over_conservative": 0.157531,
+    "gain_over_age_only": 0,
+    "paired_bootstrap_95_vs_conservative": [
+      0.112562,
+      0.206594
+    ],
+    "false_assertions_conservative": 1,
+    "false_assertions_disagreement": 1,
+    "true_opportunities_missed_conservative": 56,
+    "true_opportunities_missed_disagreement": 27
+  },
+  "counterfactual_degraded_scenarios": {
+    "abrupt_outage": {
+      "utility_conservative": 0.123906,
+      "utility_age_only": 0.105,
+      "utility_disagreement": 0.128719,
+      "utility_gain_over_age_only": 0.023719,
+      "paired_bootstrap_95_vs_conservative": [
+        -0.002156,
+        0.021406
+      ],
+      "false_assertions_conservative": 4,
+      "false_assertions_age_only": 8,
+      "false_assertions_disagreement": 4,
+      "alerted_after_step_85": 68,
+      "alert_opportunities_after_step_85": 75
+    },
+    "gradual_outage": {
+      "utility_conservative": 0.087844,
+      "utility_age_only": 0.045875,
+      "utility_disagreement": 0.087844,
+      "utility_gain_over_age_only": 0.041969,
+      "false_assertions_conservative": 4,
+      "false_assertions_age_only": 9,
+      "false_assertions_disagreement": 4,
+      "alerted_after_step_85": 75,
+      "alert_opportunities_after_step_85": 75
+    }
+  },
+  "negative_controls": {
+    "healthy_source_utility_all_policies": 0.477625,
+    "stable_outage_false_deterioration_alerts_after_step_85": 0,
+    "correlated_wrong_rumor": {
+      "utility_conservative": 0.333594,
+      "utility_disagreement": 0.501469,
+      "false_assertions_both": 3,
+      "detections_after_step_85": 0,
+      "missed_upstream_dependence": true
+    },
+    "late_reviews": {
+      "conservative_utility": 0.562031,
+      "fixed_utility": 0.566844,
+      "observed_signal_utility": 0.562031,
+      "uniqueness_benefit": false
+    }
+  },
+  "predeclared_go_checks_passed": 8,
+  "predeclared_go_checks_failed": 0,
+  "no_product_merge_reason": "GO is only for independent model/observability testing; not evidence for deployment or robust publisher independence",
+  "fail_safe_boundaries": {
+    "real_business_accuracy": null,
+    "real_human_reviews": 0,
+    "consumer_publish": false,
+    "model_calls": 0,
+    "live_source_downloads": 0,
+    "policy_saw_current_trial_truth": false,
+    "policy_saw_future_probe_answers": false,
+    "background_audit_labels_available_only_after_adjudication": true
+  },
+  "explicit_limitations": [
+    "Raw source observations remain available even when audit adjudication stops, an authored simulator assumption not validated for KEP deployments.",
+    "The two publisher roots may share upstream rumors; correlated failure was not detected.",
+    "One original CORE-003 simulator family with new seed is not independent validation under new mechanisms.",
+    "Paired bootstrap intervals are conditional on fictional case generator; abrupt difference versus conservative includes zero.",
+    "Signal observation and review/adjudication have real operational costs unmodeled here.",
+    "The 0.35 disagreement threshold was preregistered as a hypothesis, not calibrated on real data.",
+    "The next synthetic challenge must independently vary raw-observation loss, provider correlation and observation latency before any module is proposed."
+  ]
+}
