@@ -33,6 +33,7 @@ from kepcore.core import (Query, check_model_selection, decide, dt, fold, havers
 from kepcore.model_boundary import context_for_model, validate_structured_reply  # noqa: E402
 from kepcore.scheduler import SourceClock, due_sources  # noqa: E402
 from kepcore.store import Store  # noqa: E402
+from kepcore.radar import FetchResponse, PollState, Source, _public_https, load_sources, poll  # noqa: E402
 
 AT = '2026-10-10T18:00:00+03:00'  # Saturday, as in tests/test_v03.py
 
@@ -742,8 +743,212 @@ def build_store():
     }
 
 
+def url_cases():
+    urls = [
+        'https://openapi.izmir.bel.tr/api/x', 'https://EXAMPLE.org/', 'HTTPS://example.org', 'https://example.org.',
+        'https://example.org:443/x', 'https://example.org:00443/', 'https://example.org:/', 'https://example.org:8080/',
+        'https://example.org:0/', 'https://example.org:99999/', 'https://example.org:+443/', 'https://example.org:4a/',
+        'http://example.com', 'ftp://example.com', 'https:example.com', 'https:///x', '//example.com', '',
+        'https://localhost/', 'https://a.localhost/', 'https://example.local/x', 'https://svc.internal/',
+        'https://intranet/', 'https://127.0.0.1/', 'https://10.1.1.9/data', 'https://1.2.3.4./',
+        'https://01.2.3.4/', 'https://1.2.3.256/', 'https://1.2.3/', 'https://[::1]/', 'https://[::1/',
+        'https://alice:secret@example.org/', 'https://alice@example.org/', 'https://@example.org/',
+        'https://:@example.org/', 'https://example.org/path#fragment', 'https://example.org/path#',
+        'https://example.org/?q=1#', 'https://example.com\\@evil.com', 'https://exa mple.org/',
+        'https://example.org/\tx', 'https://example.org/x\u00a0', 'https://İzmir.example.org/',
+        'https://xn--zmir-5qa.example.org/', 'https://exa\u2100mple.org/', 'https://example.org?x#y',
+        'https://a.b@c.example.org/', 'https://example.org@', 'https://Example.ORG/Path?Q#',
+    ]
+    return [{'name': f'url_{i:02d}', 'url': u, 'expect': outcome(_public_https, u)} for i, u in enumerate(urls)]
+
+
+def registry_raw():
+    return load_json(LAB / 'sources/registry.json')
+
+
+def source_cases():
+    reg = registry_raw()['sources']
+    izmir, pending = reg[0], reg[1]
+    variants = {
+        'izmir': izmir, 'pending': pending,
+        'unknown_field': {**izmir, 'notes': 'x'}, 'not_object': [izmir],
+        'uses_not_list': {**izmir, 'approved_uses': 'research_ingest'},
+        'uses_non_str': {**izmir, 'approved_uses': ['research_ingest', 1]},
+        'missing_city': {k: v for k, v in izmir.items() if k != 'city'},
+        'bad_id': {**izmir, 'id': 'izmir-open'}, 'empty_id': {**izmir, 'id': ''},
+        'unicode_id': {**izmir, 'id': 'izmır'},
+        'local_url': {**izmir, 'url': 'https://localhost/x'},
+        'blank_city': {**izmir, 'city': ' \u3000 '},
+        'bad_format': {**izmir, 'format': 'html'}, 'bad_status': {**izmir, 'status': 'live'},
+        'unregistered_use': {**izmir, 'approved_uses': ['resale']},
+        'duplicate_use': {**izmir, 'approved_uses': ['research_ingest', 'research_ingest']},
+        'pending_grants': {**pending, 'approved_uses': ['research_ingest']},
+        'approved_no_license': {**izmir, 'license': ''},
+        'approved_no_evidence': {**izmir, 'rights_evidence_url': ''},
+        'approved_no_uses': {**izmir, 'approved_uses': []},
+        'approved_http_evidence': {**izmir, 'rights_evidence_url': 'http://acikveri.bizizmir.com/'},
+        'approved_bad_review_date': {**izmir, 'rights_reviewed_at': '10/10/2026'},
+        'approved_review_datetime': {**izmir, 'rights_reviewed_at': '2026-10-10T09:00:00+03:00'},
+        'adapter_without_note': {**pending, 'format': 'izmir_event_json', 'review_note': ''},
+        'adapter_with_note': {**pending, 'format': 'izmir_event_json'},
+        'website_without_note': {**pending, 'review_note': ''},
+        'blocked': {**pending, 'status': 'blocked'},
+        'poll_min_zero': {**izmir, 'min_poll_minutes': 0},
+        'poll_min_above_max': {**izmir, 'min_poll_minutes': 2000},
+        'poll_max_too_big': {**izmir, 'max_poll_minutes': 43201},
+        'poll_max_edge': {**izmir, 'max_poll_minutes': 43200},
+        'cap_zero': {**izmir, 'daily_request_cap': 0}, 'cap_edge': {**izmir, 'daily_request_cap': 10000},
+        'bytes_small': {**izmir, 'max_response_bytes': 1023}, 'bytes_edge': {**izmir, 'max_response_bytes': 1024},
+        'bytes_big': {**izmir, 'max_response_bytes': 5_000_001},
+    }
+
+    def parse(raw):
+        s = Source.parse(raw)
+        return {**{k: v for k, v in s.__dict__.items()}, 'approved_uses': list(s.approved_uses),
+                'allows_research': s.allows('research_ingest'), 'allows_display': s.allows('consumer_display')}
+    return [{'name': f'source_{k}', 'raw': v, 'expect': outcome(parse, v)} for k, v in variants.items()]
+
+
+def registry_cases():
+    import tempfile
+    reg = registry_raw()
+    first = reg['sources'][0]
+    docs = {
+        'shipped': reg, 'version_float': {**reg, 'version': 1.0}, 'version_true': {**reg, 'version': True},
+        'version_two': {**reg, 'version': 2}, 'extra_key': {**reg, 'note': 1}, 'sources_dict': {**reg, 'sources': {}},
+        'duplicate': {'version': 1, 'sources': [first, first]}, 'empty': {'version': 1, 'sources': []},
+        'not_object': [reg],
+    }
+    out = []
+    with tempfile.TemporaryDirectory() as d:
+        for k, doc in docs.items():
+            p = Path(d) / f'{k}.json'
+            p.write_text(json.dumps(doc, ensure_ascii=False), encoding='utf-8')
+            out.append({'name': f'registry_{k}', 'doc': doc,
+                        'expect': outcome(lambda: [s.id for s in load_sources(p).values()])})
+    return out
+
+
+def event_body(records, **change):
+    return json.dumps(records, ensure_ascii=False).encode()
+
+
+def poll_scenarios():
+    import builtins
+    from dataclasses import asdict
+    reg = {s['id']: s for s in registry_raw()['sources']}
+    izmir = reg['izmir_open_events']
+    raw_events = load_json(LAB / 'data/raw/izmir_events_excerpt.json')['records']
+    two = raw_events[:2]
+    ok = event_body(two)
+
+    def resp(status=200, body=ok, headers=()):
+        return {'status': status, 'body_hex': body.hex(), 'headers': [list(h) for h in headers]}
+
+    def ev(i=0, **kw):
+        recs = copy.deepcopy(two); recs[i].update(kw); return event_body(recs)
+
+    def drop(k):
+        recs = copy.deepcopy(two); del recs[0][k]; return event_body(recs)
+    noon = '2026-10-11T12:00:00+00:00'
+    tags = [('ETag', '"abc"'), ('Last-Modified', 'Sun, 11 Oct 2026 00:00:00 GMT'), ('Cache-Control', 'max-age=60'),
+            ('Date', 'Sun, 11 Oct 2026 12:00:00 GMT'), ('X-Secret', 'drop')]
+    scenarios = {
+        'pending_denied': (reg['zorlu_psm_events'], 'research_ingest', {}, [{'now': noon, 'response': resp()}]),
+        'display_denied': (izmir, 'consumer_display', {}, [{'now': noon, 'response': resp()}]),
+        'adapter_denied': ({**izmir, 'format': 'website_review_required'}, 'research_ingest', {},
+                           [{'now': noon, 'response': resp()}]),
+        'changed_conditional_unchanged': (izmir, 'research_ingest', {}, [
+            {'now': noon, 'response': resp(headers=tags)},
+            {'now': '2026-10-11T19:00:00+00:00', 'response': resp(304)},
+            {'now': '2026-10-12T02:00:00+03:00', 'response': resp(headers=[('etag', '"def"')])},
+            {'now': '2026-10-12T08:00:00.123456+00:00', 'response': resp(body=ev(1, Adi='Yeni ad'))}]),
+        'header_case_collapse': (izmir, 'research_ingest', {}, [
+            {'now': noon, 'response': resp(headers=[('ETag', '1'), ('X', 'y'), ('etag', '2'), ('DATE', 'd')])}]),
+        'empty_etag_header': (izmir, 'research_ingest', {'etag': '"old"', 'last_modified': ''}, [
+            {'now': noon, 'response': resp(headers=[('ETag', '')])}]),
+        'min_interval_and_quota': (izmir, 'research_ingest', {
+            'last_attempt_at': noon, 'last_day': '2026-10-11', 'requests_today': 1}, [
+            {'now': '2026-10-11T12:20:00+00:00', 'response': resp()},
+            {'now': '2026-10-11T17:59:59.999999+00:00', 'response': resp()},
+            {'now': '2026-10-11T18:00:00+00:00', 'response': resp()}]),
+        'quota_resets_next_utc_day': (izmir, 'research_ingest', {'last_day': '2026-10-11', 'requests_today': 4}, [
+            {'now': '2026-10-12T02:00:00+03:00', 'response': resp()},
+            {'now': '2026-10-12T03:00:00+03:00', 'response': resp()}]),
+        'clock_backwards': (izmir, 'research_ingest', {'last_attempt_at': noon}, [
+            {'now': '2026-10-11T11:59:00+00:00', 'response': resp()}]),
+        'stored_naive_timestamp': (izmir, 'research_ingest', {'last_attempt_at': '2026-10-11T12:00:00'}, [
+            {'now': noon, 'response': resp()}]),
+        'stored_z_timestamp': (izmir, 'research_ingest', {'last_attempt_at': '2026-10-11T05:00:00Z'}, [
+            {'now': noon, 'response': resp()}]),
+        'pause_403_sticks': (izmir, 'research_ingest', {}, [
+            {'now': noon, 'response': resp(403)}, {'now': '2026-10-12T12:00:00+00:00', 'response': resp()}]),
+        'pause_401': (izmir, 'research_ingest', {}, [{'now': noon, 'response': resp(401)}]),
+        'pause_429': (izmir, 'research_ingest', {}, [{'now': noon, 'response': resp(429)}]),
+        'http_500_and_404': (izmir, 'research_ingest', {}, [
+            {'now': noon, 'response': resp(500)}, {'now': '2026-10-11T18:00:00+00:00', 'response': resp(404)}]),
+        'timeout': (izmir, 'research_ingest', {}, [{'now': noon, 'raise': 'TimeoutError'}]),
+        'connection_reset': (izmir, 'research_ingest', {}, [{'now': noon, 'raise': 'ConnectionResetError'}]),
+        'transport_bug_propagates': (izmir, 'research_ingest', {}, [{'now': noon, 'raise': 'ValueError'}]),
+        'oversized': ({**izmir, 'max_response_bytes': 1024}, 'research_ingest', {}, [
+            {'now': noon, 'response': resp(body=b' ' * 1025)}]),
+        'utf8_bom_ok': (izmir, 'research_ingest', {}, [{'now': noon, 'response': resp(body=b'\xef\xbb\xbf' + ok)}]),
+    }
+    schema = {
+        'empty_list': b'[]', 'object': b'{}', 'bad_json': b'{bad json}', 'empty_body': b'',
+        'only_id': b'[{"Id": 1}]', 'invalid_utf8': b'[\xff]', 'scalar_item': b'[1]',
+        'id_bool': ev(Id=True), 'id_float': ev(Id=6927.0), 'id_string': ev(Id='6927'),
+        'id_duplicate': ev(1, Id=two[0]['Id']), 'id_huge': ev(Id=2 ** 70),
+        'blank_name': ev(Adi=' \t '), 'name_not_str': ev(Adi=5), 'missing_venue': drop('EtkinlikMerkezi'),
+        'null_venue': ev(EtkinlikMerkezi=None), 'reversed': ev(EtkinlikBitisTarihi='2020-01-01T00:00:00'),
+        'bad_date': ev(EtkinlikBaslamaTarihi='not-a-date'), 'free_flag_str': ev(UcretsizMi='yes'),
+        'free_flag_missing': drop('UcretsizMi'), 'link_int': ev(EtkinlikUrl=5), 'ticket_link_null': ev(BiletSatisLinki=None),
+        'extra_fields_dropped': ev(food_rating=5, Aciklama='uzun metin'),
+        'same_instant_other_offset': ev(EtkinlikBaslamaTarihi='2026-08-10T18:00:00Z',
+                                        EtkinlikBitisTarihi='2026-08-10T21:00:00+03:00'),
+    }
+    for k, body in schema.items():
+        scenarios[f'schema_{k}'] = (izmir, 'research_ingest', {}, [{'now': noon, 'response': resp(body=body)}])
+
+    def run(raw_source, purpose, state_raw, steps):
+        source = Source.parse(raw_source)
+        state = PollState(**state_raw)
+        out = []
+        for step in steps:
+            calls = []
+
+            def transport(url, headers, max_bytes, step=step, calls=calls):
+                calls.append([url, [list(h) for h in headers.items()], max_bytes])
+                if 'raise' in step:
+                    raise getattr(builtins, step['raise'])('simulated')
+                r = step['response']
+                return FetchResponse(r['status'], bytes.fromhex(r['body_hex']), dict(r['headers']))
+            try:
+                result = poll(source, now=datetime.fromisoformat(step['now']), state=state, transport=transport,
+                              purpose=purpose)
+            except Exception as exc:
+                out.append({'raises': type(exc).__name__, 'calls': calls})
+                break
+            out.append({'ok': asdict(result), 'calls': calls})
+            state = result.state
+        return out
+    return [{'name': f'poll_{k}', 'source': src, 'purpose': purpose, 'state': st, 'steps': steps,
+             'expect': run(src, purpose, st, steps)} for k, (src, purpose, st, steps) in scenarios.items()]
+
+
+def build_radar():
+    return {
+        'reference': 'labs/core/kepcore/radar.py (Python, policy gate only); see docs/adr/0034-rust-core-port.md',
+        'public_https': url_cases(),
+        'source': source_cases(),
+        'registry': registry_cases(),
+        'poll': poll_scenarios(),
+    }
+
+
 OUTPUTS = {'availability.json': build_availability, 'core.json': build_core,
-           'boundary.json': build_boundary, 'store.json': build_store}
+           'boundary.json': build_boundary, 'store.json': build_store,
+           'radar.json': build_radar}
 
 
 def render(data):
