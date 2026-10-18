@@ -341,9 +341,16 @@ impl Store {
             )
             .optional()?
             .ok_or(PyError::KeyError)?;
-        let r = self.get(&object_id)?.ok_or(PyError::TypeError)?;
-        if status != "pending" || Some(revision) != r["_revision"].as_i64() {
-            return Ok(json!({"send": false, "reason": "INVALIDATED_OR_SUPERSEDED"}));
+        let r = self.get(&object_id)?;
+        let invalidated = json!({"send": false, "reason": "INVALIDATED_OR_SUPERSEDED"});
+        // `p['status'] != 'pending'` short-circuits before `r['_revision']`,
+        // so a missing object only raises TypeError for a pending push.
+        if status != "pending" {
+            return Ok(invalidated);
+        }
+        let r = r.ok_or(PyError::TypeError)?;
+        if Some(revision) != r["_revision"].as_i64() {
+            return Ok(invalidated);
         }
         if !query.proactive || !query.push_opt_in {
             return Ok(json!({"send": false, "reason": "PUSH_QUERY_REQUIRES_CURRENT_CONSENT"}));
