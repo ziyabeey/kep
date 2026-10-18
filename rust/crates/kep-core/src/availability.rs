@@ -13,6 +13,124 @@ use kep_canon::stable_hash;
 use serde_json::{Map, Value};
 use std::collections::HashMap;
 
+/// Old alias zone names that Debian/Ubuntu ship only in `tzdata-legacy`, so
+/// the Python reference on the CI runner (Ubuntu 24.04, tzdata 2026c) cannot
+/// load them and answers UNKNOWN. chrono-tz still knows them; rejecting them
+/// keeps Rust fail-closed instead of reporting OPEN. Sorted for binary search.
+/// Generated from chrono-tz 0.10.4's zone and link names missing from
+/// `/usr/share/zoneinfo` on that runner.
+const LEGACY_ZONE_ALIASES: [&str; 101] = [
+    "Africa/Asmera",
+    "America/Argentina/ComodRivadavia",
+    "America/Buenos_Aires",
+    "America/Catamarca",
+    "America/Cordoba",
+    "America/Fort_Wayne",
+    "America/Godthab",
+    "America/Indianapolis",
+    "America/Jujuy",
+    "America/Knox_IN",
+    "America/Louisville",
+    "America/Mendoza",
+    "America/Rosario",
+    "Antarctica/South_Pole",
+    "Asia/Ashkhabad",
+    "Asia/Calcutta",
+    "Asia/Chungking",
+    "Asia/Dacca",
+    "Asia/Katmandu",
+    "Asia/Macao",
+    "Asia/Rangoon",
+    "Asia/Saigon",
+    "Asia/Thimbu",
+    "Asia/Ujung_Pandang",
+    "Asia/Ulan_Bator",
+    "Atlantic/Faeroe",
+    "Australia/ACT",
+    "Australia/LHI",
+    "Australia/NSW",
+    "Australia/North",
+    "Australia/Queensland",
+    "Australia/South",
+    "Australia/Tasmania",
+    "Australia/Victoria",
+    "Australia/West",
+    "Brazil/Acre",
+    "Brazil/DeNoronha",
+    "Brazil/East",
+    "Brazil/West",
+    "Canada/Atlantic",
+    "Canada/Central",
+    "Canada/Eastern",
+    "Canada/Mountain",
+    "Canada/Newfoundland",
+    "Canada/Pacific",
+    "Canada/Saskatchewan",
+    "Canada/Yukon",
+    "Chile/Continental",
+    "Chile/EasterIsland",
+    "Cuba",
+    "Egypt",
+    "Eire",
+    "Europe/Kiev",
+    "Europe/Uzhgorod",
+    "Europe/Zaporozhye",
+    "GB",
+    "GB-Eire",
+    "GMT+0",
+    "GMT-0",
+    "GMT0",
+    "Greenwich",
+    "Hongkong",
+    "Iceland",
+    "Iran",
+    "Israel",
+    "Jamaica",
+    "Japan",
+    "Kwajalein",
+    "Libya",
+    "Mexico/BajaNorte",
+    "Mexico/BajaSur",
+    "Mexico/General",
+    "NZ",
+    "NZ-CHAT",
+    "Navajo",
+    "PRC",
+    "Pacific/Enderbury",
+    "Pacific/Ponape",
+    "Pacific/Truk",
+    "Poland",
+    "Portugal",
+    "ROC",
+    "ROK",
+    "Singapore",
+    "Turkey",
+    "UCT",
+    "US/Alaska",
+    "US/Aleutian",
+    "US/Arizona",
+    "US/Central",
+    "US/East-Indiana",
+    "US/Eastern",
+    "US/Hawaii",
+    "US/Indiana-Starke",
+    "US/Michigan",
+    "US/Mountain",
+    "US/Pacific",
+    "US/Samoa",
+    "Universal",
+    "W-SU",
+    "Zulu",
+];
+
+/// An IANA zone the reference can load; legacy aliases are refused.
+fn zone(name: &str) -> Option<Tz> {
+    if LEGACY_ZONE_ALIASES.binary_search(&name).is_ok() {
+        return None;
+    }
+    name.parse().ok()
+}
+
 /// Result of [`opening_status`]; the strings match the Python reference.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OpeningStatus {
@@ -85,7 +203,7 @@ pub fn opening_status(hours: &Value, at: &DateTime<FixedOffset>) -> OpeningStatu
 
 fn status_inner(hours: &Value, at: &DateTime<FixedOffset>) -> Option<OpeningStatus> {
     let hours = hours.as_object()?;
-    let zone: Tz = hours.get("timezone")?.as_str()?.parse().ok()?;
+    let zone = zone(hours.get("timezone")?.as_str()?)?;
     let here = at.with_timezone(&zone);
     let weekly = hours.get("weekly")?.as_object()?;
     let empty = Map::new();
@@ -211,4 +329,40 @@ pub fn field_is_fresh(
         }
     }
     Ok(true)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn legacy_aliases_are_sorted() {
+        assert!(LEGACY_ZONE_ALIASES.windows(2).all(|w| w[0] < w[1]));
+    }
+
+    #[test]
+    fn legacy_alias_zones_are_unknown_not_open() {
+        let at: DateTime<FixedOffset> = "2026-10-10T18:00:00+03:00".parse().unwrap();
+        let week = |tz: &str| {
+            let day = json!([["00:00", "24:00"]]);
+            json!({"timezone": tz, "weekly": {"1": day, "2": day, "3": day, "4": day, "5": day, "6": day, "7": day}})
+        };
+        for tz in ["US/Eastern", "Turkey", "GB", "Japan", "UCT"] {
+            assert_eq!(
+                opening_status(&week(tz), &at),
+                OpeningStatus::Unknown,
+                "{tz}"
+            );
+        }
+        for tz in [
+            "Europe/Istanbul",
+            "Asia/Istanbul",
+            "UTC",
+            "America/New_York",
+            "Europe/Amsterdam",
+        ] {
+            assert_eq!(opening_status(&week(tz), &at), OpeningStatus::Open, "{tz}");
+        }
+    }
 }
