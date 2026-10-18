@@ -12,7 +12,8 @@ The arithmetic assumes the selector works exactly as the constants imply. Under 
 
 - The expected gain of the unchanged OBS-001 selector over audit-age-only in the mid-outage drift window is **+0.0196 utility per case**. The preregistered materiality bar is 0.025.
 - Early alarms (steps ~160–177) abstain from deep checks that still have positive expected value. That cancels part of the later benefit, and the check's expected value only turns negative near step 177.
-- One 90-case window cannot show value at this confidence for **any** switch. An oracle that abstains exactly when checking turns negative reaches G2a power of only about 0.05.
+- An expected-utility-optimal step schedule, which knows the drift schedule and abstains from step 178, reaches G2a power of only about 0.05 in one 90-case window. This is one reference policy, not a bound over all possible switches.
+- G2's per-case bootstrap ignores the temporal dependence between neighbouring steps, so its power figures are approximate. The closure rests on the expected G1a effect being below the bar, and that does not depend on the inference method. Future studies must use independent replicates or a dependence-preserving bootstrap.
 - P(GO) for the single-timeline design is at most about 0.04. A 113-replicate design would reach about 0.27, limited by the expected effect being below the bar, at roughly 113× the runtime.
 
 ## Decision
@@ -31,6 +32,8 @@ This is a statement about an authored simulator's constants. It is not evidence 
 | --- | --- | --- | --- |
 | Pre-data power analysis showed the expected value was below the bar | Stop before writing any code | One design workflow; no simulation | Whether any observable signal can detect a shared upstream origin |
 
+Full record: `labs/core/docs/OBS_003_CLOSED_BY_DESIGN_ARITHMETIC.md`, `labs/core/reports/KEP_OBS_003_RESULT.json`, and the protocol's `post_closure_review_corrections`.
+
 ## Rollback
 
-Delete this ADR and the OBS-003 draft protocol. Nothing else changed.
+Delete this ADR, the OBS-003 draft protocol, its doc and its aggregate record. Nothing else changed.

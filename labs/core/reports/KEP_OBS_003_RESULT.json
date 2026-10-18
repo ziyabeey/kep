@@ -1,0 +1,62 @@
+{
+  "study": "KEP-OBS-003",
+  "issue": "KEP-GATE-001 (#39)",
+  "verdict": "CLOSED_BY_DESIGN_ARITHMETIC",
+  "maps_to_option": "abandon (unlabelled-disagreement selector on this synthetic generator family)",
+  "adr": "docs/adr/0035-obs-003-closed-by-design-arithmetic.md",
+  "protocol": "labs/core/benchmarks/obs_003_protocol.json (draft r2, never frozen)",
+  "owner_choice": {
+    "option_id": "C_close_from_design_arithmetic",
+    "owner_account_id": "user_01QwfKZBhKAL9eisyCEkDSDC",
+    "utc_timestamp": "2026-10-18T11:17:52Z",
+    "chosen_label_verbatim": "Hesapla kapat"
+  },
+  "data_runs": {
+    "generator_or_evaluator_code_written": false,
+    "pilot_run": false,
+    "holdout_run": false,
+    "pilot_output_sha256": null,
+    "holdout_output_sha256": null,
+    "audited_evaluator_commit": null
+  },
+  "seeds_retired_unused": [202610180002, 202610181000],
+  "design_review": {
+    "designer_distinct_from_critics": true,
+    "independent_critic_lenses": ["mechanism-reach", "forking-paths", "decision-value"],
+    "blocking_issues_raised": 15,
+    "blocking_issues_resolved": 15,
+    "independent_reproductions_of_arithmetic": 3
+  },
+  "evidence_closed_form_from_constants": {
+    "method": "Exact closed-form arithmetic from protocol constants under assumptions A1-A3; no RNG, generator, planner or evaluator.",
+    "expected_gain_vs_audit_age_only_per_case_in_drift_window": 0.0196,
+    "materiality_bar_per_case": 0.025,
+    "expected_drift_window_sum": 1.761,
+    "drift_window_sum_bar": 2.25,
+    "deep_check_expected_utility_break_even_step": 177.1,
+    "approx_P_GO_single_timeline": "<= 0.04",
+    "approx_P_GO_113_replicates": 0.27,
+    "eu_optimal_step_schedule_reference": {
+      "definition": "Abstain on ONE_ROOT_ONLY from step 178 with the drift schedule known; one policy, not a bound over all switches",
+      "expected_drift_window_sum_charged": 2.773,
+      "approx_P_G2a": 0.05
+    }
+  },
+  "post_closure_corrections": [
+    "C1: the oracle result covers one EU-optimal step schedule, not 'any switch'.",
+    "C2: the G2 per-case bootstrap ignores temporal dependence; its power figures are approximations of an uncalibrated procedure. The closure rests on the G1a expectation (0.0196 < 0.025), not on G2."
+  ],
+  "learning_ledger": {
+    "observed_result": "Pre-data arithmetic: expected value below the preregistered bar even if the mechanism works as designed.",
+    "engineering_decision": "Stop before writing code; abandon the selector on this generator family; no module or design issue.",
+    "research_time": "one design workflow (designer, 3 critics, revision, final check); no simulation",
+    "open_question": "Whether any observable signal can detect shared upstream origin (lineage); not addressable by disagreement-only rules (ADR-0030)."
+  },
+  "fail_safe_boundaries": {
+    "real_human_reviews": 0,
+    "source_downloads": 0,
+    "model_calls": 0,
+    "consumer_publish": false,
+    "real_business_accuracy": null
+  }
+}

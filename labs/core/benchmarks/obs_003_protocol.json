@@ -55,6 +55,13 @@
     }
   },
 
+  "post_closure_review_corrections": {
+    "status": "Added after closure, during PR #46 review (Codex findings, 2026-10-18). Narrows claims; changes no constant, gate, seed or the owner's choice.",
+    "C1_oracle_scope": "gate_design_arithmetic_from_constants.oracle_bound.meaning overstates. The oracle evaluated is ONE policy: the expected-utility-optimal step schedule between fixed_voi's deep check and abstaining on ONE_ROOT_ONLY, with the drift schedule known in advance (abstain from s=178). It is not a proof over all switches, observables or action sets (e.g. other probes or case-level signals). Correct reading: even this informed step schedule reaches only ~0.05 G2a power and an expected W_drift sum of +2.77 (charged) against the 2.25 bar.",
+    "C2_bootstrap_dependence": "The G2 per-case paired bootstrap treats window steps as exchangeable. Adjacent decisions share up to 11 of 12 lookback hours, so alarms and utility differences are autocorrelated, and drift makes steps non-identical. The resulting bound is not a calibrated 95% interval, and the P(G2a) figures approximate that uncalibrated procedure. The closure does not depend on G2: under the designed mechanism the expected G1a effect is 0.0196 per case, below the 0.025 bar, whatever inference method is used. That expectation is itself a closed-form approximation under assumptions A1-A3. Any future study must use independent timeline replicates or a dependence-preserving method such as a cluster or block bootstrap.",
+    "C3_closure_artifacts": "decision_before_results.CLOSED_BY_DESIGN_ARITHMETIC and outputs_and_paths name a short doc and an aggregate record. Added: labs/core/docs/OBS_003_CLOSED_BY_DESIGN_ARITHMETIC.md and labs/core/reports/KEP_OBS_003_RESULT.json."
+  },
+
   "data_scope": "STRICTLY_SYNTHETIC_NO_REAL_SOURCE_RETRIEVAL_NO_MODEL_CALLS_NO_HUMAN_LABELS",
 
   "question": "On a newly seeded run of the OBS-002 synthetic generator design (raw-vote loss and delay during a review outage, deep_root syndicated with origin, drift that starts mid-outage, a shared rumor on current cases, and a telemetry charge per read), does the UNCHANGED OBS-001 unlabelled-disagreement selector (pair origin/deep_root, 12 h lookback, >=18 distinct entities, cutoff 0.35, completed-review age >8 h) (a) add decision value over its NEAREST control audit_age_only, and (b) avoid a distinct important mistake versus BOTH fixed VOI (CORE-002) and conservative CORE-003, measured in the predeclared windows where its mechanism can act, without net harm over the whole timeline?",
