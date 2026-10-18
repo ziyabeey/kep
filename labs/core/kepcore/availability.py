@@ -102,7 +102,7 @@ def field_is_fresh(record: dict, field: str, at: datetime, max_hours: float) -> 
         age = (at - stamp).total_seconds() / 3600
         if not (math.isfinite(age) and 0 <= age <= max_hours): return False
         until = proof.get('valid_until')
-        if until:
+        if until is not None:
             if not isinstance(until, str): return False
             deadline = datetime.fromisoformat(until.replace('Z', '+00:00'))
             if deadline.tzinfo is None or at >= deadline: return False

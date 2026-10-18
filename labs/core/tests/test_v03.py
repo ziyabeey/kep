@@ -53,7 +53,7 @@ class AvailabilityTests(unittest.TestCase):
         r=sample_place();r['price']=100;del r['source_observed_at']
         self.assertFalse(field_is_fresh(r,'price',when,48))
         self.assertEqual(decide([r],Query(city='İstanbul',kind='place',budget=500)).action,'REFRESH')
-        for bad in [dict(observed_at=1700000000),dict(valid_until=5),dict(status=['disputed'])]:
+        for bad in [dict(observed_at=1700000000),dict(valid_until=5),dict(valid_until=0),dict(valid_until=''),dict(status=['disputed'])]:
             with self.subTest(proof=bad):
                 r=sample_place();r['price']=100;r['field_evidence']={'price':{**proof(100),**bad}}
                 self.assertFalse(field_is_fresh(r,'price',when,48))
