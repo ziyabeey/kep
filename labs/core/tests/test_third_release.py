@@ -19,7 +19,7 @@ from kepcore.overture_places import PILOT, canonical
 from kepcore.overture_third_release import (
     PROTOCOL_PATH, PROTOCOL_SHA256, check_candidate_release, load_protocol,
     regional_membership_reconciliation, select_regional_groups, three_release_trajectories,
-    verify_release_chain, wilson,
+    touches_cells, verify_release_chain, wilson,
 )
 from scripts.capture_third_release import _event_reader, compare, fetch_catalog, parse_listing
 
@@ -382,6 +382,19 @@ class RegionalPlan(unittest.TestCase):
         with self.assertRaises(ValueError):
             select_regional_groups([_object('added', [INSIDE]), _object('removed', [INSIDE])],
                                    release=RELEASE, protocol=few_rows)
+
+
+class RowFilter(unittest.TestCase):
+    def test_every_selected_row_bbox_is_validated_before_filtering(self):
+        box = lambda x, y: {'xmin': x, 'xmax': x, 'ymin': y, 'ymax': y}
+        self.assertTrue(touches_cells(box(28.975, 41.024)))
+        self.assertFalse(touches_cells(box(10.0, 50.0)))
+        # NaN compares false with everything: it must stop the capture, not vanish.
+        for bad in (box(float('nan'), 41.024), box(28.975, float('inf')), box(None, 41.0),
+                    box(True, 41.0), {'xmin': 28.975, 'xmax': 28.975, 'ymin': 41.0},
+                    {'xmin': 29.0, 'xmax': 28.0, 'ymin': 41.0, 'ymax': 41.0}, None):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                touches_cells(bad)
 
 
 class _Response:

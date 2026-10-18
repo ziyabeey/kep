@@ -14,7 +14,7 @@ from __future__ import annotations
 from collections import Counter
 from datetime import date
 from hashlib import sha256
-from math import sqrt
+from math import isfinite, sqrt
 from pathlib import Path
 from typing import Iterable
 import json
@@ -338,6 +338,21 @@ def regional_membership_reconciliation(second: list[dict], third: list[dict],
         'physical_business_closures': None,
         'consumer_publish': False,
     }
+
+
+def touches_cells(bbox: object) -> bool:
+    """Validate a changelog row's bbox, then say whether it touches a cell.
+
+    NaN compares false with everything, so an unchecked NaN row would be
+    dropped silently and the capture still reported complete. Every row of a
+    selected row group passes through here, not only the ones that match.
+    """
+    if (not isinstance(bbox, dict) or set(bbox) != {'xmin', 'xmax', 'ymin', 'ymax'}
+            or any(type(v) not in (int, float) or not isfinite(v) for v in bbox.values())
+            or not -180 <= bbox['xmin'] <= bbox['xmax'] <= 180
+            or not -90 <= bbox['ymin'] <= bbox['ymax'] <= 90):
+        raise ValueError('Invalid GERS row bbox in a selected row group')
+    return any(_bbox_intersects(bbox, box) for box in PILOT.values())
 
 
 def select_regional_groups(objects: list[dict], *, release: str, protocol: dict) -> dict:

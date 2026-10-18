@@ -115,6 +115,20 @@ class FakeS3Capture(unittest.TestCase):
         from kepcore.overture_third_release import PROTOCOL_SHA256
         self.assertEqual(receipt['protocol_sha256'], PROTOCOL_SHA256)
 
+    def test_nan_bbox_in_a_selected_group_makes_the_capture_incomplete(self):
+        from scripts.capture_third_release import run_gers
+        key = f'changelog/{RELEASE}/theme=places/type=place/change_type=added/part-00000-x.parquet'
+        bad = _rows('nan', 1, 28.975, 41.024)
+        bad[0]['bbox']['xmin'] = float('nan')
+        self.objects[key] = _parquet([_rows('addedin', 5, 28.975, 41.024) + bad,
+                                      _rows('addedout', 7, 10.0, 50.0)])
+        with TemporaryDirectory() as t, patch('urllib.request.OpenerDirector.open',
+                                              autospec=True, side_effect=self.fake_open):
+            receipt = run_gers(RELEASE, Path(t) / 'gers')
+        self.assertEqual(receipt['status'], 'INCOMPLETE_EVENT_CAPTURE')
+        self.assertEqual(receipt['failure_type'], 'ValueError')
+        self.assertIn('bbox', receipt['failure_detail'])
+
     def test_wrong_stac_latest_stops_before_any_s3_read(self):
         from scripts.capture_third_release import run_gers
         self.root, _ = stac_pair(release='2026-10-28.0')

@@ -26,11 +26,11 @@ import xml.etree.ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from kepcore.gers_region_probe import RangeBudget
-from kepcore.overture_places import PILOT, canonical
+from kepcore.overture_places import canonical
 from kepcore.overture_third_release import (
     PROTOCOL_SHA256, STUDY, check_candidate_release, load_protocol,
     regional_membership_reconciliation, select_regional_groups, three_release_trajectories,
-    verify_release_chain,
+    touches_cells, verify_release_chain,
 )
 
 S3 = 'https://overturemaps-us-west-2.s3.us-west-2.amazonaws.com/'
@@ -218,10 +218,7 @@ def run_gers(release: str, output: Path) -> dict:
             for batch in table.to_batches(max_chunksize=8192):
                 for row in batch.to_pylist():
                     rows_read += 1
-                    bb = row['bbox']
-                    if any(bb['xmin'] <= box[2] and bb['xmax'] >= box[0]
-                           and bb['ymin'] <= box[3] and bb['ymax'] >= box[1]
-                           for box in PILOT.values()):
+                    if touches_cells(row['bbox']):  # raises on NaN or malformed bbox
                         regional.append({'change_type': item['change_type'], **row})
             remote.close()
         if rows_read != plan['candidate_rows']:

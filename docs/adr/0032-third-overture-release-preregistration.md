@@ -36,7 +36,7 @@ All made on 2026-10-18, before the release existed, each re-pinning the protocol
 
 The frozen version is `759cb0bbdd1447bbe39388033f593b190d28155a8877681fb57a7c21d69ffe60`. Branch commits may be squashed on merge, so this hash, which every receipt and report carries, is the durable anchor; the protocol commit on `main` is the merge of PR #44.
 
-Code-only fixes in the same round, none of which changes a metric definition: the workflow always hands the GERS directory to `compare`; the workflow warns on every M6 abstain; the footer budget is built from the protocol; a receipt whose origin contradicts its manifest is rejected; malformed GERS files abstain instead of aborting the report. Tests now pin the M4 and M5 numerators, cover `taxonomy_primary`, wide changelog row groups, the runtime read caps, the window edges and `run_places` with STAC and the download stubbed.
+Code-only fixes in the same round, none of which changes a metric definition: the workflow always hands the GERS directory to `compare`; the workflow warns on every M6 abstain; the footer budget is built from the protocol; a receipt whose origin contradicts its manifest is rejected; malformed GERS files abstain instead of aborting the report; every row of a selected GERS row group has its bbox validated before the cell filter, so a NaN row stops the capture instead of vanishing. Tests now pin the M4 and M5 numerators, cover `taxonomy_primary`, wide changelog row groups, the runtime read caps, the window edges and `run_places` with STAC and the download stubbed.
 
 ## Process against CLAUDE.md
 
