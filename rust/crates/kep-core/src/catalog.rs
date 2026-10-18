@@ -6,6 +6,7 @@ use crate::pyval::{PyError, pyindex, pystr, python_str};
 use crate::text::{collapse_whitespace, py_strip};
 use kep_canon::stable_hash;
 use serde_json::{Map, Value, json};
+use std::collections::HashSet;
 use std::path::Path;
 
 /// One catalog record (a Python dict).
@@ -13,14 +14,15 @@ pub type Record = Map<String, Value>;
 
 const AMBIGUOUS_VENUES: [&str; 2] = ["İlçelerde Etkinlik Alanları", "İlçe Çok Amaçlı Salonlar"];
 
-fn category(tur: &Value) -> &'static str {
-    match tur.as_str() {
-        Some("SİNEMA") => "cinema",
-        Some("KONSER") => "music",
-        Some("SERGİ") => "exhibition",
-        Some("DİĞER") => "other",
+/// `categories.get(raw['Tur'], 'other')`; a list or dict key is unhashable.
+fn category(tur: &Value) -> Result<&'static str, PyError> {
+    Ok(match tur {
+        Value::Array(_) | Value::Object(_) => return Err(PyError::TypeError),
+        Value::String(s) if s == "SİNEMA" => "cinema",
+        Value::String(s) if s == "KONSER" => "music",
+        Value::String(s) if s == "SERGİ" => "exhibition",
         _ => "other",
-    }
+    })
 }
 
 /// İzmir open-data events into catalog rows. Errors as the reference raises.
@@ -32,15 +34,14 @@ pub fn normalize_events(envelope: &Value) -> Result<Vec<Value>, PyError> {
     let records = pyindex(env, "records")?
         .as_array()
         .ok_or(PyError::TypeError)?;
-    let mut seen: Vec<String> = Vec::new();
+    let mut seen: HashSet<String> = HashSet::new();
     let mut out = Vec::with_capacity(records.len());
     for raw_value in records {
         let raw = raw_value.as_object().ok_or(PyError::TypeError)?;
         let key = format!("izmir_event:{}", python_str(pyindex(raw, "Id")?));
-        if seen.contains(&key) {
+        if !seen.insert(key.clone()) {
             return Err(PyError::ValueError); // duplicate source ID
         }
-        seen.push(key.clone());
         let start = istanbul_dt(pystr(pyindex(raw, "EtkinlikBaslamaTarihi")?)?)?;
         let end = istanbul_dt(pystr(pyindex(raw, "EtkinlikBitisTarihi")?)?)?;
         let mut flags: Vec<&str> = Vec::new();
@@ -91,7 +92,7 @@ pub fn normalize_events(envelope: &Value) -> Result<Vec<Value>, PyError> {
             "event_kind": kind,
             "name": collapse_whitespace(pystr(pyindex(raw, "Adi")?).map_err(|_| PyError::AttributeError)?),
             "city": m("source_city")?,
-            "category": category(tur),
+            "category": category(tur)?,
             "starts_at": isoformat_tz(&start),
             "ends_at": if equal { Value::Null } else { Value::String(isoformat_tz(&end)) },
             "declared_end": isoformat_tz(&end),

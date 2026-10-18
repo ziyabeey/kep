@@ -303,6 +303,27 @@
    "expect": {
     "ok": "2026-03-29T06:30:00+03:00"
    }
+  },
+  {
+   "name": "dt_08",
+   "text": "2015-03-29T03:30:00",
+   "expect": {
+    "ok": "2015-03-29T03:30:00+02:00"
+   }
+  },
+  {
+   "name": "dt_09",
+   "text": "2015-11-08T03:30:00",
+   "expect": {
+    "ok": "2015-11-08T03:30:00+03:00"
+   }
+  },
+  {
+   "name": "dt_10",
+   "text": "2015-11-08T01:30:00+00:00",
+   "expect": {
+    "ok": "2015-11-08T03:30:00+02:00"
+   }
   }
  ],
  "catalog": [
@@ -3242,6 +3263,210 @@
       "synthetic": false
      }
     ]
+   }
+  },
+  {
+   "name": "unhashable_type",
+   "envelope": {
+    "meta": {
+     "acquired_date": "2026-10-10",
+     "acquisition_method": "selected_fields_transcribed_from_web_tool",
+     "source_observed_at": null,
+     "origin_live_verified": false,
+     "source_snapshot_notice": "Web tool: crawled about 2 months ago. Exact snapshot date unknown.",
+     "selected_fields_only": true,
+     "source_id": "izmir_open_events",
+     "source_url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+     "catalog_url": "https://acikveri.bizizmir.com/tr/dataset/kultur-sanat-etkinlikleri",
+     "license": "CC-BY-4.0",
+     "license_url": "https://acikveri.bizizmir.com/tr/license",
+     "attribution": "İzmir Büyükşehir Belediyesi Açık Veri Portalı",
+     "source_city": "İzmir",
+     "tool_reference": "turn561805view0"
+    },
+    "records": [
+     {
+      "Id": 6927,
+      "Tur": [
+       "SERGİ"
+      ],
+      "Adi": "YENİDEN SİNEMATEK AÇIK HAVA YAZ PROGRAMI - BABA ANNE KIZ KARDEŞ ERKEK KARDEŞ",
+      "EtkinlikBaslamaTarihi": "2026-08-10T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-10T21:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "yeniden-sinematek-acik-hava-yaz-programi-baba-anne-kiz-kardes-erkek-kardes",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6949,
+      "Tur": "DİĞER",
+      "Adi": "Müzik Oyunları Çocuk Atölyesi",
+      "EtkinlikBaslamaTarihi": "2026-08-05T11:30:00",
+      "EtkinlikBitisTarihi": "2026-08-12T11:30:00",
+      "EtkinlikMerkezi": "Ahmed Adnan Saygun Sanat Merkezi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "muzik-oyunlari-cocuk-atolyesi-3881",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6948,
+      "Tur": "SİNEMA",
+      "Adi": "GEZİCİ AÇIKHAVA FİLM GÜNLERİ",
+      "EtkinlikBaslamaTarihi": "2026-07-10T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-13T21:00:00",
+      "EtkinlikMerkezi": "İlçelerde Etkinlik Alanları",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "gezici-acikhava-film-gunleri-7957",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6928,
+      "Tur": "SİNEMA",
+      "Adi": " YENİDEN SİNEMATEK AÇIK HAVA YAZ PROGRAMI-JULIA",
+      "EtkinlikBaslamaTarihi": "2026-08-17T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-17T21:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "yeniden-sinematek-acik-hava-yaz-programi-E28093-julia",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6960,
+      "Tur": "KONSER",
+      "Adi": "ZEYTİN ALTINDA ``ÜÇ SAZIN DİLİNDEN GECENİN ŞARKILARI``",
+      "EtkinlikBaslamaTarihi": "2026-08-19T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-19T21:30:00",
+      "EtkinlikMerkezi": "Ahmed Adnan Saygun Sanat Merkezi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "zeytin-altinda-6060uc-sazin-dilinden-gecenin-sarkilari6060",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6929,
+      "Tur": "SİNEMA",
+      "Adi": " YENİDEN SİNEMATEK AÇIK HAVA YAZ PROGRAMI-ADA",
+      "EtkinlikBaslamaTarihi": "2026-08-24T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-24T21:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": false,
+      "EtkinlikUrl": "yeniden-sinematek-acik-hava-yaz-programiE28093ada",
+      "BiletSatisLinki": "http://kultursanat.izmir.bel.tr/Sayfalar/KoltukSecim.aspx?Salon=20&Seans=8697&Etkinlik=6929"
+     },
+     {
+      "Id": 6932,
+      "Tur": "KONSER",
+      "Adi": "Çim Konserleri 2026",
+      "EtkinlikBaslamaTarihi": "2026-07-07T08:00:00",
+      "EtkinlikBitisTarihi": "2026-08-25T08:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "cim-konserleri-2026",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6958,
+      "Tur": "SERGİ",
+      "Adi": "Zamanda Bir Kırışıklık",
+      "EtkinlikBaslamaTarihi": "2026-08-04T16:00:00",
+      "EtkinlikBitisTarihi": "2026-08-30T18:00:00",
+      "EtkinlikMerkezi": "Ahmed Adnan Saygun Sanat Merkezi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "zamanda-bir-kirisiklik",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6957,
+      "Tur": "SERGİ",
+      "Adi": "Meserret - İhtimal",
+      "EtkinlikBaslamaTarihi": "2026-08-07T08:00:00",
+      "EtkinlikBitisTarihi": "2026-08-31T17:30:00",
+      "EtkinlikMerkezi": "Tarihi Bıçakçı Han",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "meserret-ihtimal",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6959,
+      "Tur": "SERGİ",
+      "Adi": "Karşılaşmanın Ardından",
+      "EtkinlikBaslamaTarihi": "2026-08-07T09:00:00",
+      "EtkinlikBitisTarihi": "2026-08-31T18:00:00",
+      "EtkinlikMerkezi": "Tarihi Bıçakçı Han",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "karsilasmanin-ardindan",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6930,
+      "Tur": "SİNEMA",
+      "Adi": " YENİDEN SİNEMATEK AÇIK HAVA YAZ PROGRAMI-MANEVİ DEĞER",
+      "EtkinlikBaslamaTarihi": "2026-08-31T21:00:00",
+      "EtkinlikBitisTarihi": "2026-08-31T21:00:00",
+      "EtkinlikMerkezi": "Tarihi Havagazı Fabrikası",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "yeniden-sinematek-acik-hava-yaz-programi-manevi-deger",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6931,
+      "Tur": "SERGİ",
+      "Adi": "Peaceful Towns (Barışçıl Şehirler) Sergisi",
+      "EtkinlikBaslamaTarihi": "2026-07-01T15:00:00",
+      "EtkinlikBitisTarihi": "2026-08-31T15:00:00",
+      "EtkinlikMerkezi": "Vasıf Çınar Meydanı",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "cocuklarin-gozunden-barisinrenkleri-resim-sergisi",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6925,
+      "Tur": "DİĞER",
+      "Adi": "Kent Tarihi ve Kültürü Yaz Atölyeleri",
+      "EtkinlikBaslamaTarihi": "2026-07-01T08:00:00",
+      "EtkinlikBitisTarihi": "2026-09-01T08:00:00",
+      "EtkinlikMerkezi": "Ahmet Piriştina Kent Arşivi ve Müzesi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "kent-tarihi-ve-kulturu-yaz-atolyeleri-872",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6956,
+      "Tur": "SERGİ",
+      "Adi": "Müziğin Tınısı Fotoğraf Sergisi",
+      "EtkinlikBaslamaTarihi": "2026-08-10T08:00:00",
+      "EtkinlikBitisTarihi": "2026-09-06T18:00:00",
+      "EtkinlikMerkezi": "Ahmed Adnan Saygun Sanat Merkezi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "muzigin-tinisi-fotograf-sergisi",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6583,
+      "Tur": "SERGİ",
+      "Adi": "SERGİ: İzmir Fotoğrafhanesi - Görsel Hafızanın İnşası (1840-1922)",
+      "EtkinlikBaslamaTarihi": "2025-12-11T18:00:00",
+      "EtkinlikBitisTarihi": "2026-12-13T18:00:00",
+      "EtkinlikMerkezi": "Ahmet Piriştina Kent Arşivi ve Müzesi",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "sergi-E2809Cizmir-fotografhanesi-gorsel-hafizanin-insasi-1840-1922E2809D",
+      "BiletSatisLinki": null
+     },
+     {
+      "Id": 6835,
+      "Tur": "SERGİ",
+      "Adi": "İzmir Mutfak Müzesinin Tanıtım Sergisi  Göl Gazinosunda Ziyarete Açıldı",
+      "EtkinlikBaslamaTarihi": "2026-04-02T08:00:00",
+      "EtkinlikBitisTarihi": "2026-12-31T17:00:00",
+      "EtkinlikMerkezi": "İlçe Çok Amaçlı Salonlar",
+      "UcretsizMi": true,
+      "EtkinlikUrl": "izmir-mutfak-muzesiE28099nin-tanitim-sergisigol-gazinosuE28099nda-ziyarete-acildi",
+      "BiletSatisLinki": null
+     }
+    ]
+   },
+   "expect": {
+    "raises": "TypeError"
    }
   }
  ],
@@ -42165,6 +42390,498 @@
      "policy_version": "query_aware_v0.3"
     }
    }
+  },
+  {
+   "name": "dst_gap_hours_2015-03-29T03:30:00",
+   "catalog": [
+    {
+     "id": "wikidata:Q1463961",
+     "name": "İstanbul Modern",
+     "city": "İstanbul",
+     "category": "museum",
+     "lat": 41.026,
+     "lon": 28.98293889,
+     "source_url": "https://www.wikidata.org/wiki/Q1463961",
+     "license": "CC0-1.0",
+     "source_id": "wikidata",
+     "source_coordinates": "41°1'33.60\"N,28°58'58.58\"E",
+     "geo_warning": "Community coordinate; current entrance/location not independently verified.",
+     "opening_hours": {
+      "timezone": "Europe/Istanbul",
+      "weekly": {
+       "1": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "2": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "3": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "4": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "5": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "6": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "7": [
+        [
+         "03:00",
+         "04:00"
+        ]
+       ]
+      },
+      "exceptions": {}
+     },
+     "admission_price": null,
+     "crowd": null,
+     "source_observed_at": "2015-03-29T00:30:00+02:00",
+     "origin_live_verified": true,
+     "acquired_date": "2026-10-10",
+     "coordinate_accuracy_m": null,
+     "kind": "place",
+     "rights_scope": "open_attribution",
+     "publisher_root": "wikimedia",
+     "evidence_status": "source_recorded",
+     "lifecycle": "listed_claim",
+     "price": null,
+     "currency": "TRY",
+     "synthetic": true,
+     "flags": [
+      "PRICE_AMOUNT_UNKNOWN",
+      "OPENING_HOURS_UNKNOWN",
+      "CROWD_UNKNOWN"
+     ],
+     "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004"
+    }
+   ],
+   "query": {
+    "city": "İstanbul",
+    "kind": "place",
+    "open_now": true,
+    "at": "2015-03-29T03:30:00"
+   },
+   "policy": "query_aware",
+   "expect": {
+    "ok": {
+     "action": "DISCOVER",
+     "selected": [
+      {
+       "id": "wikidata:Q1463961",
+       "name": "İstanbul Modern",
+       "city": "İstanbul",
+       "kind": "place",
+       "source_url": "https://www.wikidata.org/wiki/Q1463961",
+       "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004",
+       "distance_km": null,
+       "distance_type": null,
+       "caveats": [
+        "LIVE_STATUS_UNVERIFIED",
+        "ADMISSION_NOT_CONFIRMED"
+       ],
+       "price": null,
+       "evidence_status": "source_recorded"
+      }
+     ],
+     "reasons": [
+      "REQUIRED_FIELDS_CHECKED"
+     ],
+     "considered": 1,
+     "blocked": {},
+     "model_used": false,
+     "policy_version": "query_aware_v0.3"
+    }
+   }
+  },
+  {
+   "name": "dst_gap_hours_2015-03-29T04:30:00",
+   "catalog": [
+    {
+     "id": "wikidata:Q1463961",
+     "name": "İstanbul Modern",
+     "city": "İstanbul",
+     "category": "museum",
+     "lat": 41.026,
+     "lon": 28.98293889,
+     "source_url": "https://www.wikidata.org/wiki/Q1463961",
+     "license": "CC0-1.0",
+     "source_id": "wikidata",
+     "source_coordinates": "41°1'33.60\"N,28°58'58.58\"E",
+     "geo_warning": "Community coordinate; current entrance/location not independently verified.",
+     "opening_hours": {
+      "timezone": "Europe/Istanbul",
+      "weekly": {
+       "1": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "2": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "3": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "4": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "5": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "6": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "7": [
+        [
+         "03:00",
+         "04:00"
+        ]
+       ]
+      },
+      "exceptions": {}
+     },
+     "admission_price": null,
+     "crowd": null,
+     "source_observed_at": "2015-03-29T00:30:00+02:00",
+     "origin_live_verified": true,
+     "acquired_date": "2026-10-10",
+     "coordinate_accuracy_m": null,
+     "kind": "place",
+     "rights_scope": "open_attribution",
+     "publisher_root": "wikimedia",
+     "evidence_status": "source_recorded",
+     "lifecycle": "listed_claim",
+     "price": null,
+     "currency": "TRY",
+     "synthetic": true,
+     "flags": [
+      "PRICE_AMOUNT_UNKNOWN",
+      "OPENING_HOURS_UNKNOWN",
+      "CROWD_UNKNOWN"
+     ],
+     "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004"
+    }
+   ],
+   "query": {
+    "city": "İstanbul",
+    "kind": "place",
+    "open_now": true,
+    "at": "2015-03-29T04:30:00"
+   },
+   "policy": "query_aware",
+   "expect": {
+    "ok": {
+     "action": "ABSTAIN",
+     "selected": [],
+     "reasons": [
+      "NO_ELIGIBLE_RECORD"
+     ],
+     "considered": 1,
+     "blocked": {
+      "wikidata:Q1463961": [
+       "CLOSED_AT_REQUESTED_TIME"
+      ]
+     },
+     "model_used": false,
+     "policy_version": "query_aware_v0.3"
+    }
+   }
+  },
+  {
+   "name": "dst_fold_blanket_age",
+   "catalog": [
+    {
+     "id": "wikidata:Q1463961",
+     "name": "İstanbul Modern",
+     "city": "İstanbul",
+     "category": "museum",
+     "lat": 41.026,
+     "lon": 28.98293889,
+     "source_url": "https://www.wikidata.org/wiki/Q1463961",
+     "license": "CC0-1.0",
+     "source_id": "wikidata",
+     "source_coordinates": "41°1'33.60\"N,28°58'58.58\"E",
+     "geo_warning": "Community coordinate; current entrance/location not independently verified.",
+     "opening_hours": {
+      "timezone": "Europe/Istanbul",
+      "weekly": {
+       "1": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "2": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "3": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "4": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "5": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "6": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "7": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ]
+      },
+      "exceptions": {}
+     },
+     "admission_price": null,
+     "crowd": null,
+     "source_observed_at": "2015-11-08T03:15:00+02:00",
+     "origin_live_verified": true,
+     "acquired_date": "2026-10-10",
+     "coordinate_accuracy_m": null,
+     "kind": "place",
+     "rights_scope": "open_attribution",
+     "publisher_root": "wikimedia",
+     "evidence_status": "source_recorded",
+     "lifecycle": "listed_claim",
+     "price": 0,
+     "currency": "TRY",
+     "synthetic": true,
+     "flags": [
+      "PRICE_AMOUNT_UNKNOWN",
+      "OPENING_HOURS_UNKNOWN",
+      "CROWD_UNKNOWN"
+     ],
+     "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004"
+    }
+   ],
+   "query": {
+    "city": "İstanbul",
+    "at": "2015-11-08T03:30:00"
+   },
+   "policy": "blanket_verification",
+   "expect": {
+    "ok": {
+     "action": "DISCOVER",
+     "selected": [
+      {
+       "id": "wikidata:Q1463961",
+       "name": "İstanbul Modern",
+       "city": "İstanbul",
+       "kind": "place",
+       "source_url": "https://www.wikidata.org/wiki/Q1463961",
+       "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004",
+       "distance_km": null,
+       "distance_type": null,
+       "caveats": [
+        "LIVE_STATUS_UNVERIFIED",
+        "ADMISSION_NOT_CONFIRMED"
+       ],
+       "price": null,
+       "evidence_status": "source_recorded"
+      }
+     ],
+     "reasons": [
+      "REQUIRED_FIELDS_CHECKED"
+     ],
+     "considered": 1,
+     "blocked": {},
+     "model_used": false,
+     "policy_version": "blanket_verification_v0.3"
+    }
+   }
+  },
+  {
+   "name": "dst_fold_event_2015-11-08T03:30:00",
+   "catalog": [
+    {
+     "id": "izmir_event:6960",
+     "kind": "event",
+     "event_kind": "single_occurrence",
+     "name": "ZEYTİN ALTINDA ``ÜÇ SAZIN DİLİNDEN GECENİN ŞARKILARI``",
+     "city": "İzmir",
+     "category": "music",
+     "starts_at": "2015-11-08T03:15:00+02:00",
+     "ends_at": "2015-11-08T03:45:00+02:00",
+     "declared_end": "2026-08-19T21:30:00+03:00",
+     "time_zone": "Europe/Istanbul",
+     "lifecycle": "scheduled_claim",
+     "evidence_status": "source_recorded",
+     "origin_live_verified": true,
+     "source_observed_at": "2015-11-08T03:00:00+03:00",
+     "acquired_date": "2026-10-10",
+     "source_id": "izmir_open_events",
+     "source_url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+     "source_item_id": "6960",
+     "source_record_hash": "da47ed7c3b3d16e67598ce994ec041be3804c887c0a17a82246a2ca9a514bc46",
+     "publisher_root": "izmir_municipality",
+     "rights_scope": "open_attribution",
+     "license": "CC-BY-4.0",
+     "venue": "Ahmed Adnan Saygun Sanat Merkezi",
+     "venue_precision": "named_only",
+     "lat": null,
+     "lon": null,
+     "price": 0,
+     "currency": "TRY",
+     "source_claim_free": true,
+     "opening_hours": null,
+     "crowd": null,
+     "sales_link": null,
+     "source_slug": "zeytin-altinda-6060uc-sazin-dilinden-gecenin-sarkilari6060",
+     "flags": [],
+     "synthetic": true
+    }
+   ],
+   "query": {
+    "city": "İzmir",
+    "at": "2015-11-08T03:30:00"
+   },
+   "policy": "query_aware",
+   "expect": {
+    "ok": {
+     "action": "RECOMMEND",
+     "selected": [
+      {
+       "id": "izmir_event:6960",
+       "name": "ZEYTİN ALTINDA ``ÜÇ SAZIN DİLİNDEN GECENİN ŞARKILARI``",
+       "city": "İzmir",
+       "kind": "event",
+       "source_url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+       "source_record_hash": "da47ed7c3b3d16e67598ce994ec041be3804c887c0a17a82246a2ca9a514bc46",
+       "distance_km": null,
+       "distance_type": null,
+       "caveats": [],
+       "price": 0,
+       "evidence_status": "source_recorded"
+      }
+     ],
+     "reasons": [
+      "REQUIRED_FIELDS_CHECKED"
+     ],
+     "considered": 1,
+     "blocked": {},
+     "model_used": false,
+     "policy_version": "query_aware_v0.3"
+    }
+   }
+  },
+  {
+   "name": "dst_fold_event_2015-11-08T03:50:00",
+   "catalog": [
+    {
+     "id": "izmir_event:6960",
+     "kind": "event",
+     "event_kind": "single_occurrence",
+     "name": "ZEYTİN ALTINDA ``ÜÇ SAZIN DİLİNDEN GECENİN ŞARKILARI``",
+     "city": "İzmir",
+     "category": "music",
+     "starts_at": "2015-11-08T03:15:00+02:00",
+     "ends_at": "2015-11-08T03:45:00+02:00",
+     "declared_end": "2026-08-19T21:30:00+03:00",
+     "time_zone": "Europe/Istanbul",
+     "lifecycle": "scheduled_claim",
+     "evidence_status": "source_recorded",
+     "origin_live_verified": true,
+     "source_observed_at": "2015-11-08T03:00:00+03:00",
+     "acquired_date": "2026-10-10",
+     "source_id": "izmir_open_events",
+     "source_url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+     "source_item_id": "6960",
+     "source_record_hash": "da47ed7c3b3d16e67598ce994ec041be3804c887c0a17a82246a2ca9a514bc46",
+     "publisher_root": "izmir_municipality",
+     "rights_scope": "open_attribution",
+     "license": "CC-BY-4.0",
+     "venue": "Ahmed Adnan Saygun Sanat Merkezi",
+     "venue_precision": "named_only",
+     "lat": null,
+     "lon": null,
+     "price": 0,
+     "currency": "TRY",
+     "source_claim_free": true,
+     "opening_hours": null,
+     "crowd": null,
+     "sales_link": null,
+     "source_slug": "zeytin-altinda-6060uc-sazin-dilinden-gecenin-sarkilari6060",
+     "flags": [],
+     "synthetic": true
+    }
+   ],
+   "query": {
+    "city": "İzmir",
+    "at": "2015-11-08T03:50:00"
+   },
+   "policy": "query_aware",
+   "expect": {
+    "ok": {
+     "action": "ABSTAIN",
+     "selected": [],
+     "reasons": [
+      "NO_ELIGIBLE_RECORD"
+     ],
+     "considered": 1,
+     "blocked": {
+      "izmir_event:6960": [
+       "EVENT_ENDED"
+      ]
+     },
+     "model_used": false,
+     "policy_version": "query_aware_v0.3"
+    }
+   }
   }
  ],
  "reconcile": [
@@ -42488,6 +43205,54 @@
        "a"
       ],
       "independent_publisher_count": 1,
+      "source_urls": [
+       "https://example.org/a"
+      ],
+      "action": "REFRESH"
+     }
+    }
+   }
+  },
+  {
+   "name": "reconcile_big_ints",
+   "claims": [
+    {
+     "entity_id": "p1",
+     "field": "id",
+     "value": 9007199254740993,
+     "publisher_root": "a",
+     "source_url": "https://example.org/a"
+    },
+    {
+     "entity_id": "p1",
+     "field": "id",
+     "value": 9007199254740992,
+     "publisher_root": "b",
+     "source_url": "https://example.org/a"
+    },
+    {
+     "entity_id": "p1",
+     "field": "id",
+     "value": 9007199254740992.0,
+     "publisher_root": "c",
+     "source_url": "https://example.org/a"
+    }
+   ],
+   "expect": {
+    "ok": {
+     "p1/id": {
+      "status": "disputed",
+      "value": null,
+      "observed_values": [
+       9007199254740992,
+       9007199254740993
+      ],
+      "publisher_roots": [
+       "a",
+       "b",
+       "c"
+      ],
+      "independent_publisher_count": 3,
       "source_urls": [
        "https://example.org/a"
       ],

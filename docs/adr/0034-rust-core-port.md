@@ -74,6 +74,7 @@ Bu Rust kararı yalnız KEP içindir; başka projelere emsal oluşturmaz.
 `core.py` ve `query.py` taşındı (`kep-core::{catalog, query, decision, distance, text}`, `kep-cli`). Python'un ürettiği ~380 karar vakası, katalog normalizasyonu, sorgu doğrulama, uzlaşma ve model koruması Rust'ta birebir tutuyor; `kep-query` örnek sorgularda `query.py` ile bayt bayt aynı çıktıyı veriyor.
 
 - **Mesafe:** `geo::Haversine` 200 bin rastgele nokta çiftinde Python'la `round(d, 4)` düzeyinde %100 aynı, ham değerde ise ~%70 bit-bit aynı (son bit farkı). Yarıçap karşılaştırması ham mesafeyle yapıldığı için sınırdan bir ulp uzaklıktaki bir kayıt iki tarafta farklı karar alabilir; pratikte ihmal edilebilir, vektörlerde 1 km sınırının iki yanı ayrıca sınanıyor.
+- **İstanbul saatleri:** Python aynı `tzinfo`'yu paylaşan iki zamanı duvar saatine göre karşılaştırır ve çıkarır, DST boşluğundaki naif saati de olduğu gibi tutar. Rust `IstDateTime` aynı kuralı izler (2016 öncesi geçiş anları dahil); başka bölgelerle karşılaştırmada Python'un `utcoffset()` değeri kullanılır.
 - **Sorgu tipleri:** Python `Query` tip kontrolü yapmaz (ör. `limit: true` geçer); Rust yanlış tipli alanları `TypeError` ile reddeder.
 
 ## Faz geçiş ölçütü

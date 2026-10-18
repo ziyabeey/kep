@@ -266,7 +266,8 @@ def haversine_cases():
 
 def dt_cases():
     texts = ['2026-10-10T18:00:00+03:00', '2026-10-10T18:00:00', '2026-10-10T15:00:00Z', '2026-10-10T18:00:00-04:00',
-             '2026-08-10T21:00:00', '2026-10-10', 'not a date', '2026-03-29T03:30:00+00:00']
+             '2026-08-10T21:00:00', '2026-10-10', 'not a date', '2026-03-29T03:30:00+00:00',
+             '2015-03-29T03:30:00', '2015-11-08T03:30:00', '2015-11-08T01:30:00+00:00']
     return [{'name': f'dt_{i:02d}', 'text': t, 'expect': outcome(lambda x: dt(x).isoformat(), t)}
             for i, t in enumerate(texts)]
 
@@ -284,6 +285,8 @@ def normalize_error_cases():
     cases.append(('unknown_type_venue_free_flag', odd))
     zone = copy.deepcopy(raw); zone['records'][2]['EtkinlikBaslamaTarihi'] = '2026-08-05T08:30:00Z'
     cases.append(('utc_start', zone))
+    listed = copy.deepcopy(raw); listed['records'][0]['Tur'] = ['SERGİ']
+    cases.append(('unhashable_type', listed))
     return [{'name': n, 'envelope': env, 'expect': outcome(normalize_events, env)} for n, env in cases]
 
 
@@ -417,6 +420,20 @@ def decide_cases(catalog):
     # Naive times are Istanbul local; 2015-03-29 03:30 fell in a DST gap.
     for at in ['2015-03-29T03:30:00', '2015-11-08T03:30:00', '2026-10-10T18:00:00']:
         add(f'naive_at_{at}', {'city': 'İstanbul', 'at': at}, records=[base])
+    # Python keeps a DST-gap wall time as given, and compares or subtracts two
+    # Istanbul datetimes by wall clock (same tzinfo), not by instant.
+    gap_hours = live(base, '2015-03-29T00:30:00+02:00'); gap_hours['opening_hours'] = schedule()
+    gap_hours['opening_hours']['weekly']['7'] = [['03:00', '04:00']]  # 2015-03-29 was a Sunday
+    for at in ['2015-03-29T03:30:00', '2015-03-29T04:30:00']:
+        add(f'dst_gap_hours_{at}', {'city': 'İstanbul', 'kind': 'place', 'open_now': True, 'at': at},
+            records=[gap_hours])
+    fold_seen = live(base, '2015-11-08T03:15:00+02:00'); fold_seen.update(price=0, opening_hours=schedule())
+    add('dst_fold_blanket_age', {'city': 'İstanbul', 'at': '2015-11-08T03:30:00'}, records=[fold_seen],
+        policy='blanket_verification')
+    fold_event = live(single_open, '2015-11-08T03:00:00+03:00')
+    fold_event.update(starts_at='2015-11-08T03:15:00+02:00', ends_at='2015-11-08T03:45:00+02:00')
+    for at in ['2015-11-08T03:30:00', '2015-11-08T03:50:00']:
+        add(f'dst_fold_event_{at}', {'city': 'İzmir', 'at': at}, records=[fold_event])
     return cases
 
 
@@ -445,6 +462,8 @@ def reconcile_cases():
         'unhashable_raise': [c('p1', 'hours', ['09', '17'], 'a')],
         'single_null': [c('p1', 'crowd', None, 'a')],
         'numeric_entity': [c(5, 'price', 1, 'a'), c(5.0, 'price', 2, 'a')],
+        'big_ints': [c('p1', 'id', 9007199254740993, 'a'), c('p1', 'id', 9007199254740992, 'b'),
+                     c('p1', 'id', 9007199254740992.0, 'c')],
         'empty': [],
     }
     return [{'name': f'reconcile_{k}', 'claims': v, 'expect': outcome(reconcile_claims, v)} for k, v in sets.items()]

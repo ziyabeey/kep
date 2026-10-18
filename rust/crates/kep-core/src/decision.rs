@@ -2,14 +2,12 @@
 //! ordering and the final action. No model, popularity or quality signal is
 //! used; calendar, rights and factual constraints are hard gates.
 
-use crate::availability::{OpeningStatus, field_is_fresh, opening_status};
+use crate::availability::{OpeningStatus, field_is_fresh, opening_status_ist};
 use crate::distance::{haversine_km, round4};
-use crate::isotime::istanbul_dt;
+use crate::isotime::{IstDateTime, istanbul_dt};
 use crate::pyval::{PyError, dedupe, pyfloat, pyget, pyindex, pystr, python_str, truthy};
 use crate::query::Query;
 use crate::text::fold;
-use chrono::DateTime;
-use chrono_tz::Tz;
 use serde_json::{Map, Value, json};
 
 /// Result of [`decide`]; `to_json` matches `Decision.to_dict()`.
@@ -57,7 +55,7 @@ fn is_str(v: Option<&Value>, s: &str) -> bool {
 }
 
 /// `temporal_state()`: where an event sits in time relative to `when`.
-pub fn temporal_state(r: &Value, when: &DateTime<Tz>) -> Result<&'static str, PyError> {
+pub fn temporal_state(r: &Value, when: &IstDateTime) -> Result<&'static str, PyError> {
     let r = record(r)?;
     if !is_str(Some(pyindex(r, "kind")?), "event") {
         return Ok("not_applicable");
@@ -95,7 +93,7 @@ pub fn temporal_state(r: &Value, when: &DateTime<Tz>) -> Result<&'static str, Py
 }
 
 /// `fresh()`: the record was checked live within `max_hours` before `when`.
-pub fn fresh(r: &Value, when: &DateTime<Tz>, max_hours: f64) -> Result<bool, PyError> {
+pub fn fresh(r: &Value, when: &IstDateTime, max_hours: f64) -> Result<bool, PyError> {
     let r = record(r)?;
     let observed = r.get("source_observed_at");
     if !truthy(r.get("origin_live_verified")) || !truthy(observed) {
@@ -131,7 +129,7 @@ pub fn candidate_gate(rv: &Value, q: &Query) -> Result<Gate, PyError> {
     let r = record(rv)?;
     let mut g = Gate::default();
     let when = istanbul_dt(&q.at)?;
-    let at = when.fixed_offset();
+    let at = when.instant();
     if fold(pystr(pyindex(r, "city")?)?) != fold(&q.city) {
         g.hard.push("WRONG_CITY");
     }
@@ -155,7 +153,11 @@ pub fn candidate_gate(rv: &Value, q: &Query) -> Result<Gate, PyError> {
     if let Some(radius) = q.radius_km {
         match (pyget(r, "lat"), pyget(r, "lon")) {
             (Some(lat), Some(lon)) => {
-                let (qlat, qlon) = (q.lat.expect("validated"), q.lon.expect("validated"));
+                // Python fails in haversine_km (TypeError) if a radius comes without an origin.
+                let (qlat, qlon) = (
+                    q.lat.ok_or(PyError::TypeError)?,
+                    q.lon.ok_or(PyError::TypeError)?,
+                );
                 let d = haversine_km(qlat, qlon, pyfloat(lat)?, pyfloat(lon)?)?;
                 g.distance = Some(d);
                 if d > radius {
@@ -214,7 +216,7 @@ pub fn candidate_gate(rv: &Value, q: &Query) -> Result<Gate, PyError> {
     } else {
         if q.open_now {
             let hours = r.get("opening_hours").unwrap_or(&Value::Null);
-            let state = opening_status(hours, &at);
+            let state = opening_status_ist(hours, &when);
             if state == OpeningStatus::Unknown {
                 g.needed.push("OPENING_HOURS_UNKNOWN");
             }
@@ -269,7 +271,7 @@ pub fn decide(catalog: &[Value], q: &Query, policy: &str) -> Result<Decision, Py
         }
     }
     let when = istanbul_dt(&q.at)?;
-    let at = when.fixed_offset();
+    let at = when.instant();
     let mut blocked = Map::new();
     let mut allowed: Vec<(Option<f64>, String, Value)> = Vec::new();
     let mut unresolved: Vec<String> = Vec::new();
@@ -373,29 +375,82 @@ pub fn decide(catalog: &[Value], q: &Query, policy: &str) -> Result<Decision, Py
     })
 }
 
-/// A JSON scalar compared and hashed as Python does (`1 == 1.0 == True`).
+/// A JSON scalar compared as Python does (`1 == 1.0 == True`). Integers stay
+/// exact, as Python's are; an integer beyond `i128` falls back to float.
 #[derive(Debug, Clone)]
 enum PyKey {
     None,
-    Num(f64),
+    Int(i128),
+    Float(f64),
     Str(String),
+}
+
+/// 2^127 as f64: floats at or beyond it are outside `i128`.
+const I128_BOUND: f64 = 170_141_183_460_469_231_731_687_303_715_884_105_728.0;
+
+/// Exact comparison of an int with a float, as Python does.
+fn cmp_int_float(i: i128, f: f64) -> std::cmp::Ordering {
+    use std::cmp::Ordering::{Equal, Greater, Less};
+    if f.is_nan() {
+        return Equal; // unordered in Python; keep input order
+    }
+    if f >= I128_BOUND {
+        return Less;
+    }
+    if f < -I128_BOUND {
+        return Greater;
+    }
+    let t = f.trunc();
+    match i.cmp(&(t as i128)) {
+        Equal if f > t => Less,
+        Equal if f < t => Greater,
+        other => other,
+    }
+}
+
+fn cmp_num(a: &PyKey, b: &PyKey) -> Option<std::cmp::Ordering> {
+    Some(match (a, b) {
+        (PyKey::Int(x), PyKey::Int(y)) => x.cmp(y),
+        (PyKey::Float(x), PyKey::Float(y)) => x.total_cmp(y),
+        (PyKey::Int(x), PyKey::Float(y)) => cmp_int_float(*x, *y),
+        (PyKey::Float(x), PyKey::Int(y)) => cmp_int_float(*y, *x).reverse(),
+        _ => return None,
+    })
 }
 
 impl PartialEq for PyKey {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (PyKey::None, PyKey::None) => true,
-            (PyKey::Num(a), PyKey::Num(b)) => a == b,
             (PyKey::Str(a), PyKey::Str(b)) => a == b,
-            _ => false,
+            (PyKey::Float(a), PyKey::Float(b)) => a == b,
+            _ => {
+                let nan = matches!(self, PyKey::Float(f) if f.is_nan())
+                    || matches!(other, PyKey::Float(f) if f.is_nan());
+                !nan && cmp_num(self, other) == Some(std::cmp::Ordering::Equal)
+            }
         }
+    }
+}
+
+impl PyKey {
+    fn is_num(&self) -> bool {
+        matches!(self, PyKey::Int(_) | PyKey::Float(_))
     }
 }
 
 fn py_key(v: &Value) -> Result<PyKey, PyError> {
     match v {
         Value::Null => Ok(PyKey::None),
-        Value::Bool(_) | Value::Number(_) => Ok(PyKey::Num(pyfloat(v)?)),
+        Value::Bool(b) => Ok(PyKey::Int(i128::from(*b))),
+        Value::Number(n) => {
+            let text = n.to_string();
+            let is_int = !text.contains(['.', 'e', 'E']);
+            match text.parse::<i128>() {
+                Ok(i) if is_int => Ok(PyKey::Int(i)),
+                _ => Ok(PyKey::Float(pyfloat(v)?)),
+            }
+        }
         Value::String(s) => Ok(PyKey::Str(s.clone())),
         _ => Err(PyError::TypeError), // unhashable
     }
@@ -412,15 +467,14 @@ fn sorted_set(values: impl Iterator<Item = Value>) -> Result<Vec<Value>, PyError
         }
     }
     if uniq.len() > 1 {
-        let all_num = uniq.iter().all(|(k, _)| matches!(k, PyKey::Num(_)));
+        let all_num = uniq.iter().all(|(k, _)| k.is_num());
         let all_str = uniq.iter().all(|(k, _)| matches!(k, PyKey::Str(_)));
         if !(all_num || all_str) {
             return Err(PyError::TypeError);
         }
         uniq.sort_by(|(a, _), (b, _)| match (a, b) {
-            (PyKey::Num(x), PyKey::Num(y)) => x.total_cmp(y),
             (PyKey::Str(x), PyKey::Str(y)) => x.cmp(y),
-            _ => std::cmp::Ordering::Equal,
+            _ => cmp_num(a, b).unwrap_or(std::cmp::Ordering::Equal),
         });
     }
     Ok(uniq.into_iter().map(|(_, v)| v).collect())

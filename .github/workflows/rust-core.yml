@@ -8,6 +8,7 @@ on:
       - 'labs/core/data/raw/**'
       - 'labs/core/examples/**'
       - 'labs/core/benchmarks/edge_cases.py'
+      - 'labs/core/query.py'
       - '.github/workflows/rust-core.yml'
   push:
     branches: [main]
@@ -17,6 +18,7 @@ on:
       - 'labs/core/data/raw/**'
       - 'labs/core/examples/**'
       - 'labs/core/benchmarks/edge_cases.py'
+      - 'labs/core/query.py'
       - '.github/workflows/rust-core.yml'
 
 permissions:

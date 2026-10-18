@@ -5,9 +5,9 @@
 //! A date override replaces the whole day's regular hours, including carry-over.
 //! Unsupported/malformed input is UNKNOWN, never an implicit open flag.
 
-use crate::isotime::parse_reference_timestamp;
+use crate::isotime::{IstDateTime, parse_reference_timestamp};
 use crate::pyval::{PyError, truthy};
-use chrono::{DateTime, Datelike, Days, FixedOffset, Timelike};
+use chrono::{DateTime, Datelike, Days, FixedOffset, NaiveDateTime, Timelike};
 use chrono_tz::Tz;
 use kep_canon::stable_hash;
 use serde_json::{Map, Value};
@@ -199,13 +199,31 @@ fn parse_days(map: &Map<String, Value>) -> Option<HashMap<&str, Vec<(i64, i64)>>
 
 /// Whether a place is open at `at`, given its declared hours.
 pub fn opening_status(hours: &Value, at: &DateTime<FixedOffset>) -> OpeningStatus {
-    status_inner(hours, at).unwrap_or(OpeningStatus::Unknown)
+    status_inner(hours, |zone, _| at.with_timezone(zone).naive_local())
+        .unwrap_or(OpeningStatus::Unknown)
 }
 
-fn status_inner(hours: &Value, at: &DateTime<FixedOffset>) -> Option<OpeningStatus> {
+/// [`opening_status`] for a `core.dt()` value. Python's `astimezone` leaves a
+/// datetime unchanged when the target zone is its own tzinfo, so for
+/// `Europe/Istanbul` hours the wall time is used as is, even inside a DST gap.
+pub fn opening_status_ist(hours: &Value, at: &IstDateTime) -> OpeningStatus {
+    status_inner(hours, |zone, name| {
+        if name == "Europe/Istanbul" {
+            at.wall()
+        } else {
+            at.instant().with_timezone(zone).naive_local()
+        }
+    })
+    .unwrap_or(OpeningStatus::Unknown)
+}
+
+fn status_inner(
+    hours: &Value,
+    local: impl Fn(&Tz, &str) -> NaiveDateTime,
+) -> Option<OpeningStatus> {
     let hours = hours.as_object()?;
-    let zone = zone(hours.get("timezone")?.as_str()?)?;
-    let here = at.with_timezone(&zone);
+    let name = hours.get("timezone")?.as_str()?;
+    let here = local(&zone(name)?, name);
     let weekly = hours.get("weekly")?.as_object()?;
     let empty = Map::new();
     let overrides = match hours.get("exceptions") {
@@ -218,7 +236,7 @@ fn status_inner(hours: &Value, at: &DateTime<FixedOffset>) -> Option<OpeningStat
     }
     let parsed = parse_days(weekly)?;
     let exceptions = parse_days(overrides)?;
-    let d = here.date_naive();
+    let d = here.date();
     let prev = d.checked_sub_days(Days::new(1))?;
     let m = f64::from(here.hour() * 60 + here.minute()) + f64::from(here.second()) / 60.0;
     let iso = |date: chrono::NaiveDate| date.format("%Y-%m-%d").to_string();
