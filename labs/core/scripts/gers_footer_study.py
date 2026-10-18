@@ -102,7 +102,7 @@ def listed_objects(reader):
     return sorted(out,key=lambda o:o['key'])
 
 
-def decode_footer(item,footer):
+def decode_footer(item,footer,releases=cost.RELEASES):
     import pyarrow as pa
     import pyarrow.parquet as pq
     if pa.__version__!=ARROW_VERSION:
@@ -136,7 +136,7 @@ def decode_footer(item,footer):
     name='footers/'+sha256(item['key'].encode()).hexdigest()+'.bin'
     result={**item,'footer_length':len(footer)-8,'footer_sha256':sha256(footer).hexdigest(),
         'footer_member':name,'rows':md.num_rows,'row_groups':groups,'created_by':md.created_by}
-    cost.validate_objects([result])
+    cost.validate_objects([result],releases)
     return result
 
 
