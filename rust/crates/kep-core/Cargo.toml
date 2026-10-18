@@ -1,0 +1,18 @@
+[package]
+name = "kep-core"
+version = "0.1.0"
+description = "KEP Core decision kernel, ported module by module from the Python reference (ADR-0034)"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[dependencies]
+kep-canon = { path = "../kep-canon" }
+serde_json.workspace = true
+chrono.workspace = true
+chrono-tz.workspace = true
+geo.workspace = true
+unicode-normalization.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,67 @@
+name: KEP Rust Core
+
+on:
+  pull_request:
+    paths:
+      - 'rust/**'
+      - 'labs/core/kepcore/**'
+      - 'labs/core/data/raw/**'
+      - 'labs/core/examples/**'
+      - 'labs/core/benchmarks/edge_cases.py'
+      - 'labs/core/query.py'
+      - '.github/workflows/rust-core.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'rust/**'
+      - 'labs/core/kepcore/**'
+      - 'labs/core/data/raw/**'
+      - 'labs/core/examples/**'
+      - 'labs/core/benchmarks/edge_cases.py'
+      - 'labs/core/query.py'
+      - '.github/workflows/rust-core.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-core-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+      - name: Format
+        run: cargo fmt --all --check
+      - name: Clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
+      - name: Unit and Python parity tests
+        run: cargo test --locked
+
+  # The vectors must still be what the Python reference produces today.
+  parity-vectors:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Vectors match the Python reference
+        run: python rust/parity/export_vectors.py --check

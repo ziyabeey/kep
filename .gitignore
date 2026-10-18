@@ -38,3 +38,10 @@ KEP_Istanbul_Real_Field_Reviewer_*.xlsx
 # KEP-DATA-005 independent third-human review artifacts
 labs/core/data/field_reviews_private/adjudications/
 *blinded-adjudication-case*.jsonl
+
+# Generic guard for private material named in CLAUDE.md: any *_private/ or .local/ folder
+**/*_private/
+**/.local/
+
+# Rust build output
+rust/target/

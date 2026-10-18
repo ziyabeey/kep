@@ -1,0 +1,4050 @@
+{
+ "reference": "labs/core (Python); see docs/adr/0034-rust-core-port.md",
+ "canon": [
+  {
+   "name": "canon_00",
+   "value": null,
+   "canonical": "null",
+   "sha256": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+  },
+  {
+   "name": "canon_01",
+   "value": true,
+   "canonical": "true",
+   "sha256": "b5bea41b6c623f7c09f1bf24dcae58ebab3c0cdd90ad966bc43a45b44867e12b"
+  },
+  {
+   "name": "canon_02",
+   "value": false,
+   "canonical": "false",
+   "sha256": "fcbcf165908dd18a9e49f7ff27810176db8e9f63b4352213741664245224f8aa"
+  },
+  {
+   "name": "canon_03",
+   "value": 0,
+   "canonical": "0",
+   "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+  },
+  {
+   "name": "canon_04",
+   "value": 0,
+   "canonical": "0",
+   "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+  },
+  {
+   "name": "canon_05",
+   "value": 1,
+   "canonical": "1",
+   "sha256": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+  },
+  {
+   "name": "canon_06",
+   "value": -17,
+   "canonical": "-17",
+   "sha256": "d3471dcc109cd382f5e09a64253c2219958b5f8f07371fba48ac81fed97bb18a"
+  },
+  {
+   "name": "canon_07",
+   "value": 9007199254740992,
+   "canonical": "9007199254740992",
+   "sha256": "c681da39d7273a6a24c15c9cac3a75526ff2ecf8ba4ee60346a0c70c8163bdb2"
+  },
+  {
+   "name": "canon_08",
+   "value": 9223372036854775807,
+   "canonical": "9223372036854775807",
+   "sha256": "b34a1c30a715f6bf8b7243afa7fab883ce3612b7231716bdcbbdc1982e1aed29"
+  },
+  {
+   "name": "canon_09",
+   "value": 18446744073709551616,
+   "canonical": "18446744073709551616",
+   "sha256": "8b292fc2d32f1fd491784610c61b90dc4632a6e4add19261eca4c3979e4ea6d2"
+  },
+  {
+   "name": "canon_10",
+   "value": 1000000000000000000000000000000,
+   "canonical": "1000000000000000000000000000000",
+   "sha256": "fa72d4146f76703a4c9589d4a4af8722b2568665c8f8b8aa773d800e00a12d1f"
+  },
+  {
+   "name": "canon_11",
+   "value": 0.0,
+   "canonical": "0.0",
+   "sha256": "8aed642bf5118b9d3c859bd4be35ecac75b6e873cce34e7b6f554b06f75550d7"
+  },
+  {
+   "name": "canon_12",
+   "value": -0.0,
+   "canonical": "-0.0",
+   "sha256": "c26617c7ccbcaa6631b45d851b8cf56e21d2ca624bdb1193afdbd4b560702cec"
+  },
+  {
+   "name": "canon_13",
+   "value": 1.0,
+   "canonical": "1.0",
+   "sha256": "d0ff5974b6aa52cf562bea5921840c032a860a91a3512f7fe8f768f6bbe005f6"
+  },
+  {
+   "name": "canon_14",
+   "value": -1.5,
+   "canonical": "-1.5",
+   "sha256": "37c2b212b94e5372b33df924ea2a91182d90c237d0bf942c1768e794ebef2376"
+  },
+  {
+   "name": "canon_15",
+   "value": 0.1,
+   "canonical": "0.1",
+   "sha256": "14be4b45f18e0d8c67b4f719b5144eee88497e413709d11d85b096d8e2346310"
+  },
+  {
+   "name": "canon_16",
+   "value": 0.0001,
+   "canonical": "0.0001",
+   "sha256": "e539aebac7fd2ed8aba8854fedeaa65436962f8ee1c82341b394698f085b6496"
+  },
+  {
+   "name": "canon_17",
+   "value": 1e-05,
+   "canonical": "1e-05",
+   "sha256": "5a9530d3c6d5faad6ba8afe16fb8e438df23865128370b2ec14ef622bb5f2ec9"
+  },
+  {
+   "name": "canon_18",
+   "value": 1e-07,
+   "canonical": "1e-07",
+   "sha256": "e485fac25775a7da830698e7daac582737fc8b43ba4b351467a16cf8ed83122a"
+  },
+  {
+   "name": "canon_19",
+   "value": 123456.789,
+   "canonical": "123456.789",
+   "sha256": "df16e278bec8bd79b90a36552e05a4179549b0870da68fbe2580a8a920597ef4"
+  },
+  {
+   "name": "canon_20",
+   "value": 1000000000000000.0,
+   "canonical": "1000000000000000.0",
+   "sha256": "c02731631f61648f06ba5501a9c68e2b0a9186a934ff45f40ab28eb6f3673021"
+  },
+  {
+   "name": "canon_21",
+   "value": 1e+16,
+   "canonical": "1e+16",
+   "sha256": "a144838520595009e7daf5aff8472573f9ce6a4bcd8c30673675618883464ab0"
+  },
+  {
+   "name": "canon_22",
+   "value": 1.5e+300,
+   "canonical": "1.5e+300",
+   "sha256": "ba5b9d007ed3bac3aed4e53fff4395ec6e034ab008e90969287e3b8860c31b12"
+  },
+  {
+   "name": "canon_23",
+   "value": 5e-324,
+   "canonical": "5e-324",
+   "sha256": "c46e7ca1be4c8734f373a56530787288fa2058d73d07855e9247e949f811a42a"
+  },
+  {
+   "name": "canon_24",
+   "value": 2.5,
+   "canonical": "2.5",
+   "sha256": "b8736b999909049671d0ea075a42b308a5fbe2df1854899123fe09eb0ee9de61"
+  },
+  {
+   "name": "canon_25",
+   "value": 100.0,
+   "canonical": "100.0",
+   "sha256": "43b87f618caab482ebe4976c92bcd6ad308b48055f1c27b4c574f3e31d7683e0"
+  },
+  {
+   "name": "canon_26",
+   "value": 1e+22,
+   "canonical": "1e+22",
+   "sha256": "814a97daeb45416e24befc0ae9a6414ac2f41f269a9f2f019fc65a0d03725f34"
+  },
+  {
+   "name": "canon_27",
+   "value": 0.30000000000000004,
+   "canonical": "0.30000000000000004",
+   "sha256": "06bad31060c1212ae832de4c031f7b31e3b48aed57858294478cb19450cf34ca"
+  },
+  {
+   "name": "canon_28",
+   "value": 999999999987524.2,
+   "canonical": "999999999987524.2",
+   "sha256": "3116086db31f513d5e62b3977e4a0e62f679874d5f6b6f0cdd7a1d1d8077f186"
+  },
+  {
+   "name": "canon_29",
+   "value": 2.2250738585072014e-308,
+   "canonical": "2.2250738585072014e-308",
+   "sha256": "8d51a73768cb59d15302f6b0a4c7147a04b0cce9df743b5bf50e31ab87b2d807"
+  },
+  {
+   "name": "canon_30",
+   "value": 1.7976931348623157e+308,
+   "canonical": "1.7976931348623157e+308",
+   "sha256": "c2784e1abd6317452708f3fbf9641c16b959561bc621a1d408c23a20aa2cb585"
+  },
+  {
+   "name": "canon_31",
+   "value": 9007199254740992.0,
+   "canonical": "9007199254740992.0",
+   "sha256": "0ad10bbdda8db20784fb3edc08722b255b8da67f2a12bb58ec32994ba4a3596e"
+  },
+  {
+   "name": "canon_32",
+   "value": "",
+   "canonical": "\"\"",
+   "sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+  },
+  {
+   "name": "canon_33",
+   "value": "İstanbul",
+   "canonical": "\"İstanbul\"",
+   "sha256": "33769c4d83bafd3af33cf9dd052fd83e32e1805a0fc4a10621f4f47e74ccf35c"
+  },
+  {
+   "name": "canon_34",
+   "value": "ışık ğüş",
+   "canonical": "\"ışık ğüş\"",
+   "sha256": "f8b996047271a0c0c7e38810e0a928aef18642adcd81af8e3c7cf2853bae9b9c"
+  },
+  {
+   "name": "canon_35",
+   "value": "quote \" back \\ slash",
+   "canonical": "\"quote \\\" back \\\\ slash\"",
+   "sha256": "2d90fd84271b1bc8ab2a6cdb8b24444f8c8a7ab99c21c2f55c738ec07d9e5786"
+  },
+  {
+   "name": "canon_36",
+   "value": "tab\tnl\ncr\r",
+   "canonical": "\"tab\\tnl\\ncr\\r\"",
+   "sha256": "b1f63ff95665a6ab4e5041f0aca336b5f944edc31b0e33a95a604cb2d35e27f9"
+  },
+  {
+   "name": "canon_37",
+   "value": "\b\f\u0000\u0001\u001f",
+   "canonical": "\"\\b\\f\\u0000\\u0001\\u001f\"",
+   "sha256": "6689296efd5f70e5cb714e5eea1bc69eab8d06a9476f1f0e5d75681a82948aae"
+  },
+  {
+   "name": "canon_38",
+   "value": "  ",
+   "canonical": "\"  \"",
+   "sha256": "e3a0e2262ac7790f4df36b522a8fbdd4ee3370d568eb15dc25c5f1775f14ed6c"
+  },
+  {
+   "name": "canon_39",
+   "value": "emoji 🎟️",
+   "canonical": "\"emoji 🎟️\"",
+   "sha256": "868a13e84eaff9e107763776c2cdca663f804de87c6373a55f21d7b891650ffa"
+  },
+  {
+   "name": "canon_40",
+   "value": "é (NFC) vs é (NFD)",
+   "canonical": "\"é (NFC) vs é (NFD)\"",
+   "sha256": "5bf650198aebc0680a618d03a12ce39e77d28c5196e461f5ccc95170f088c98a"
+  },
+  {
+   "name": "canon_41",
+   "value": [],
+   "canonical": "[]",
+   "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  {
+   "name": "canon_42",
+   "value": [
+    1,
+    "a",
+    null
+   ],
+   "canonical": "[1,\"a\",null]",
+   "sha256": "6f9c54658fdbc2f155e7105e0ad633c8c03e83b677a6b8a5dfb7541264b83622"
+  },
+  {
+   "name": "canon_43",
+   "value": {},
+   "canonical": "{}",
+   "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  {
+   "name": "canon_44",
+   "value": {
+    "b": 1,
+    "a": 2,
+    "A": 3,
+    "İ": 4,
+    "i": 5,
+    "": 6,
+    "aa": 7
+   },
+   "canonical": "{\"\":6,\"A\":3,\"a\":2,\"aa\":7,\"b\":1,\"i\":5,\"İ\":4}",
+   "sha256": "878523320825b3dfb08dc244f6d8d75ac56a0381831038103f3e34de89130edd"
+  },
+  {
+   "name": "canon_45",
+   "value": {
+    "nested": {
+     "z": [
+      1.0,
+      {
+       "y": null,
+       "x": true
+      }
+     ],
+     "k": "v"
+    }
+   },
+   "canonical": "{\"nested\":{\"k\":\"v\",\"z\":[1.0,{\"x\":true,\"y\":null}]}}",
+   "sha256": "a9569c17ece99000e5988a8f9ac1f352f3d6287d0783620984d539978a9866fe"
+  },
+  {
+   "name": "canon_46",
+   "value": [
+    [
+     "09:00",
+     "20:00"
+    ]
+   ],
+   "canonical": "[[\"09:00\",\"20:00\"]]",
+   "sha256": "208ae4632b4f92af9ade2300472eb834f25ea50915fb839eeacabd2bba97fcb4"
+  },
+  {
+   "name": "canon_47",
+   "value": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": []
+    }
+   },
+   "canonical": "{\"timezone\":\"Europe/Istanbul\",\"weekly\":{\"1\":[]}}",
+   "sha256": "2d88bd61ce5341f0f8d6e9e1c71d355af2997549585c146a18b63b9ee2be2571"
+  },
+  {
+   "name": "canon_literal_00",
+   "json": "1e2",
+   "canonical": "100.0"
+  },
+  {
+   "name": "canon_literal_01",
+   "json": "1E2",
+   "canonical": "100.0"
+  },
+  {
+   "name": "canon_literal_02",
+   "json": "-0",
+   "canonical": "0"
+  },
+  {
+   "name": "canon_literal_03",
+   "json": "-0.0",
+   "canonical": "-0.0"
+  },
+  {
+   "name": "canon_literal_04",
+   "json": "1.50",
+   "canonical": "1.5"
+  },
+  {
+   "name": "canon_literal_05",
+   "json": "1e400",
+   "canonical": "Infinity"
+  },
+  {
+   "name": "canon_literal_06",
+   "json": "-1e400",
+   "canonical": "-Infinity"
+  },
+  {
+   "name": "canon_literal_07",
+   "json": "12345678901234567890123",
+   "canonical": "12345678901234567890123"
+  },
+  {
+   "name": "canon_literal_08",
+   "json": "0.1e1",
+   "canonical": "1.0"
+  },
+  {
+   "name": "canon_literal_09",
+   "json": "3.0e-5",
+   "canonical": "3e-05"
+  },
+  {
+   "name": "canon_literal_10",
+   "json": "[1.0,2,3e0]",
+   "canonical": "[1.0,2,3.0]"
+  },
+  {
+   "name": "canon_literal_11",
+   "json": "{\"a\":1,\"a\":2}",
+   "canonical": "{\"a\":2}"
+  }
+ ],
+ "isotime": [
+  {
+   "name": "iso_'2026-10-10T17:50:00+03:00'",
+   "text": "2026-10-10T17:50:00+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00Z'",
+   "text": "2026-10-10T17:50:00Z",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+00:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00-04:00'",
+   "text": "2026-10-10T17:50:00-04:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00-04:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10 17:50:00+03:00'",
+   "text": "2026-10-10 17:50:00+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10x17:50:00+03:00'",
+   "text": "2026-10-10x17:50:00+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50+03:00'",
+   "text": "2026-10-10T17:50+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17+03:00'",
+   "text": "2026-10-10T17+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:00:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00.1+03:00'",
+   "text": "2026-10-10T17:50:00.1+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00.100000+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00.123456+03:00'",
+   "text": "2026-10-10T17:50:00.123456+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00.123456+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00.1234567+03:00'",
+   "text": "2026-10-10T17:50:00.1234567+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00.123456+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00,5+03:00'",
+   "text": "2026-10-10T17:50:00,5+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00.500000+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+0300'",
+   "text": "2026-10-10T17:50:00+0300",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+03'",
+   "text": "2026-10-10T17:50:00+03",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+03:00:30'",
+   "text": "2026-10-10T17:50:00+03:00:30",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00:30"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00-00:00'",
+   "text": "2026-10-10T17:50:00-00:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+00:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00'",
+   "text": "2026-10-10T17:50:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10'",
+   "text": "2026-10-10",
+   "expect": {
+    "ok": "2026-10-10T00:00:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T24:00:00+03:00'",
+   "text": "2026-10-10T24:00:00+03:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+24:00'",
+   "text": "2026-10-10T17:50:00+24:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:60+03:00'",
+   "text": "2026-10-10T17:50:60+03:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-02-30T00:00:00+03:00'",
+   "text": "2026-02-30T00:00:00+03:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'+2026-10-10T17:50:00+03:00'",
+   "text": "+2026-10-10T17:50:00+03:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'0000-01-01T00:00:00+00:00'",
+   "text": "0000-01-01T00:00:00+00:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'yesterday'",
+   "text": "yesterday",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_''",
+   "text": "",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T'",
+   "text": "2026-10-10T",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:5+03:00'",
+   "text": "2026-10-10T17:5+03:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+3:00'",
+   "text": "2026-10-10T17:50:00+3:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+1€'",
+   "text": "2026-10-10T17:50:00+1€",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+€€'",
+   "text": "2026-10-10T17:50:00+€€",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+0€:00'",
+   "text": "2026-10-10T17:50:00+0€:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:5€+03:00'",
+   "text": "2026-10-10T17:5€+03:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-1€T17:50:00+03:00'",
+   "text": "2026-10-1€T17:50:00+03:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+03:60'",
+   "text": "2026-10-10T17:50:00+03:60",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+04:00"
+   }
+  },
+  {
+   "name": "iso_'20261010T175000+0300'",
+   "text": "20261010T175000+0300",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-W41-6T17:50:00+03:00'",
+   "text": "2026-W41-6T17:50:00+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T175000+03:00'",
+   "text": "2026-10-10T175000+03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00 +03:00'",
+   "text": "2026-10-10T17:50:00 +03:00",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+03:00:30.5'",
+   "text": "2026-10-10T17:50:00+03:00:30.5",
+   "expect": {
+    "ok": "2026-10-10T17:50:00+03:00:30.500000"
+   }
+  }
+ ],
+ "minute": [
+  {
+   "name": "minute_'00:00'_False",
+   "text": "00:00",
+   "end": false,
+   "expect": {
+    "ok": 0
+   }
+  },
+  {
+   "name": "minute_'00:00'_True",
+   "text": "00:00",
+   "end": true,
+   "expect": {
+    "ok": 0
+   }
+  },
+  {
+   "name": "minute_'09:30'_False",
+   "text": "09:30",
+   "end": false,
+   "expect": {
+    "ok": 570
+   }
+  },
+  {
+   "name": "minute_'09:30'_True",
+   "text": "09:30",
+   "end": true,
+   "expect": {
+    "ok": 570
+   }
+  },
+  {
+   "name": "minute_'23:59'_False",
+   "text": "23:59",
+   "end": false,
+   "expect": {
+    "ok": 1439
+   }
+  },
+  {
+   "name": "minute_'23:59'_True",
+   "text": "23:59",
+   "end": true,
+   "expect": {
+    "ok": 1439
+   }
+  },
+  {
+   "name": "minute_'24:00'_False",
+   "text": "24:00",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'24:00'_True",
+   "text": "24:00",
+   "end": true,
+   "expect": {
+    "ok": 1440
+   }
+  },
+  {
+   "name": "minute_'24:01'_False",
+   "text": "24:01",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'24:01'_True",
+   "text": "24:01",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'25:00'_False",
+   "text": "25:00",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'25:00'_True",
+   "text": "25:00",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'12:60'_False",
+   "text": "12:60",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'12:60'_True",
+   "text": "12:60",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'9:30'_False",
+   "text": "9:30",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'9:30'_True",
+   "text": "9:30",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09:3'_False",
+   "text": "09:3",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09:3'_True",
+   "text": "09:3",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09-30'_False",
+   "text": "09-30",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09-30'_True",
+   "text": "09-30",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'0930'_False",
+   "text": "0930",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'0930'_True",
+   "text": "0930",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_''_False",
+   "text": "",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_''_True",
+   "text": "",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_' 9:30'_False",
+   "text": " 9:30",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_' 9:30'_True",
+   "text": " 9:30",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'9 :30'_False",
+   "text": "9 :30",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'9 :30'_True",
+   "text": "9 :30",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'+9:30'_False",
+   "text": "+9:30",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'+9:30'_True",
+   "text": "+9:30",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'-0:00'_False",
+   "text": "-0:00",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'-0:00'_True",
+   "text": "-0:00",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09:+5'_False",
+   "text": "09:+5",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09:+5'_True",
+   "text": "09:+5",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09: 5'_False",
+   "text": "09: 5",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09: 5'_True",
+   "text": "09: 5",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'ab:cd'_False",
+   "text": "ab:cd",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'ab:cd'_True",
+   "text": "ab:cd",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'1_:00'_False",
+   "text": "1_:00",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'1_:00'_True",
+   "text": "1_:00",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09:30 '_False",
+   "text": "09:30 ",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'09:30 '_True",
+   "text": "09:30 ",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'٠٩:٣٠'_False",
+   "text": "٠٩:٣٠",
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_'٠٩:٣٠'_True",
+   "text": "٠٩:٣٠",
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_None_False",
+   "text": null,
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_None_True",
+   "text": null,
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_930_False",
+   "text": 930,
+   "end": false,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "minute_930_True",
+   "text": 930,
+   "end": true,
+   "expect": {
+    "raises": "ValueError"
+   }
+  }
+ ],
+ "intervals": [
+  {
+   "name": "intervals_00",
+   "raw": [],
+   "expect": {
+    "ok": []
+   }
+  },
+  {
+   "name": "intervals_01",
+   "raw": [
+    [
+     "09:00",
+     "20:00"
+    ]
+   ],
+   "expect": {
+    "ok": [
+     [
+      540,
+      1200
+     ]
+    ]
+   }
+  },
+  {
+   "name": "intervals_02",
+   "raw": [
+    [
+     "22:00",
+     "02:00"
+    ]
+   ],
+   "expect": {
+    "ok": [
+     [
+      1320,
+      120
+     ]
+    ]
+   }
+  },
+  {
+   "name": "intervals_03",
+   "raw": [
+    [
+     "00:00",
+     "24:00"
+    ]
+   ],
+   "expect": {
+    "ok": [
+     [
+      0,
+      1440
+     ]
+    ]
+   }
+  },
+  {
+   "name": "intervals_04",
+   "raw": [
+    [
+     "00:00",
+     "00:00"
+    ]
+   ],
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "intervals_05",
+   "raw": [
+    [
+     "09:00"
+    ]
+   ],
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "intervals_06",
+   "raw": [
+    [
+     "09:00",
+     "10:00",
+     "11:00"
+    ]
+   ],
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "intervals_07",
+   "raw": [
+    "09:00-10:00"
+   ],
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "intervals_08",
+   "raw": null,
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "intervals_09",
+   "raw": {},
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "intervals_10",
+   "raw": "open",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "intervals_11",
+   "raw": [
+    [
+     "10:00",
+     "09:00"
+    ],
+    [
+     "12:00",
+     "13:00"
+    ]
+   ],
+   "expect": {
+    "ok": [
+     [
+      600,
+      540
+     ],
+     [
+      720,
+      780
+     ]
+    ]
+   }
+  },
+  {
+   "name": "intervals_12",
+   "raw": [
+    [
+     "24:00",
+     "01:00"
+    ]
+   ],
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "intervals_13",
+   "raw": [
+    [
+     9,
+     10
+    ]
+   ],
+   "expect": {
+    "raises": "ValueError"
+   }
+  }
+ ],
+ "opening_status": [
+  {
+   "name": "open_regular",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "overnight_carry",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "22:00",
+       "02:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T01:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "overnight_exact_close",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "22:00",
+       "02:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T02:00:00+03:00",
+   "expect": {
+    "ok": "CLOSED"
+   }
+  },
+  {
+   "name": "exception_overrides_carry",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "22:00",
+       "02:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {
+     "2026-10-10": []
+    }
+   },
+   "at": "2026-10-10T01:00:00+03:00",
+   "expect": {
+    "ok": "CLOSED"
+   }
+  },
+  {
+   "name": "utc_conversion",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T06:00:00+00:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "missing_weekday_unknown",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "equal_hours_unknown",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "00:00",
+       "00:00"
+      ]
+     ],
+     "2": [
+      [
+       "00:00",
+       "00:00"
+      ]
+     ],
+     "3": [
+      [
+       "00:00",
+       "00:00"
+      ]
+     ],
+     "4": [
+      [
+       "00:00",
+       "00:00"
+      ]
+     ],
+     "5": [
+      [
+       "00:00",
+       "00:00"
+      ]
+     ],
+     "6": [
+      [
+       "00:00",
+       "00:00"
+      ]
+     ],
+     "7": [
+      [
+       "00:00",
+       "00:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "all_day_explicit",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "2": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "3": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "4": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "5": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "6": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ],
+     "7": [
+      [
+       "00:00",
+       "24:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T23:59:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "invalid_schedule_0",
+   "hours": null,
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "invalid_schedule_1",
+   "hours": [],
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "invalid_schedule_2",
+   "hours": {},
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "invalid_schedule_3",
+   "hours": "open",
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "invalid_schedule_4",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "30:00",
+       "31:00"
+      ]
+     ],
+     "2": [
+      [
+       "30:00",
+       "31:00"
+      ]
+     ],
+     "3": [
+      [
+       "30:00",
+       "31:00"
+      ]
+     ],
+     "4": [
+      [
+       "30:00",
+       "31:00"
+      ]
+     ],
+     "5": [
+      [
+       "30:00",
+       "31:00"
+      ]
+     ],
+     "6": [
+      [
+       "30:00",
+       "31:00"
+      ]
+     ],
+     "7": [
+      [
+       "30:00",
+       "31:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "boundary_08:59:59",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T08:59:59+03:00",
+   "expect": {
+    "ok": "CLOSED"
+   }
+  },
+  {
+   "name": "boundary_09:00:00",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T09:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "boundary_19:59:59",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T19:59:59+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "boundary_20:00:00",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T20:00:00+03:00",
+   "expect": {
+    "ok": "CLOSED"
+   }
+  },
+  {
+   "name": "boundary_20:00:30",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T20:00:30+03:00",
+   "expect": {
+    "ok": "CLOSED"
+   }
+  },
+  {
+   "name": "closed_day_empty_list",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "CLOSED"
+   }
+  },
+  {
+   "name": "two_intervals_gap",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "12:00"
+      ],
+      [
+       "19:00",
+       "23:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "CLOSED"
+   }
+  },
+  {
+   "name": "two_intervals_in_gap",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "12:00"
+      ],
+      [
+       "19:00",
+       "23:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T15:00:00+03:00",
+   "expect": {
+    "ok": "CLOSED"
+   }
+  },
+  {
+   "name": "exception_open_window",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {
+     "2026-10-10": [
+      [
+       "17:00",
+       "18:30"
+      ]
+     ]
+    }
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "yesterday_exception_carry",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {
+     "2026-10-09": [
+      [
+       "22:00",
+       "19:00"
+      ]
+     ]
+    }
+   },
+   "at": "2026-10-10T08:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "bad_exception_value_unknown",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {
+     "not-a-date": [
+      [
+       "25:00",
+       "26:00"
+      ]
+     ]
+    }
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "extra_weekday_key_bad_value_unknown",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "8": "x"
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "extra_weekday_key_ignored",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "8": [
+      [
+       "01:00",
+       "02:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "exceptions_not_dict_unknown",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": []
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "exceptions_missing_ok",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    }
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "timezone_missing_unknown",
+   "hours": {
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "timezone_0",
+   "hours": {
+    "timezone": "UTC",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "timezone_1",
+   "hours": {
+    "timezone": "Europe/London",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "timezone_2",
+   "hours": {
+    "timezone": "America/New_York",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "timezone_3",
+   "hours": {
+    "timezone": "Asia/Tokyo",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "CLOSED"
+   }
+  },
+  {
+   "name": "timezone_4",
+   "hours": {
+    "timezone": "Not/AZone",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "timezone_5",
+   "hours": {
+    "timezone": "",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "timezone_6",
+   "hours": {
+    "timezone": "europe/istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "timezone_7",
+   "hours": {
+    "timezone": "../etc/passwd",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "timezone_8",
+   "hours": {
+    "timezone": 5,
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "london_dst_end",
+   "hours": {
+    "timezone": "Europe/London",
+    "weekly": {
+     "1": [
+      [
+       "01:00",
+       "02:00"
+      ]
+     ],
+     "2": [
+      [
+       "01:00",
+       "02:00"
+      ]
+     ],
+     "3": [
+      [
+       "01:00",
+       "02:00"
+      ]
+     ],
+     "4": [
+      [
+       "01:00",
+       "02:00"
+      ]
+     ],
+     "5": [
+      [
+       "01:00",
+       "02:00"
+      ]
+     ],
+     "6": [
+      [
+       "01:00",
+       "02:00"
+      ]
+     ],
+     "7": [
+      [
+       "01:00",
+       "02:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-25T01:30:00+00:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "newyork_dst_start",
+   "hours": {
+    "timezone": "America/New_York",
+    "weekly": {
+     "1": [
+      [
+       "02:00",
+       "03:30"
+      ]
+     ],
+     "2": [
+      [
+       "02:00",
+       "03:30"
+      ]
+     ],
+     "3": [
+      [
+       "02:00",
+       "03:30"
+      ]
+     ],
+     "4": [
+      [
+       "02:00",
+       "03:30"
+      ]
+     ],
+     "5": [
+      [
+       "02:00",
+       "03:30"
+      ]
+     ],
+     "6": [
+      [
+       "02:00",
+       "03:30"
+      ]
+     ],
+     "7": [
+      [
+       "02:00",
+       "03:30"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-03-08T07:15:00+00:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  },
+  {
+   "name": "weekly_not_dict_unknown",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": [],
+    "exceptions": {}
+   },
+   "at": "2026-10-10T18:00:00+03:00",
+   "expect": {
+    "ok": "UNKNOWN"
+   }
+  },
+  {
+   "name": "intervals_tuple_like_list",
+   "hours": {
+    "timezone": "Europe/Istanbul",
+    "weekly": {
+     "1": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "2": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "3": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "4": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "5": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ],
+     "6": [
+      [
+       "09:00",
+       "20:00"
+      ],
+      [
+       "20:00",
+       "24:00"
+      ]
+     ],
+     "7": [
+      [
+       "09:00",
+       "20:00"
+      ]
+     ]
+    },
+    "exceptions": {}
+   },
+   "at": "2026-10-10T23:00:00+03:00",
+   "expect": {
+    "ok": "OPEN"
+   }
+  }
+ ],
+ "field_is_fresh": [
+  {
+   "name": "record_level_fresh",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "record_level_not_live",
+   "record": {
+    "origin_live_verified": false,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "record_level_too_old",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-08T17:00:00+03:00",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "record_level_exact_48h",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-08T18:00:00+03:00",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "record_level_future_observation",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T18:00:01+03:00",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "record_level_naive_timestamp",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "record_level_zulu",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T14:50:00Z",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "record_level_fraction",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00.123456+03:00",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "record_level_space_separator",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10 17:50:00+03:00",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "record_level_bad_timestamp",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "yesterday",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "record_level_missing_timestamp_raises",
+   "record": {
+    "origin_live_verified": true,
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "record_level_numeric_timestamp_raises",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": 1700000000,
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "record_level_missing_everything",
+   "record": {},
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_fresh",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "field_proof_value_mismatch",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 200,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_float_vs_int_hash",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100.0,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_expired",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "valid_until": "2026-10-10T18:00:00+03:00"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_valid_until_later",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "valid_until": "2026-10-10T18:00:01+03:00"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "field_proof_valid_until_naive",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "valid_until": "2026-10-11T00:00:00"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_valid_until_numeric_raises",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "valid_until": 5
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_status_disputed",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "status": "disputed"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_status_unknown",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "status": "unknown"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_status_retracted",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "status": "retracted"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_status_confirmed",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "status": "confirmed"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "field_proof_status_None",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "status": null
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "field_proof_status_list_raises",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306",
+      "status": [
+       "disputed"
+      ]
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_not_live",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": {
+      "origin_live_verified": false,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "ad57366865126e55649ecb23ae1d48887544976efea46a48eb5d85a6eeb4d306"
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_not_dict",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": "yes"
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_evidence_not_dict",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": [
+     "price"
+    ]
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_evidence_null",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": null
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "field_proof_null_falls_back",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "price": null
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "other_field_proof_ignored",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "crowd": {
+      "origin_live_verified": false
+     }
+    }
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "opening_hours_proof",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "opening_hours": {
+     "timezone": "Europe/Istanbul",
+     "weekly": {
+      "1": [
+       [
+        "09:00",
+        "20:00"
+       ]
+      ],
+      "2": [
+       [
+        "09:00",
+        "20:00"
+       ]
+      ],
+      "3": [
+       [
+        "09:00",
+        "20:00"
+       ]
+      ],
+      "4": [
+       [
+        "09:00",
+        "20:00"
+       ]
+      ],
+      "5": [
+       [
+        "09:00",
+        "20:00"
+       ]
+      ],
+      "6": [
+       [
+        "09:00",
+        "20:00"
+       ]
+      ],
+      "7": [
+       [
+        "09:00",
+        "20:00"
+       ]
+      ]
+     },
+     "exceptions": {}
+    },
+    "field_evidence": {
+     "opening_hours": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "e1142a8a5d3c9281b1b258dcc91cf90f214f643f5f19873a4ddd3c07c005d849"
+     }
+    }
+   },
+   "field": "opening_hours",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "missing_field_hash_of_null",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "field_evidence": {
+     "crowd": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:50:00+03:00",
+      "value_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+     }
+    }
+   },
+   "field": "crowd",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 48,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "crowd_half_hour_window_ok",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "crowd": "low",
+    "field_evidence": {
+     "crowd": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:35:00+03:00",
+      "value_hash": "364bb7082249ee9fbc5247ee49735c4246f271b82c2745a35107ddda0d7cabcc"
+     }
+    }
+   },
+   "field": "crowd",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 0.5,
+   "expect": {
+    "ok": true
+   }
+  },
+  {
+   "name": "crowd_half_hour_window_exceeded",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-10T17:50:00+03:00",
+    "price": 100,
+    "crowd": "low",
+    "field_evidence": {
+     "crowd": {
+      "origin_live_verified": true,
+      "observed_at": "2026-10-10T17:35:00+03:00",
+      "value_hash": "364bb7082249ee9fbc5247ee49735c4246f271b82c2745a35107ddda0d7cabcc"
+     }
+    }
+   },
+   "field": "crowd",
+   "at": "2026-10-10T18:05:00.000001+03:00",
+   "max_hours": 0.5,
+   "expect": {
+    "ok": false
+   }
+  },
+  {
+   "name": "cross_offset_age",
+   "record": {
+    "origin_live_verified": true,
+    "source_observed_at": "2026-10-09T20:00:00-04:00",
+    "price": 100
+   },
+   "field": "price",
+   "at": "2026-10-10T18:00:00+03:00",
+   "max_hours": 0.5,
+   "expect": {
+    "ok": false
+   }
+  }
+ ]
+}
