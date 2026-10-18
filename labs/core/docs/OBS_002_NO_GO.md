@@ -57,6 +57,10 @@ Following ADR-0028/0029/0030, the experimental evaluator `benchmarks/obs_002_eva
 
 Real Istanbul source accuracy: UNKNOWN. Real human labels: ZERO. Source downloads: ZERO. Model calls: ZERO. Consumer publishing: DISABLED.
 
+## Follow-up
+
+The owner reopened the question as a new study, KEP-OBS-003, with new seeds. It was closed before its freeze by pre-data design arithmetic: even with the mechanism working as designed, the expected gain over audit-age-only stays below the 0.025 bar. See [ADR-0035](../../../docs/adr/0035-obs-003-closed-by-design-arithmetic.md).
+
 ## Rollback
 
 Delete this document, the OBS-002 protocol, the report and ADR-0031. No Core code, archive or field file was changed.

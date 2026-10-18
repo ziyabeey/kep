@@ -2,8 +2,8 @@
   "study": "KEP-OBS-003",
   "protocol_version": 1,
   "draft_revision": 2,
-  "stage": "PREREGISTRATION_BEFORE_GENERATOR_EVALUATOR_TESTS_PILOT_OR_HOLDOUT",
-  "freeze_status": "DRAFT_NOT_FROZEN: awaiting owner_power_confirmation_required_before_freeze. Until the owner's choice is recorded there, this file is a draft: it is not committed as a preregistration, its SHA-256 is not pinned, and no generator, evaluator or test code may be written.",
+  "stage": "CLOSED_BEFORE_FREEZE_BY_OWNER_CHOICE",
+  "freeze_status": "CLOSED_BY_DESIGN_ARITHMETIC: never frozen as a preregistration; no generator, evaluator, test, pilot or holdout code was written or run. Seeds 202610180002 and 202610181000 retired unused. See docs/adr/0035-obs-003-closed-by-design-arithmetic.md.",
   "created": "2026-10-18",
   "source_snapshot": "78d383282d415466e7c29c6bc7417473fa5d2c00",
   "issue": "KEP-GATE-001 Test Değeri Kapısı, https://github.com/ziyabeey/kep/issues/39",
@@ -17,7 +17,7 @@
   "owner_decision_provenance": "On 2026-10-18 the protocol owner chose 'Dur + OBS-003' on the card about how OBS-002 should close: stop OBS-002 and open a new, separately labelled preregistration. Seeds, selector thresholds, telemetry cost, false-assertion penalty, the definition of 'proposal', the pilot shape, the single guarded holdout and the disposition below are owner-fixed and may not be changed by the designer, implementer or auditor.",
 
   "owner_power_confirmation_required_before_freeze": {
-    "status": "PENDING_OWNER_CHOICE",
+    "status": "OWNER_CHOICE_RECORDED",
     "why": "Closed-form arithmetic from this protocol's own constants (gate_design_arithmetic_from_constants; no RNG, generator, planner or evaluator) shows that even if the code implements the protocol exactly and the mechanism works as the constants imply, the expected W_drift sum of (u_candidate - u_audit_age_only) is about +1.76 (0.0196 per case). That is below the G1a bar of 2.250 (0.025 per case). G2a's power is about 0.01-0.05, and even an oracle switch reaches only about 0.05. Under option A, P(GO) is at most about 0.04, so NO_GO is the designed outcome whatever the truth of the hypothesis, and a GO would most likely be a noise artefact. Issue #39 items 4-5 ask whether a run is worth its cost. The owner must answer that with this arithmetic in hand.",
     "rule": "Exactly one option below is recorded here before the freeze commit: option id, owner account id, UTC timestamp, verbatim choice text. A decision-card tap by the owner counts. The choice is made without reference to which verdict anyone prefers. The designer, implementer, auditor and orchestrating agents may not choose. Whatever is chosen, no window, threshold, penalty, cost, seed, selector constant or gate changes because of this arithmetic.",
     "options": {
@@ -39,7 +39,20 @@
         "cost": "Writing the closure record only."
       }
     },
-    "recorded_choice": null
+    "recorded_choice": {
+      "option_id": "C_close_from_design_arithmetic",
+      "owner_account_id": "user_01QwfKZBhKAL9eisyCEkDSDC",
+      "owner_display_name": "Ziya",
+      "utc_timestamp": "2026-10-18T11:17:52Z",
+      "channel": "decision card tap in the KEP project thread (platform-verified tap from the owner client)",
+      "card_question_verbatim": "OBS-003'ü güç hesabına göre çalıştıralım mı, kapatalım mı?",
+      "chosen_label_verbatim": "Hesapla kapat",
+      "chosen_consequence_verbatim": "OBS-003 hiç koşturulmadan ADR-0035 ile kapanır. Bu üretecin ailesinde bu seçici bırakılır, seed'ler kullanılmadan emekliye ayrılır.",
+      "other_labels_offered": {
+        "113 tekrar": "B_replicate_timelines",
+        "Tasarıma sadık kal": "A_run_as_designed"
+      }
+    }
   },
 
   "data_scope": "STRICTLY_SYNTHETIC_NO_REAL_SOURCE_RETRIEVAL_NO_MODEL_CALLS_NO_HUMAN_LABELS",
