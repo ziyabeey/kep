@@ -1,0 +1,804 @@
+{
+  "study": "KEP-OBS-003",
+  "protocol_version": 1,
+  "draft_revision": 2,
+  "stage": "PREREGISTRATION_BEFORE_GENERATOR_EVALUATOR_TESTS_PILOT_OR_HOLDOUT",
+  "freeze_status": "DRAFT_NOT_FROZEN: awaiting owner_power_confirmation_required_before_freeze. Until the owner's choice is recorded there, this file is a draft: it is not committed as a preregistration, its SHA-256 is not pinned, and no generator, evaluator or test code may be written.",
+  "created": "2026-10-18",
+  "source_snapshot": "78d383282d415466e7c29c6bc7417473fa5d2c00",
+  "issue": "KEP-GATE-001 Test Değeri Kapısı, https://github.com/ziyabeey/kep/issues/39",
+  "governing_adrs": [
+    "docs/adr/0028-measure-test-value-first.md",
+    "docs/adr/0029-rejected-audit-grace.md",
+    "docs/adr/0030-observable-audit-outage-signals.md",
+    "docs/adr/0031-obs-002-procedural-no-go.md"
+  ],
+  "reserved_adr": "ADR-0035 (records this study's verdict or closure; number reserved before results)",
+  "owner_decision_provenance": "On 2026-10-18 the protocol owner chose 'Dur + OBS-003' on the card about how OBS-002 should close: stop OBS-002 and open a new, separately labelled preregistration. Seeds, selector thresholds, telemetry cost, false-assertion penalty, the definition of 'proposal', the pilot shape, the single guarded holdout and the disposition below are owner-fixed and may not be changed by the designer, implementer or auditor.",
+
+  "owner_power_confirmation_required_before_freeze": {
+    "status": "PENDING_OWNER_CHOICE",
+    "why": "Closed-form arithmetic from this protocol's own constants (gate_design_arithmetic_from_constants; no RNG, generator, planner or evaluator) shows that even if the code implements the protocol exactly and the mechanism works as the constants imply, the expected W_drift sum of (u_candidate - u_audit_age_only) is about +1.76 (0.0196 per case). That is below the G1a bar of 2.250 (0.025 per case). G2a's power is about 0.01-0.05, and even an oracle switch reaches only about 0.05. Under option A, P(GO) is at most about 0.04, so NO_GO is the designed outcome whatever the truth of the hypothesis, and a GO would most likely be a noise artefact. Issue #39 items 4-5 ask whether a run is worth its cost. The owner must answer that with this arithmetic in hand.",
+    "rule": "Exactly one option below is recorded here before the freeze commit: option id, owner account id, UTC timestamp, verbatim choice text. A decision-card tap by the owner counts. The choice is made without reference to which verdict anyone prefers. The designer, implementer, auditor and orchestrating agents may not choose. Whatever is chosen, no window, threshold, penalty, cost, seed, selector constant or gate changes because of this arithmetic.",
+    "options": {
+      "A_run_as_designed": {
+        "what": "Freeze this protocol unchanged: one timeline per regime, pilot then single holdout.",
+        "pre_data_power": "P(G1a) ~0.48, P(G2a) ~0.01-0.05, P(G3a) ~0.97, P(GO) ~0.01-0.03 (upper bound ~0.04) under the designed mechanism.",
+        "what_a_result_means": "NO_GO: value over audit_age_only was not shown at the preregistered bar on a design that could not show it. GO: a low-probability event whose expected effect under the constants is below the bar."
+      },
+      "B_replicate_timelines": {
+        "what": "Draft revision 3, written before freeze, with exactly these changes and no others. R = 113 independent replicate timelines for every regime. Stream keys become 'kep-obs003|generator|{base_seed}|{regime}|rep{r}|background' and '...|rep{r}|cases' for r in 0..112, and background entity ids and case ids carry 'rep{r}'. The base seeds are unchanged. The pilot runs on replicate 0 of the pilot seed only and is otherwise unchanged. Windows are unchanged within each replicate. Every gate pools all R replicates of its regime. Every Decimal threshold is multiplied by R: G1a/G1b >= 254.250, G1c >= 161.025, G4 window part >= 415.275, G5 utility part <= 271.20, G6 <= 1356.00. Count gates scale too: G9 alarms >= 2712 of 5424, G10 alarms <= 5876 of 23504. G3a/G3b are strict inequalities on pooled counts; G5/G7 require identity at every step of every replicate. G2a/G2b/G2c become a cluster bootstrap: resample the R replicate window totals with replacement, 2000 draws, statistic = sum of resampled totals / (R x window size), key suffix '|cluster'. Every invariant is checked per replicate.",
+        "R_rule": "R = ceil(((1.96 + 0.8416) x sd_timeline / 2.25)^2) with sd_timeline = 8.517, the correlated-alarm upper bound on the per-timeline W_drift sd. This gives 80% G2a power at a true effect EQUAL to the 0.025 bar. R is NOT set from the selector's expected value. 112.47 rounds up to 113; the independence sd 8.415 would give 110.",
+        "pre_data_power": "Under the designed mechanism (0.0196/case): P(G1a) ~0.27, P(G2a) ~0.59, P(GO) ~0.27, limited by G1a because the expected effect is below the bar. At a true effect equal to the bar: P(G1a) = 0.50 for any R, P(G2a) ~0.80. At twice the bar: P(G1a) ~0.998, P(G2a) ~1.",
+        "cost": "Holdout runtime about R times the single-timeline runtime (hours, offline). Exact runtime UNKNOWN.",
+        "what_a_result_means": "NO_GO: the pooled effect did not reach the materiality bar with adequate power. GO: the pooled effect reached the bar."
+      },
+      "C_close_from_design_arithmetic": {
+        "what": "No pilot and no holdout. Seeds 202610180002 and 202610181000 are retired unused. ADR-0035 records CLOSED_BY_DESIGN_ARITHMETIC. On this generator family, one 90-case drift window cannot show value over audit_age_only at the 0.025 bar for any switch (oracle G2a power ~0.05). The constants imply the selector's expected W_drift value over audit_age_only is about 0.0196 per case, below the bar. The closure is arithmetic, not data.",
+        "maps_to_option": "abandon (this selector on this generator family), by design arithmetic",
+        "cost": "Writing the closure record only."
+      }
+    },
+    "recorded_choice": null
+  },
+
+  "data_scope": "STRICTLY_SYNTHETIC_NO_REAL_SOURCE_RETRIEVAL_NO_MODEL_CALLS_NO_HUMAN_LABELS",
+
+  "question": "On a newly seeded run of the OBS-002 synthetic generator design (raw-vote loss and delay during a review outage, deep_root syndicated with origin, drift that starts mid-outage, a shared rumor on current cases, and a telemetry charge per read), does the UNCHANGED OBS-001 unlabelled-disagreement selector (pair origin/deep_root, 12 h lookback, >=18 distinct entities, cutoff 0.35, completed-review age >8 h) (a) add decision value over its NEAREST control audit_age_only, and (b) avoid a distinct important mistake versus BOTH fixed VOI (CORE-002) and conservative CORE-003, measured in the predeclared windows where its mechanism can act, without net harm over the whole timeline?",
+  "which_gates_can_answer_the_question": {
+    "telemetry_value_over_audit_age_only": "Only G1a, G2a and G3a can discriminate telemetry value. G1b, G2b and G3a's fixed_voi clause duplicate them, because S2/S9 force audit_age_only == fixed_voi on every W_drift step.",
+    "genuine_harm_checks": "G1d's audit_age_only clause checks that the telemetry adds no net harm. G6 and G8 are genuine harm checks of the adopted package, but audit_age_only attains them too, so they are not evidence that the telemetry bounds harm.",
+    "mechanism_checks": "G9 and G10 check that the alarm path works.",
+    "near_structural": "The vs-conservative half of (b) (G1c, G2c, G3b) and G4 follow from the constants for ANY policy that equals fixed_voi while conservative is blind, audit_age_only included. They are required but are not evidence.",
+    "sanity_structural": "G5 and G7 test implementation only."
+  },
+
+  "decision_before_results": {
+    "options_considered": ["apply", "simplify", "postpone", "abandon"],
+    "GO_FOR_FURTHER_RESEARCH_ONLY": {
+      "condition": "Owner option A or B recorded and frozen. Pilot verdict PILOT_PASS. Then, on the single holdout run, every hard gate G1-G10 and every sanity invariant S1-S9 passes with no missing data.",
+      "maps_to_option": "postpone (apply only after real validation)",
+      "engineering_consequence": "No selector, module, test suite or CI job is merged to main. ADR-0035 records a synthetic research GO. GO shows value over audit_age_only only in outage_midstream_drift windows. Apply versus simplify (to audit_age_only) stays open: it depends on UNKNOWN real regime frequencies. Any design issue must carry the per-regime candidate-minus-audit_age_only ledger and the break-even frequency ratio (reported_not_gated: nearest_control_ledger); the design expectation is that mid-outage drift must be ~31-37 times as frequent as raw-loss outages. The hypothesis may be written up as ONE separately reviewed optional-module design issue, which must also address the syndication blind spot. That issue stays parked until the owner lifts ADR-0028's standing instruction to stop real-data hunting, because any code entering Core needs real (non-synthetic) validation. Until then GO and NO_GO lead to the same engineering action (nothing built), and the study's decision value lies in the record.",
+      "claim_limit": "A pass on an authored simulator is not evidence of real provider reliability or real utility. Only G1a/G2a/G3a are evidence of telemetry value. Value over audit_age_only is not value over every no-telemetry rule. In every drift regime the drift onset falls at a fixed review age (about 150 - 24 = 126 h after the last completed review), so an ungated age-ceiling rule could imitate the alarm, and a GO does not show that the telemetry is necessary. G6/G8 passing does not show that the telemetry bounds syndication or rumor harm, since audit_age_only attains them too. The syndication drift-window regret (design-expected ~0.095/case) is reported. ADR-0035 and the doc repeat this claim limit verbatim."
+    },
+    "NO_GO": {
+      "condition": "Pilot PASS but any hard gate or sanity invariant fails on the holdout; or any gate input is missing; or the holdout run raises or dies after its output file exists; or the pilot recompute is not byte-identical (PILOT_NOT_REPRODUCIBLE); or a rule in leakage_rules or audit_requirements is found violated; or deviation_policy assigns NO_GO.",
+      "maps_to_option": "abandon",
+      "meaning": "Under option A, NO_GO is the outcome the design predicts: P(NO_GO | mechanism works as the constants imply) is about 0.96 or more. It means the selector did not show material value over audit_age_only at the preregistered bar, on a design whose expected effect (~0.0196/case in W_drift) is below that bar and whose G2a power is at most ~0.05 for any switch. It is not a falsification of the hypothesis that the signal carries information. Under option B it means the pooled effect did not reach the bar with ~80% power at an effect equal to the bar.",
+      "engineering_consequence": "Abandon the unlabelled-disagreement selector as a Core candidate for this generator family. Together with OBS-002, this closes ADR-0030's allowance for this selector. No retuning of thresholds, windows, seeds, costs, regimes or gates on the exposed holdout. Keep only the protocol, aggregate report, doc and ADR-0035 on main.",
+      "report_wording_predeclared": {
+        "if_any_of_G1a_G2a_G3a_fails": "'Telemetry value over audit_age_only was not demonstrated at the preregistered materiality (0.025 per case) and confidence (95% paired bootstrap).' The report shows, for each of G1a, G2a and G3a, the point estimate, the interval and the pre-data pass probability from gate_design_arithmetic_from_constants. If G1a and G3a pass and only G2a fails, it adds: 'The point estimate met the materiality bar but the interval includes zero; the design gave G2a a pre-data power of about 0.04 (option A).'",
+        "if_G1a_G2a_G3a_all_pass_but_another_gate_or_invariant_fails": "'Telemetry value over audit_age_only was observed in W_drift, but the package failed preregistered gate(s) or invariant(s) {ids}; the verdict is NO_GO.'",
+        "if_a_NEAR_STRUCTURAL_or_SANITY_STRUCTURAL_gate_or_any_invariant_fails": "'The implementation or generator does not match the protocol's constants ({ids}); no inference about the signal is drawn.'",
+        "always": "'This does NOT approve audit_age_only, whose drift harm this study does not gate. Any audit-age fallback needs its own preregistration with adverse-drift gates.'",
+        "rule": "Every applicable sentence appears; none may be omitted or reworded after results."
+      },
+      "failure_reasons_recorded": "Every failing gate or invariant id is listed in the report; none may be omitted."
+    },
+    "NO_GO_NOT_DISCRIMINATING": {
+      "condition": "The pilot fails a discriminability minimum (PD1, PD2) or a validity check (V1-V4), has missing data, raises, or dies after its output file exists (STARTED record stands); or deviation_policy assigns it before the holdout.",
+      "maps_to_option": "abandon",
+      "engineering_consequence": "The holdout is cancelled and never run. Seed 202610181000 is retired unused. No amendment and no re-pilot. Abandon the selector. Any reopening needs a different hypothesis (a different observable), not a third run of this selector on this generator family.",
+      "narrative_by_reason_code": {
+        "PD1_BELOW_MINIMUM / PD2_BELOW_MINIMUM": "Substantive: the signal did not change decisions where the constants say it must.",
+        "VALIDITY_CHECK_FAILED / MISSING_DATA / PILOT_EXCEPTION": "Procedural: the run did not complete as specified. Still final, still abandon. No inference about the signal is drawn."
+      },
+      "issue_39_item": 5
+    },
+    "CLOSED_BY_DESIGN_ARITHMETIC": {
+      "condition": "Owner chooses option C.",
+      "maps_to_option": "abandon (this selector on this generator family)",
+      "engineering_consequence": "No code is written. Both seeds are retired unused. ADR-0035, a short doc and an aggregate record go to main, with gate_design_arithmetic_from_constants as the evidence. No data claim is made."
+    },
+    "WITHDRAWN_UNEXPOSED": {
+      "condition": "See procedural_outcome_table.protocol_defect_found_before_pilot.",
+      "maps_to_option": "postpone",
+      "engineering_consequence": "Seeds retired unused. ADR-0035 records the withdrawal. Any retry is a new study with new seeds. No inference about the signal is drawn."
+    }
+  },
+
+  "relation_to_obs_002": {
+    "label": "Reopens the question left open by OBS-002's procedural NO_GO_NOT_DISCRIMINATING (ADR-0031). This is a NEW, separately labelled study, not an amendment of OBS-002.",
+    "obs_002_holdout_status": "Seed 202610180615 was cancelled, never run and retired. Nobody has outcome data for it. OBS-003 does not use it.",
+    "new_seeds": {
+      "holdout": 202610181000,
+      "pilot": 202610180002,
+      "retired_never_to_be_used": [202610180615, 202610180001]
+    },
+    "known_prior_exposure": {
+      "what_the_designer_read": "Main-tree OBS-002 protocol, doc (labs/core/docs/OBS_002_NO_GO.md), aggregate report (labs/core/reports/KEP_OBS_002_NO_GO.json) and ADR-0031, plus the evaluator and tests at 2a18772. Also critics' notes on draft 1, which contain closed-form arithmetic only. Nothing under /tmp/claude-0/ was read. No OBS-002 or OBS-003 code was executed.",
+      "outcomes_seen": "OBS-002 pilot outcomes for steps 0-59 of the same generator design, on retired pilot seed 202610180001 (different seed and stream keys):",
+      "outcomes_seen_list": [
+        "28 telemetry reads per outage regime (steps 32-59) and 0 alarms in every regime.",
+        "Raw-loss regime: 28 of 28 reads had insufficient pairs; mean 1.464 pairs when read.",
+        "Mean pairs when read: outage_stable 35.929, outage_midstream_drift 38.964, outage_syndicated_drift 38.107, outage_shared_rumor 38.25.",
+        "Action-level identity: candidate == conservative == audit_age_only on all 360 pilot cases.",
+        "Under (action, probe_id): candidate != conservative on 5 syndicated-regime cases (deep instead of balanced) and on 0 elsewhere; candidate == audit_age_only on all 360."
+      ],
+      "obs_003_windows_and_gates_overlapping_steps_0_to_59": [
+        "W_pre [0,32): S1.",
+        "W_read [32,60) part: G10 (outage_stable), S2, S5, S9 and the nearest-control ledger.",
+        "W_rawloss_fallback [36,60) part: G5.",
+        "W_whole [0,60) part: G1d, G4 (whole-regime clauses), G5, G6, G7, G8.",
+        "Syndicated [32,60): G6 and the ledger, where conservative's still-informed probe choice matters."
+      ],
+      "settings_made_with_that_exposure": [
+        "G10 start 32 = t_outage + max_review_age_hours. It is derived from constants, but it moved from OBS-002's 48 into a stretch already seen to have 0 alarms on a sister seed. That raises G10's denominator from 192 to 208 and its allowance from 48 to 52 alarms.",
+        "The expected-pairs figure 36.75 = 4 x 0.81 x 11.3417 is derived from constants, but it was computed after seeing observed means of 35.9-39.0.",
+        "gate_design_arithmetic assumption A2: at expected audit counts, conservative's informed probe in the syndicated regime is balanced. The 5 syndicated differences seen suggest it is mostly deep, so syndicated figures that depend on informed conservative are given as a range over both."
+      ],
+      "response": "No window, threshold, constant or gate was changed in response to this exposure. It is disclosed so that the auditor and readers can weigh it."
+    },
+    "generator_reuse_justification": "The OBS-002 regimes, quality tables, raw-loss, syndication, rumor and timeline are reused because its holdout was never run. Every numeric literal is now an explicit key in 'generator'. RNG stream keys carry the study tag 'kep-obs003', so no OBS-003 stream can coincide with an OBS-002 stream.",
+    "changes_and_reasons_derived_from_frozen_constants": [
+      {"change": "The pilot evaluates only predeclared sampled steps inside the mechanism windows, computes proposals only, and measures discriminability against the nearest control audit_age_only (PD1) and separately against conservative (PD2).",
+       "reason": "OBS-002's frozen constants put pilot_end=60 before conservative's audit history empties (24-3+72=93), before drift onset (150) and before the G9 window (180). Its stop rule compared against BOTH controls, so a candidate identical to audit_age_only could pass it. By the rule itself the candidate differs from audit_age_only only when it reads telemetry and the pairs are insufficient or alarming."},
+      {"change": "proposal := (action, probe_id), defined once (see 'proposal_definition') and used identically in the pilot, G5, G7 and S1-S4.",
+       "reason": "OBS-002 left 'proposal' undefined. The reused executors record action only, which produced the post-pilot deviation D1."},
+      {"change": "New primary gates against audit_age_only (G1a, G2a, G3a).",
+       "reason": "The rule makes audit_age_only the nearest control. Value over fixed_voi or conservative alone cannot show that the telemetry signal adds anything."},
+      {"change": "Primary value gates are evaluated in mechanism windows derived from timeline constants (W_blind, W_drift), plus a whole-regime no-net-harm gate (G1d).",
+       "reason": "OBS-002's whole-regime per-case means mixed in phases where the compared policies are identical by construction ([0,32) for candidate vs audit_age_only and conservative). The meaning of a per-case threshold then depends on arbitrary phase lengths. G1d keeps a window from hiding net harm."},
+      {"change": "Materiality: the per-case numbers 0.025 / 0.05 / 0.01 / 0.5 / 0.25 are unchanged, but the absolute G1 bar is not. OBS-002 required 0.025 x 240 = 6.0 over the whole regime against fixed_voi and conservative. OBS-003 requires 0.025 x 90 = 2.250 over W_drift (~0.0094 per case over the whole regime) plus G1d >= 0, and 0.025 x 57 = 1.425 over W_blind.",
+       "reason": "The windows contain the mechanism, and whole-regime bars mix in identical phases. Stated here so that 'unchanged' does not mislead."},
+      {"change": "G9 window is [192,240) = drift_onset + ramp + lookback. G10 window is [32,240), every step where the candidate is certain to read telemetry.",
+       "reason": "OBS-002's G9 started at 180, when the 12 h lookback still held partially degraded votes (alpha 0.6-1.0). Its G10 start (48) did not match the first certain read (24+8=32). See known_prior_exposure for G10."},
+      {"change": "G5 and G7 are SANITY_STRUCTURAL with exact proposal identity. G1c, G2c, G3b and G4 are NEAR_STRUCTURAL. G6 and G8 are INHERITED_AUDIT_AGE_COMPONENT. None of these count as telemetry-value evidence; all remain required with unchanged conditions.",
+       "reason": "Design logic: their outcomes follow from the constants (margins in gate_design_arithmetic_from_constants), or audit_age_only attains them without telemetry."},
+      {"change": "Each paired bootstrap has its own string seed key (see accounting.bootstrap).",
+       "reason": "OBS-002's frozen rule (seed+i+9100 for candidate-minus-fixed_voi and +1 for candidate-minus-conservative) gives regime i's second bootstrap the same seed as regime i+1's first."},
+      {"change": "Missing data fails every gate and invariant, not only G9/G10.",
+       "reason": "OBS-002's deviation D2 fixed this only for G9/G10."},
+      {"change": "The independent audit happens BEFORE the pilot. Pilot and holdout each run once from the same audited SHA through guarded CLIs with no code change in between. The output file is created before any protected-seed data exists, and the guards live in the seeding function.",
+       "reason": "OBS-002's decisive deviation D1 was a code change made after the pilot. OBS-002's holdout guard was a bypassable _guarded flag, and its output file was written only at the end."},
+      {"change": "Generator literals that OBS-002 left in prose or code (0.6 loss, 4-20 h delay, 0.08 second root, 0.04 negative, 90/60/45 min offsets, 0-3 reposts, minute offset 0-59, draw order) and conservative's window_hours=72 and min_class_n=12 are explicit keys.",
+       "reason": "The owner requires every generator literal in the protocol so that the auditor can check code against protocol."},
+      {"change": "Bootstrap draws go from 400 to 2000.",
+       "reason": "Gated comparisons now use 57- and 90-case windows instead of 240-case regimes. 2000 draws put the 2.5% quantile at index 50 instead of 10. Chosen before any data. It cannot help either side."}
+    ],
+    "unchanged_from_obs_002": ["six regime definitions", "quality tables", "drift ramp", "raw-loss, syndication and rumor definitions", "telemetry cost 0.004 per read", "false-assertion penalty 4", "per-case materiality numbers (absolute bars changed; see changes)", "selector rule and boundaries", "five policies", "240 cases per regime, 96 h warmup, hourly spacing"]
+  },
+
+  "frozen_holdout": {
+    "seed": 202610181000,
+    "cases_per_regime": 240,
+    "regimes": ["outage_stable", "outage_midstream_drift", "outage_syndicated_drift", "outage_raw_loss_drift", "healthy_midstream_drift", "outage_shared_rumor"],
+    "case_spacing_hours": 1,
+    "run_count_allowed": 1,
+    "run_only_after": "(1) owner option A or B recorded, protocol frozen and committed, its SHA-256 pinned in the evaluator; (2) independent audit signed off on an audited evaluator commit SHA; (3) pilot run once from that SHA with final record COMPLETE and verdict PILOT_PASS.",
+    "guarded_cli": {
+      "command": "python -m benchmarks.obs_003_eval --stage holdout --confirm-audited-evaluator-commit <SHA> (cwd labs/core)",
+      "order_of_operations_all_required": [
+        "1. Guards that need no protected-seed data: git rev-parse HEAD equals <SHA> exactly; git status --porcelain -- labs/core is empty except for the one untracked pilot output labs/core/reports/KEP_OBS_003_PILOT_PROPOSALS.json; the protocol file's SHA-256 equals the pinned value; the pilot output parses, its record_state is COMPLETE, its payload verdict is PILOT_PASS, and its payload's audited_evaluator_commit equals <SHA> and protocol_sha256 equals the pinned hash; labs/core/reports/KEP_OBS_003_HOLDOUT_FULL.json does not exist; the stage seed equals 202610181000.",
+        "2. Immediately after these guards pass and BEFORE any pilot- or holdout-seed data is generated, the holdout output file is created with open(path, 'x') (O_EXCL) and a STARTED record is written and fsynced: {record_state: 'STARTED', run_metadata: {stage, seed, audited SHA, protocol_sha256, interpreter sys.version, pid, nonce, started_at UTC}}.",
+        "3. The pilot is recomputed in memory (proposals only, deterministic), and the canonical JSON of its payload is compared byte for byte with the stored pilot payload. On mismatch the file's final record is {record_state: 'PILOT_NOT_REPRODUCIBLE'}, the final verdict is NO_GO (reason PILOT_NOT_REPRODUCIBLE), and no holdout-seed data is generated. Never a retry.",
+        "4. The holdout is generated, planned, executed and scored once. The final record replaces the STARTED record in the same file (seek 0, truncate, write, fsync), with record_state 'COMPLETE'.",
+        "5. If the process raises after step 2, the final record is {record_state: 'EXCEPTION', exception type and message} and the verdict is NO_GO (HOLDOUT_EXCEPTION). If the process dies after step 2, the STARTED record stands as the final record and the verdict is NO_GO (HOLDOUT_EXCEPTION). No re-run in either case.",
+        "6. The output file's SHA-256 is published externally at once (comment in the study PR and on issue #39), so a deterministic re-run after deleting the untracked file could not go unrecorded."
+      ],
+      "seeding_function_guard": "The single function that seeds generator streams refuses seed 202610181000 unless, at that moment, (i) git HEAD equals the audited SHA and the tree is clean as in step 1, and (ii) this process created the holdout output file with O_EXCL and holds the pid and nonce written into its STARTED record. It refuses seed 202610180002 unless the same holds for the pilot output in stage pilot, or for the holdout output during the step-3 recompute in stage holdout. It always refuses every seed in forbidden_seeds. So no code path, guarded flag or not, can generate pilot- or holdout-seed data without consuming the one run and leaving the file.",
+      "python_api": "The Python API refuses stage 'holdout' and stage 'pilot' (it raises before any generator call) unless called from the guarded CLI entry point that performed steps 1-2. There is no _guarded flag or token parameter.",
+      "guard_refusal_semantics": "A refusal at step 1, before the output file exists, is not a run. The operator records it in the study PR thread (UTC timestamp, failing guard); no file under labs/core is written. A retry is allowed only from the same audited SHA, after restoring the audited state, with no tracked file changed (git diff --quiet <SHA> -- labs/core). Any refusal or failure after step 2 is final.",
+      "canonical_json": "json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(',', ':')) + '\\n', encoded as UTF-8.",
+      "byte_identity_scope": "Only the 'payload' object is compared. 'run_metadata' (interpreter sys.version, pid, nonce, timestamps) is excluded. Cross-interpreter determinism (3.11/3.13) of the payload is established during the audit, on fixture seeds only.",
+      "interpreter": "Recorded in run_metadata. The holdout is not re-run on a second interpreter."
+    },
+    "forbidden_seeds": [202610180615, 202610180001, 202610121015, 2026101204, 20261015, 20261013, 20261011],
+    "forbidden_seeds_scope": "Global: refused by the seeding function in every context (tests, audit, pilot, holdout). In addition, 202610180002 is refused everywhere except stage pilot and the holdout's step-3 recompute, and 202610181000 is refused everywhere except stage holdout.",
+    "seed_note": "Owner-fixed, wall-clock 2026-10-18 10:00, chosen before any OBS-003 code existed. Distinct from every earlier study seed."
+  },
+
+  "pilot": {
+    "seed": 202610180002,
+    "purpose": "Small counterfactual mechanism check (issue #39 item 5). It answers ONE question: does the candidate's proposal differ from its nearest control where the timeline constants say the signal must act, and from conservative where conservative is provably blind? It is not evidence of value.",
+    "run_count_allowed": 1,
+    "run_only_after": "Owner option A or B recorded and frozen; independent audit sign-off. The pilot runs from the audited SHA.",
+    "guarded_cli": {
+      "command": "python -m benchmarks.obs_003_eval --stage pilot --confirm-audited-evaluator-commit <SHA> (cwd labs/core)",
+      "order_of_operations_all_required": [
+        "1. HEAD equals <SHA>; git status --porcelain -- labs/core is empty; protocol SHA-256 equals the pinned value; labs/core/reports/KEP_OBS_003_PILOT_PROPOSALS.json does not exist; stage seed equals 202610180002.",
+        "2. Immediately after these guards pass and BEFORE any pilot-seed data is generated, the pilot output file is created with open(path, 'x') (O_EXCL) and a STARTED record is written and fsynced (same run_metadata fields as the holdout).",
+        "3. The pilot computation runs. Its final record replaces the STARTED record (record_state 'COMPLETE', run_metadata, payload).",
+        "4. If the process raises after step 2, the final record is {record_state: 'EXCEPTION'}. If it dies, the STARTED record stands. Either way the final verdict is NO_GO_NOT_DISCRIMINATING (PILOT_EXCEPTION). No retry.",
+        "5. The pilot file's SHA-256 is published externally at once (study PR and issue #39)."
+      ],
+      "seeding_function_guard_and_api": "As frozen_holdout.guarded_cli.seeding_function_guard and python_api: the pilot seed cannot be generated outside this CLI run or the holdout's step-3 recompute.",
+      "guard_refusal_semantics": "As frozen_holdout.guarded_cli.guard_refusal_semantics."
+    },
+    "regime": "outage_midstream_drift",
+    "regime_reason": "The only regime where both halves of the mechanism exist: conservative blind with a stable world (W_blind), and a drifted world with an independent pair (W_alarm). In syndicated drift the signal is defeated by design, in raw loss the fallback is structural, in healthy the rule never reads, and in stable and rumor regimes no drift occurs.",
+    "timeline_generated": "The full timeline on the pilot seed: background hours -96..239 and cases 0..239, using the holdout generator code path and stream keys with base seed 202610180002. This preserves background-stream continuity. Trial objects are built because the case RNG stream requires drawing truth and hidden answers, but the pilot never reads trial.truth or trial.hidden_answers.",
+    "sampled_steps": {
+      "S_A_in_W_blind": [93, 95, 97, 99, 101, 103, 105, 107, 109, 111, 113, 115, 117, 119, 121, 123, 125, 127, 129, 131, 133, 135, 137, 139, 141, 143, 145, 147, 149],
+      "S_A_rule": "range(t_blind=93, t_drift=150, 2): 29 steps",
+      "S_B_in_W_alarm": [192, 194, 196, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 220, 222, 224, 226, 228, 230, 232, 234, 236, 238],
+      "S_B_rule": "range(t_alarm=192, n=240, 2): 24 steps",
+      "total": 53,
+      "no_other_step_is_planned": true
+    },
+    "policies_planned": ["conservative", "fixed_voi", "audit_age_only", "unlabelled_disagreement"],
+    "computation_allowed": "For each sampled step only: build the policy-visible inputs at as_of (View, delivered truth-free ObservedVotes, completed audits for conservative, ReviewPulse), call each planner or selector, and record proposal = (action, probe_id).",
+    "computation_forbidden": [
+      "Calling execute_preplanned or any executor.",
+      "Reading trial.truth or trial.hidden_answers.",
+      "Computing outcomes, assertions, false assertions, missed true, utilities, check or telemetry costs, a bootstrap or any gate.",
+      "Planning any step outside S_A and S_B.",
+      "Emitting disagreement fractions, pair counts, alarm flags or rates, selector branch labels or audit counts."
+    ],
+    "what_the_emission_ban_does_not_hide": "The ban limits what is written, not what can be inferred. On ONE_ROOT_ONLY steps, candidate == conservative != fixed_voi reveals an alarm or insufficient pairs, and conservative's action strings reveal evidence status. This is harmless (pilot seed, policy-visible data only), and the pilot does not claim to hide mechanism state.",
+    "outputs_allowed": {
+      "payload": ["study", "stage", "seed", "regime", "protocol_sha256", "audited_evaluator_commit", "source_sha256 of reused modules", "per sampled step: step, window label (S_A or S_B), proposals of the four planned policies as [action, probe_id]", "PD1 count", "PD2 count", "V1-V4 booleans", "pilot verdict and reason code"],
+      "run_metadata": ["interpreter sys.version", "pid", "nonce", "started_at and finished_at UTC"],
+      "record_state": "STARTED | COMPLETE | EXCEPTION"
+    },
+    "discriminability_criteria_all_required": {
+      "PD1_nearest_control": {
+        "definition": "Number of steps s in S_B with proposal(unlabelled_disagreement, s) != proposal(audit_age_only, s).",
+        "minimum": 3,
+        "what_it_tests": "The telemetry signal changes proposals versus audit_age_only where every lookback vote is fully degraded.",
+        "strength_note": "PD1 >= 3 corresponds to an S_B alarm rate of only ~0.26 (3 of ~11.7 expected ONE_ROOT_ONLY steps), weaker than G9's 0.5. It is a screen against a never-alarming selector, not a recall test."
+      },
+      "PD2_conservative": {
+        "definition": "Number of steps s in S_A with proposal(unlabelled_disagreement, s) != proposal(conservative, s).",
+        "minimum": 3,
+        "what_it_tests": "Where conservative is deterministically blind and the world is stable, the candidate does not just reproduce conservative.",
+        "strength_note": "audit_age_only itself meets PD2, since it equals fixed_voi on every S_A step. PD2 only tests that the candidate does not raise near-constant false alarms or fall back for lack of pairs in W_blind (for example with votes made invisible). The criterion is owner-fixed and labelled as such."
+      },
+      "minimum_justification": "3 means a single isolated alarm, or a single coincidence, cannot satisfy a criterion. It is >=12.5% of the 24 S_B steps and >=10% of the 29 S_A steps. Design arithmetic from the constants alone (design_arithmetic_from_constants) gives about 11.1 expected PD1 differences and 16.2 expected PD2 differences if the mechanism works as the constants imply. The stride 2 and the minimum 3 are chosen design constants, not derived ones. Tail probabilities are independence approximations: see design_arithmetic_from_constants."
+    },
+    "validity_checks_all_required": {
+      "V1": "At every sampled step proposal(audit_age_only) == proposal(fixed_voi). Steps are >= t_read=32, so review age > 8 h is certain.",
+      "V2": "At every sampled step conservative's action != 'PROPOSE_CHECK'. Steps are >= t_blind=93, so conservative's 72 h window holds zero audits.",
+      "V3": "Exactly the 53 sampled steps were planned, each for all four policies. No other step was planned.",
+      "V4": "Every proposal is a 2-tuple with probe_id null unless action == 'PROPOSE_CHECK'; no value is missing."
+    },
+    "verdict_rule": "PILOT_PASS iff PD1 >= 3 AND PD2 >= 3 AND V1-V4 all true AND no missing value AND no exception AND the final record_state is COMPLETE. Otherwise the final study verdict is NO_GO_NOT_DISCRIMINATING with a reason code (PD1_BELOW_MINIMUM, PD2_BELOW_MINIMUM, VALIDITY_CHECK_FAILED, MISSING_DATA or PILOT_EXCEPTION). No amendment, no re-pilot, holdout cancelled.",
+    "pilot_results_are_not_evidence": true,
+    "allowed_changes_after_pilot": "NONE. See deviation_policy."
+  },
+
+  "proposal_definition": {
+    "proposal": "proposal(P, s) := (plan.action, plan.probe_id). plan is the ResearchPlan returned at step s by the base planner that policy P uses. never and fixed_voi use plan_research; conservative uses plan_adaptive in mode conservative; audit_age_only and unlabelled_disagreement use whichever base planner their selector returns. probe_id is null unless action == 'PROPOSE_CHECK'.",
+    "equality": "Tuple equality on both elements.",
+    "not_part_of_proposal": ["plan.policy string", "selector branch", "probe_root", "proposed_cost", "assumed_expected_net_gain", "assumed_current_probability"],
+    "recording": "The evaluator records the tuple from the plan object itself. It must NOT use execute_preplanned's 'proposed_action' field, which holds action only.",
+    "used_identically_in": ["pilot PD1, PD2, V1, V2, V4", "G5", "G7", "S1", "S2", "S3", "S4", "all reported proposal-difference counts"]
+  },
+
+  "clock_definitions": {
+    "as_of": "as_of(s) := view.query.at = start_time_utc + s hours. It is the only clock for every policy input: ObservedVote visibility (observed_at window and available_at <= as_of), ReviewPulse (audits with adjudicated_at <= as_of), review age (as_of - last_completed_at), conservative's audits (adjudicated_at <= as_of), estimate_sources and plan_adaptive (as_of = q.at), and plan_research (q.at).",
+    "decision_clock": "query.at + max_wait_minutes (20 min). Used only inside execute_preplanned, for probe arrival and the final Core pipeline.",
+    "delay_conversion": "Generator delays are timedelta(minutes=x) for normal delivery and timedelta(hours=x) for raw-loss delay, built from the float draw and never rounded to whole minutes."
+  },
+
+  "outcome_definitions": {
+    "source": "benchmarks.adaptive_trust_eval.execute_preplanned(case, plan), reused unchanged.",
+    "accepted": "execute_preplanned(...)['accepted']: the final Core action at the decision clock is LAB_CORROBORATED with non-empty selected_ids.",
+    "assertion": "accepted",
+    "correct_assertion": "accepted AND truth",
+    "false_assertion": "accepted AND NOT truth",
+    "missed_true": "truth AND NOT accepted. Every non-accepted action counts, HUMAN_REVIEW and every NO_CHECK_* or CORE_REFUSED action included.",
+    "human_review_proposal": "proposal action == 'HUMAN_REVIEW'",
+    "check": "proposal action == 'PROPOSE_CHECK'",
+    "telemetry_read": "the candidate's selector read pair telemetry at this step (review age > 8 h)",
+    "assertion_coverage": "assertions / cases in the window (reported only).",
+    "false_fraction_given_assertion": "false_assertions / assertions; null when assertions == 0 (reported only, never gated).",
+    "counts": "All counts are Python ints."
+  },
+
+  "generator": {
+    "rng": {
+      "library": "Python random.Random seeded with a str (seed version 2, sha512-based; deterministic across Python 3.11/3.13)",
+      "background_stream_key": "kep-obs003|generator|{base_seed}|{regime}|background",
+      "case_stream_key": "kep-obs003|generator|{base_seed}|{regime}|cases",
+      "base_seed": "the stage's seed (holdout 202610181000 or pilot 202610180002), used directly for every regime; no integer offsets",
+      "background_draw_order_per_entity": "truth = U < background_truth_rate; minute = randrange(60); upstream = draw(truth, origin quality at hour); syndicated = U < pair_syndication (drawn even when pair_syndication = 0); then for root in model_roots_order: answer = upstream if root == 'origin' or (root == 'deep_root' and syndicated) else draw(truth, root quality at hour); skip root if U >= per_root_observation_probability; if lossy: drop if U < raw_loss_drop_probability, else delay = timedelta(hours=uniform(raw_loss_delay_hours_uniform)); else delay = timedelta(minutes=uniform(normal_delivery_delay_minutes_uniform))",
+      "case_draw_order_per_step": "truth = U < test_truth_rate; claim = draw(truth, origin quality at step); rumor = (not truth) and U < test_rumor (U drawn only when truth is False); if rumor, claim = True immediately, so the emitted origin claim and its reposts carry the post-rumor value; emit origin claim; reposts: k = randrange(4), emit k reposts; second root if U < pre_existing_second_root_probability, and only then its answer = draw(truth, balanced_root quality); negative if U < pre_existing_negative_probability; probe answers cheap, balanced, deep = draw(truth, cheap_root / balanced_root / deep_root quality) in that order; if U < pair_syndication then deep = claim (U drawn even when pair_syndication = 0); if rumor then cheap = balanced = deep = True; mirror = unlicensed = truth",
+      "draw_definition": "draw(truth, (sens, spec)) = U < (sens if truth else 1 - spec)"
+    },
+    "start_time_utc": "2026-11-02T08:00:00+00:00",
+    "case_spacing_hours": 1,
+    "cases_per_regime": 240,
+    "warmup_hours_before_first_case": 96,
+    "test_truth_rate": 0.68,
+    "prior": 0.70,
+    "budget": 0.15,
+    "max_wait_minutes": 20,
+    "query": {"city": "İstanbul", "kind": "place", "limit": 1, "at": "start_time_utc + step hours"},
+    "base_record": {
+      "selection": "first load_catalog() row with kind == 'place' and city == 'İstanbul' (wikidata:Q1463961 at source_snapshot)",
+      "overrides": {
+        "id": "synthetic:obs003:{regime}:{base_seed}:{step}",
+        "source_url": "synthetic://obs003-created-in-memory",
+        "source_id": "obs003_synthetic_fixture",
+        "publisher_root": "synthetic_source",
+        "source_record_hash": "sha256('obs003/{regime}/{base_seed}/{step}')",
+        "synthetic": true,
+        "rights_scope": "open_attribution"
+      }
+    },
+    "approved_roots": ["origin", "cheap_root", "balanced_root", "deep_root"],
+    "model_roots_order": ["balanced_root", "cheap_root", "deep_root", "origin"],
+    "observed_source_model": {"id": "source", "publisher_root": "origin", "sensitivity": 0.86, "specificity": 0.84, "cost": 0.0, "approved": true, "origin_primary": true},
+    "check_options_reused_unchanged": {
+      "source": "benchmarks.budgeted_core_eval._check_options(), verified equal to this table at evaluator load",
+      "options": [
+        {"id": "cheap", "publisher_root": "cheap_root", "sensitivity": 0.74, "specificity": 0.72, "cost": 0.020, "approved": true, "latency_minutes": 2},
+        {"id": "balanced", "publisher_root": "balanced_root", "sensitivity": 0.88, "specificity": 0.86, "cost": 0.065, "approved": true, "latency_minutes": 7},
+        {"id": "deep", "publisher_root": "deep_root", "sensitivity": 0.97, "specificity": 0.95, "cost": 0.115, "approved": true, "latency_minutes": 16},
+        {"id": "mirror", "publisher_root": "origin", "sensitivity": 0.999, "specificity": 0.999, "cost": 0.0, "approved": true, "latency_minutes": 0, "note": "forbidden: same root as the seed claim"},
+        {"id": "unlicensed", "publisher_root": "external_unapproved", "sensitivity": 0.999, "specificity": 0.999, "cost": 0.0, "approved": false, "latency_minutes": 0, "note": "forbidden: unapproved"}
+      ],
+      "note": "These are the planners' ASSUMED probe qualities. Actual probe answers come from the generator quality tables below."
+    },
+    "test_case_signals": {
+      "origin_claim_minutes_before_query": 90,
+      "origin_repost_count_uniform_integer_inclusive": [0, 3],
+      "origin_repost_minutes_before_query": 90,
+      "pre_existing_second_root": "balanced_root",
+      "pre_existing_second_root_probability": 0.08,
+      "pre_existing_second_root_minutes_before_query": 60,
+      "pre_existing_second_root_answer": "draw(truth, current balanced_root quality)",
+      "pre_existing_negative_root": "cheap_root",
+      "pre_existing_negative_probability": 0.04,
+      "pre_existing_negative_minutes_before_query": 45,
+      "pre_existing_negative_supports": false,
+      "signal_observed_at_equals_available_at": true,
+      "signal_rights_scope": "research_ingest",
+      "event_ids": ["obs003-origin:{step}", "obs003-repost:{step}:{k}", "obs003-second:{step}", "obs003-negative:{step}"]
+    },
+    "probe_answers": {
+      "cheap": "draw(truth, current cheap_root quality)",
+      "balanced": "draw(truth, current balanced_root quality)",
+      "deep": "draw(truth, current deep_root quality); replaced by the origin claim with probability pair_syndication",
+      "mirror": "truth (never selectable)",
+      "unlicensed": "truth (never selectable)",
+      "visibility": "Executor only, after the plan is frozen"
+    },
+    "background_stream": {
+      "hours": "from -warmup_hours_before_first_case to cases_per_regime - 1 inclusive",
+      "entities_per_hour": 4,
+      "entity_id": "synthetic:obs003-background:{regime}:{base_seed}:{hour}:{j}",
+      "background_truth_rate": 0.55,
+      "observation_minute_offset_uniform_integer_inclusive": [0, 59],
+      "observed_at": "start_time_utc + hour h + minute offset (one shared observed_at for all roots of one entity)",
+      "per_root_observation_probability": 0.9,
+      "normal_delivery_delay_minutes_uniform": [0, 60],
+      "audit_adjudication_delay_hours": 3,
+      "audit_id": "obs003-audit:{regime}:{base_seed}:{hour}:{j}:{root}",
+      "audit_fields": "AuditFeedback(audit_id, entity_id, publisher_root=root, observed_at, adjudicated_at=observed_at+3h, supports=answer, truth)",
+      "audit_exists_only_if": "the root's vote was observed AND observed_at + delay <= adjudicated_at (delivered votes only) AND (no outage OR adjudicated_at < outage_at)",
+      "audits_during_outage": "none: an audit with adjudicated_at >= outage_at is never emitted"
+    },
+    "raw_loss": {
+      "applies_when": "regime raw_loss is true AND vote observed_at >= outage_at",
+      "raw_loss_drop_probability": 0.6,
+      "raw_loss_delay_hours_uniform": [4, 20],
+      "available_at": "observed_at + delay"
+    },
+    "pair_syndication_definition": "With probability pair_syndication per background entity, deep_root's vote equals origin's vote instead of an independent draw. Independently, with the same probability per current case, the deep probe answer equals the origin claim.",
+    "test_rumor_definition": "For a false current case, with probability test_rumor the origin claim (and its reposts) and the cheap, balanced and deep probe answers are all True. The pre-existing second-root and negative signals are not forced.",
+    "quality_format": "[sensitivity, specificity]",
+    "quality_stable": {
+      "origin": [0.86, 0.84],
+      "cheap_root": [0.76, 0.70],
+      "balanced_root": [0.90, 0.85],
+      "deep_root": [0.96, 0.94]
+    },
+    "quality_degraded": {
+      "origin": [0.60, 0.55],
+      "cheap_root": [0.56, 0.52],
+      "balanced_root": [0.58, 0.55],
+      "deep_root": [0.62, 0.57]
+    },
+    "drift_ramp_hours": 30,
+    "drift_interpolation": "quality(step) = stable if onset is null or step < onset; else stable*(1-alpha) + degraded*alpha, with alpha = min(1, (step - onset)/drift_ramp_hours). step = case index for cases and hour index for background votes.",
+    "regimes": {
+      "outage_stable": {"outage_start_step": 24, "drift_onset_step": null, "raw_loss": false, "pair_syndication": 0.0, "test_rumor": 0.0},
+      "outage_midstream_drift": {"outage_start_step": 24, "drift_onset_step": 150, "raw_loss": false, "pair_syndication": 0.0, "test_rumor": 0.0},
+      "outage_syndicated_drift": {"outage_start_step": 24, "drift_onset_step": 150, "raw_loss": false, "pair_syndication": 0.8, "test_rumor": 0.0},
+      "outage_raw_loss_drift": {"outage_start_step": 24, "drift_onset_step": 150, "raw_loss": true, "pair_syndication": 0.0, "test_rumor": 0.0},
+      "healthy_midstream_drift": {"outage_start_step": null, "drift_onset_step": 150, "raw_loss": false, "pair_syndication": 0.0, "test_rumor": 0.0},
+      "outage_shared_rumor": {"outage_start_step": 24, "drift_onset_step": null, "raw_loss": false, "pair_syndication": 0.0, "test_rumor": 0.30}
+    },
+    "regime_order": ["outage_stable", "outage_midstream_drift", "outage_syndicated_drift", "outage_raw_loss_drift", "healthy_midstream_drift", "outage_shared_rumor"],
+    "executor_reused_unchanged": "benchmarks.adaptive_trust_eval.execute_preplanned: a chosen probe's answer arrives at query + latency; the Core pipeline is evaluated at the decision clock query + max_wait_minutes; accepted iff LAB_CORROBORATED with non-empty selected_ids.",
+    "evaluator_must_read_every_literal_from_this_file": true
+  },
+
+  "reused_core_unchanged": {
+    "modules_sha256_at_source_snapshot": {
+      "labs/core/kepcore/adaptive_trust.py": "01c4cdc1b59d5b863a635f3910bf64a72d493cc1c86049ec165e8df99233c311",
+      "labs/core/kepcore/budgeted_verify.py": "2b432433af2fb300f282b58a69c70a62b3243e09ca6b22d961f473584092bbc7",
+      "labs/core/kepcore/temporal_pipeline.py": "248a319ab520499964ef8b93e3187d4934be65fd0f1ea8eece886708e70a61b4",
+      "labs/core/kepcore/core.py": "348af954c00f75654ac0683605fdfecee94a74328a9b28ad3cf17533ef53005b",
+      "labs/core/kepcore/evidence_lab.py": "6648d8441c81bc728a0077228ca532f3b908799f4a9d9ffc367837f2ca825b30",
+      "labs/core/kepcore/calibration.py": "6ee7b1091a7acf4dbbe052a1aad60e59ed147f174b50442eb062d32a26c4da15",
+      "labs/core/benchmarks/budgeted_core_eval.py": "cc09c7c4eb377e5d7aadd39ab2ef9ca1b0b486a4ea0cbd39134e171c88486695",
+      "labs/core/benchmarks/adaptive_trust_eval.py": "e6bb4029a3f0ce5f56ae258c274cdb346cdb7a4ea541aa4c700450764da59b4b"
+    },
+    "unchanged_since": "f8ec7cf (empty diff to source_snapshot)",
+    "reused_core_constants_not_changed": {
+      "conservative_LOWER_ROOT_GATE": 0.62,
+      "wilson_z": 1.96,
+      "conservative_beta_smoother": "Beta(2,2)",
+      "core_evidence_ttl_hours": 48,
+      "voi_false_assertion_weight_inside_planner": 4.0,
+      "voi_min_gain": 1e-12
+    }
+  },
+
+  "policies": ["never", "conservative", "fixed_voi", "audit_age_only", "unlabelled_disagreement"],
+  "policy_definitions": {
+    "clock": "Every policy input uses as_of = view.query.at (clock_definitions.as_of). The decision clock is used only inside execute_preplanned.",
+    "never": "plan_research(policy='never'): never proposes a check. Pre-existing multi-root support still corroborates, so this is NOT always-abstain.",
+    "conservative": "plan_adaptive(mode='conservative', window_hours=72, min_class_n=12, audits = completed audits with adjudicated_at <= as_of): CORE-003 unchanged.",
+    "fixed_voi": "plan_research(policy='voi') with the fixed observed_source_model and check options: CORE-002 unchanged.",
+    "audit_age_only": "If no completed review exists or its age (as_of - last_completed_at) <= 8 h: conservative; otherwise fixed_voi. Reads no pair telemetry; charged 0.",
+    "unlabelled_disagreement": "The candidate; see candidate_rule_unchanged_from_obs_001."
+  },
+  "conservative_parameters": {"mode": "conservative", "window_hours": 72, "min_class_n": 12},
+  "always_abstain_reference": "Analytic reference, not a planner (issue #39 item 2): it never asserts, so utility = 0, false assertions = 0, coverage = 0 and missed_true = number of true cases, per regime and window. Reported beside every table.",
+
+  "candidate_rule_unchanged_from_obs_001": {
+    "primary_method": "unlabelled_disagreement",
+    "pair_of_publisher_roots": ["origin", "deep_root"],
+    "observed_vote_lookback_hours": 12,
+    "min_distinct_entities": 18,
+    "disagreement_cutoff_fraction": 0.35,
+    "max_last_completed_review_age_hours": 8,
+    "as_of": "as_of := view.query.at = start_time_utc + s hours, for vote visibility, the review pulse and review age (clock_definitions.as_of).",
+    "rule": "If no completed review exists, or its age <= 8 h: conservative (no telemetry read). Otherwise read pair telemetry. If at least 18 distinct background entities have policy-visible votes from BOTH roots and their disagreement fraction <= 0.35: fixed_voi. Otherwise (fewer than 18, or disagreement > 0.35 = alarm): conservative.",
+    "integer_form": "pairs and mismatches are unrounded ints. insufficient iff pairs < 18. alarm iff pairs >= 18 AND 20*mismatches > 7*pairs. No float comparison decides a branch.",
+    "alarm_flag_single_source": "S4, G9 and G10 use the alarm flag the selector itself computed at that step, never a value recomputed from a rounded fraction.",
+    "boundaries": "Review age exactly 8 h means conservative. A vote with observed_at exactly as_of-12 h is included. A vote with available_at exactly as_of is included. Exactly 18 entities is sufficient. Disagreement exactly 0.35 (20*mismatches == 7*pairs) is not an alarm.",
+    "vote_visibility": "A raw vote is policy-visible iff as_of-12h <= observed_at <= as_of AND available_at <= as_of. The latest observed vote per (root, entity) is used. The generator emits at most one vote per (root, entity); a duplicate is a generator error and the evaluator raises.",
+    "observed_vote_fields": ["root", "entity_id", "observed_at", "available_at", "supports"],
+    "review_pulse": "Only max(adjudicated_at) over audits with adjudicated_at <= as_of. Reviewer outcomes (truth) are never visible to the selector.",
+    "current_case_excluded_from_telemetry": true,
+    "alarm": "Telemetry read AND >= 18 entities AND disagreement > 0.35"
+  },
+
+  "timeline_arithmetic": {
+    "constants": {"n": 240, "t_outage": 24, "audit_adjudication_delay_hours": 3, "conservative_window_hours": 72, "min_class_n": 12, "max_review_age_hours": 8, "lookback_hours": 12, "t_drift_onset": 150, "drift_ramp_hours": 30, "entities_per_hour": 4, "per_root_observation_probability": 0.9, "background_truth_rate": 0.55},
+    "points": {
+      "outage_start": {"step": 24, "formula": "outage_start_step"},
+      "last_audited_observation_hour": {"step": 20, "formula": "t_outage - adjudication_delay - 1", "derivation": "observed_at = hour + 0..59 min; an audit needs observed_at + 3 h < 24 h, so the latest audited observations fall in [20 h, 21 h) and are adjudicated in [23 h, 24 h)."},
+      "first_certain_telemetry_read": {"step": 32, "formula": "t_outage + max_review_age_hours", "derivation": "The last completed review is strictly before 24 h, so the age exceeds 8 h for every s >= 32. For s <= 31 the age is <= 8 h unless no audit was observed in hour 20, which has probability (1-0.9)^(4*4) = 1e-16."},
+      "raw_loss_lookback_fully_lossy": {"step": 36, "formula": "t_outage + lookback_hours", "derivation": "Every vote with observed_at in [s-12, s] has observed_at >= 24 h. In [32,36) the fallback is also near-certain: P(>= 18 pairs) is 3e-5 at s=32, 9e-12 at s=33 and 0 from s=34 (exact DP)."},
+      "conservative_wilson_gate_expected_failure": {"step_approx": 82, "derivation": "Expected per-root negative-class audits = 4*0.45*0.9 = 1.62 per audited hour. The audited hours left in the window number 93-s. With origin specificity 0.84, Wilson lower >= 0.62 needs about 19 negatives, and 1.62*(93-s) < 19 first at s = 82. This is an expectation only; it is not used as a window boundary."},
+      "conservative_class_count_expected_insufficient": {"step_approx": 86, "derivation": "1.62*(93-s) < 12 first at s = 86 (expected 11.34). Expectation only; it matches the OBS-002 doc's '~86'."},
+      "conservative_audit_history_empty": {"step": 93, "formula": "t_outage - adjudication_delay + conservative_window_hours = 24 - 3 + 72", "derivation": "estimate_sources counts audits with observed_at >= as_of - 72 h. At s >= 93 that lower bound is >= 21 h > every audited observation, so the window holds zero audits. Conservative then returns NO_CHECK_INSUFFICIENT_AUDITS on every ONE_ROOT_ONLY case. Deterministic."},
+      "drift_onset": {"step": 150, "formula": "drift_onset_step", "note": "alpha(150) = 0; quality first departs from stable at 151"},
+      "lookback_pre_drift_until": {"step": 150, "derivation": "At s <= 150 the lookback holds hours s-12..s-1, all <= 149."},
+      "expected_cutoff_crossing_hour": {"hour_approx": 162.0, "derivation": "Expected independent-pair disagreement D(alpha) = 0.55*P(differ | true) + 0.45*P(differ | false) rises from 0.1832 (stable) to 0.4837 (degraded) and crosses 0.35 at alpha = 0.4003, hour 150 + 0.4003*30 = 162.01. Expectation only."},
+      "alarm_probability_passes_one_half": {"step_approx": 170, "derivation": "Exact lookback DP: P(alarm) = 0.4951 at s=169 and 0.5507 at s=170 (table in gate_design_arithmetic_from_constants)."},
+      "deep_check_break_even": {"step_approx": 177, "derivation": "fixed_voi's (PROPOSE_CHECK, deep) on ONE_ROOT_ONLY has positive expected utility until alpha = 0.9036 (s = 177.1): +0.0039 at s=177, -0.0319 at s=178, -0.1054 from s=180."},
+      "full_degradation": {"step": 180, "formula": "t_drift_onset + drift_ramp_hours"},
+      "alarm_window_start": {"step": 192, "formula": "t_drift_onset + drift_ramp_hours + lookback_hours", "derivation": "At s >= 192 every policy-visible pair vote (hours s-12..s-1 >= 180) is drawn at fully degraded quality."},
+      "end": {"step": 240, "formula": "n (exclusive)"}
+    },
+    "phase_table_outage_regimes": [
+      {"steps": "[0,24)", "state": "reviews flowing; candidate = audit_age_only = conservative; fixed_voi may differ"},
+      {"steps": "[24,32)", "state": "outage begun; review age <= 8 h; candidate = audit_age_only = conservative"},
+      {"steps": "[32,93)", "state": "candidate reads telemetry every step; audit_age_only = fixed_voi; conservative's audit counts fall, and it becomes probabilistically blind from ~82"},
+      {"steps": "[93,150)", "state": "conservative deterministically blind; world and lookback stable"},
+      {"steps": "[150,180)", "state": "drift ramp; P(alarm) passes 0.5 at ~170 (independent pair only); deep check EV turns negative at ~177"},
+      {"steps": "[180,240)", "state": "cases at fully degraded quality"},
+      {"steps": "[192,240)", "state": "lookback fully degraded"}
+    ],
+    "regime_specific_derivations": {
+      "expected_pairs_per_lookback_normal_delivery": {"value": 36.747, "derivation": "4 entities/h * 0.9^2 * (11 full hours + 0.3417 for the last, partially delivered hour); 18 required; sd about 2.75; P(< 18) = 2.5e-10 (exact DP)."},
+      "expected_pairs_per_lookback_raw_loss_from_36": {"value": 0.347, "derivation": "4 * (0.9*0.4)^2 * sum over the 12 lookback hours of P(both delays U[4,20] h <= vote age); 18 required, so the rule falls back to conservative."},
+      "syndicated_expected_disagreement": {"stable": 0.0366, "degraded": 0.0967, "derivation": "(1-0.8) * D(alpha). Never exceeds 0.35; exact P(alarm) <= 1.9e-5 per read. The signal is defeated by design and the candidate behaves like audit_age_only."},
+      "healthy_review_age": "Audits observed in hour s-4 are adjudicated in [s-1, s), so the age is <= 1 h < 8 h at every step and the candidate never reads.",
+      "rumor_regime_background": "The rumor touches only current cases. The background pair is unaffected (expected D = 0.1832 < 0.35; exact P(alarm) = 0.0084 per read).",
+      "fixed_voi_proposal_on_one_root_only": "With observed_source_model 0.86/0.84 and prior 0.70, posterior p = 0.926. CORE-002 net gains: deep 0.768 > balanced 0.708 > cheap 0.582, so fixed_voi proposes (PROPOSE_CHECK, deep) on every ONE_ROOT_ONLY case. Every other evidence state yields the same non-check baseline action for all policies (plan_adaptive returns plan_research's baseline action for non-ONE_ROOT_ONLY states).",
+      "one_root_only_share": {"stable": 0.5617, "degraded": 0.4875, "rumor": 0.6329, "derivation": "P(origin claim True) * (1-0.08) * (1-0.04); P(claim True) = 0.68*sens + 0.32*(1-spec), and in the rumor regime 0.68*sens + 0.32*(0.3 + 0.7*(1-spec))."}
+    },
+    "windows": {
+      "W_pre": {"steps": [0, 32], "size": 32, "regimes": "outage regimes", "use": "S1 only"},
+      "W_read": {"steps": [32, 240], "size": 208, "regimes": "outage regimes", "mechanism": "candidate reads telemetry on every decision", "use": "G10 (outage_stable), S2, S5, S9, nearest-control ledger"},
+      "W_blind": {"steps": [93, 150], "size": 57, "regime": "outage_midstream_drift for gates; every outage regime for the reported ledger", "mechanism": "Conservative deterministically blind (s >= 93); cases and lookback stable (s <= 150), so the candidate is expected to equal fixed_voi (stable false-alarm probability 0.0084 per read). The candidate can avoid conservative's distinct mistake (missed true) here, but so does audit_age_only.", "use": "G1c, G2c, G3b; pilot S_A; ledger"},
+      "W_drift": {"steps": [150, 240], "size": 90, "regime": "outage_midstream_drift for gates; every outage regime for the reported ledger", "mechanism": "From drift onset to the end. audit_age_only = fixed_voi (s >= 32) keeps proposing deep checks. Conservative is blind (s >= 93), so an alarm switches the candidate to abstention on ONE_ROOT_ONLY cases. In [150,~160) alarms are rare (P(alarm) < 0.06), both policies equal fixed_voi, and the alarm lag costs ~0. The cost inside the window comes from alarms in ~[160,177), which fire while fixed_voi's deep check still has positive expected utility (break-even s ~177, alpha ~0.9): design-expected -0.94 over [150,177). The gain comes from [177,240): +2.70. The candidate can avoid audit_age_only's distinct mistake (false assertions under drift) only here.", "use": "G1a, G1b, G2a, G2b, G3a; ledger"},
+      "W_alarm": {"steps": [192, 240], "size": 48, "regime": "outage_midstream_drift", "mechanism": "Lookback fully degraded; expected disagreement 0.4837 > 0.35 with about 36.75 expected pairs; exact P(alarm) = 0.9484 per read.", "use": "G9; pilot S_B"},
+      "W_blind_stable": {"steps": [93, 240], "size": 147, "regime": "outage_stable", "mechanism": "Conservative blind with no drift to the end; the candidate is expected to equal fixed_voi.", "use": "G4"},
+      "W_post_blind": {"steps": [93, 240], "size": 147, "regime": "every outage regime", "mechanism": "Conservative blind to the end (same range as W_blind_stable).", "use": "reported nearest-control ledger only"},
+      "W_rawloss_fallback": {"steps": [36, 240], "size": 204, "regime": "outage_raw_loss_drift", "mechanism": "Lookback fully lossy; about 0.347 expected pairs, so the rule forces conservative.", "use": "G5"},
+      "W_whole": {"steps": [0, 240], "size": 240, "use": "G1d, G4 (whole-regime clauses), G5 (utility and false-assertion parts), G6, G7, G8; ledger"},
+      "W_late_blind": {"steps": [82, 93], "size": 11, "regime": "outage_midstream_drift and outage_stable", "use": "reported only (probabilistic blindness)"},
+      "W_transition": {"steps": [150, 192], "size": 42, "regime": "outage_midstream_drift", "use": "reported only (alarm lag)"},
+      "notation": "[a, b] in 'steps' means the half-open range a <= s < b."
+    },
+    "pilot_windows_contain_mechanism": "S_A is inside W_blind, where conservative is deterministically blind and the candidate is expected to equal fixed_voi. S_B is inside W_alarm, where the candidate is expected to alarm and equal conservative while audit_age_only equals fixed_voi. Both follow from the constants above alone.",
+    "gate_windows_contain_mechanism": "Each gate below names its window. Each window's mechanism follows from the points above. Whole-regime gates contain every window. Containing the mechanism is not the same as being powered to detect it: see gate_design_arithmetic_from_constants."
+  },
+
+  "design_arithmetic_from_constants": {
+    "status": "Closed-form expectations computed from protocol constants only (exact probability DPs over the lookback, no RNG, generator, planner, evaluator or simulation). They are not outcome predictions and no gate uses them.",
+    "independent_pair_expected_disagreement": {"stable": 0.1832, "degraded": 0.4837},
+    "alarm_probability_per_read": {"stable": 0.0084, "fully_degraded": 0.9484, "method": "exact DP over (pairs, mismatches) for the 48 lookback entities (44 with pair probability 0.81, 4 in the last hour with 0.81*0.3417), alarm iff pairs >= 18 and 20*mismatches > 7*pairs. Draft 1's 'about 0.005' was a normal approximation and is corrected."},
+    "pilot_expected_counts_if_mechanism_works": {
+      "PD2_in_S_A": 16.15,
+      "PD1_in_S_B": 11.10,
+      "one_root_only_steps_expected_in_S_B": 11.70,
+      "approx_probability_below_minimum": {
+        "PD2": "~3e-8 under independent steps. ONE_ROOT_ONLY indicators are independent per case, so this stands.",
+        "PD1": "~8e-5 under independent steps. Adjacent sampled steps share 10 of 12 lookback hours, so alarm states are autocorrelated and the true tail is larger, roughly 1e-4 to 1e-3."
+      }
+    }
+  },
+
+  "gate_design_arithmetic_from_constants": {
+    "status": "Closed-form pre-data arithmetic under the designed mechanism, computed from protocol constants only and run as stdin scripts: exact lookback DPs, enumeration of ONE_ROOT_ONLY case outcomes, no RNG, generator, planner or evaluator. Pass probabilities are approximations. No gate uses these numbers, and no window, threshold, penalty, cost or seed was changed in response to them.",
+    "assumptions": {
+      "A1": "Alarms depend only on the background stream and are independent of the current case. Case outcomes are independent across steps. sd_independent ignores alarm autocorrelation; sd_upper adds the maximal positive covariance between steps within 11 h of each other.",
+      "A2": "Conservative's proposal on ONE_ROOT_ONLY while it still has audits is approximated at expected audit counts: (PROPOSE_CHECK, deep) in the non-syndicated outage regimes for s < 82, and no check from s = 82 (expected Wilson failure; deterministic from 93). In the syndicated regime the approximation gives balanced (net 0.57 vs deep 0.51 at s = 24), but OBS-002 exposure suggests mostly deep, so figures are given for both. These figures are approximations; the exact behaviour depends on the random audit counts.",
+      "A3": "Normal approximation for sums against thresholds. G2's percentile bootstrap lower bound > 0 is approximated as sum > 1.96 * sqrt(n) * sample sd."
+    },
+    "p_alarm_by_step_outage_midstream_drift": {"150": 0.0084, "151": 0.0084, "152": 0.0085, "153": 0.0093, "154": 0.0107, "155": 0.0131, "156": 0.0166, "157": 0.022, "158": 0.0298, "159": 0.0413, "160": 0.0577, "161": 0.081, "162": 0.113, "163": 0.1557, "164": 0.205, "165": 0.2594, "166": 0.3173, "167": 0.377, "168": 0.4368, "169": 0.4951, "170": 0.5507, "171": 0.6028, "172": 0.6508, "173": 0.6943, "174": 0.7332, "175": 0.7677, "176": 0.798, "177": 0.8242, "178": 0.847, "179": 0.8665, "180": 0.8831, "181": 0.8973, "182": 0.9092, "183": 0.9186, "184": 0.9262, "185": 0.9323, "186": 0.937, "187": 0.9407, "188": 0.9436, "189": 0.9457, "190": 0.9471, "191": 0.948, "192": 0.9484},
+    "deep_check_expected_utility_on_one_root_only_by_step": {"150": 0.7484, "155": 0.6394, "160": 0.5182, "165": 0.3842, "170": 0.2362, "175": 0.0734, "176": 0.039, "177": 0.0039, "178": -0.0319, "180": -0.1054, "break_even": "alpha = 0.9036, s = 177.1", "per_case_sd_when_degraded": 1.50},
+    "per_gate_under_designed_mechanism": {
+      "G1a": {"expected_sum": 1.761, "sd_independent": 8.415, "sd_upper": 8.517, "threshold": ">= 2.250", "approx_pass_probability": 0.48, "components": "[150,177): -0.940 (sd 2.41); [177,240): +2.701 (sd 8.06)", "per_case": 0.0196},
+      "G1b": {"note": "Identical to G1a by S2/S9 (audit_age_only == fixed_voi on every W_drift step).", "approx_pass_probability": 0.48},
+      "G2a": {"required_sum_approx": 16.5, "approx_pass_probability": "0.04 (normal approximation); about 0.012 using an exact count distribution with a sample-variance bound (critic arithmetic). Range 0.01-0.05.", "avoided_false_assertions_needed": "about 8-11"},
+      "G2b": {"note": "Same diff vector as G2a, different bootstrap key. The two can split only if the bound is within ~0.01 of 0.", "approx_pass_probability": "as G2a"},
+      "G3a": {"expected_avoided_false_assertions": 3.465, "approx_pass_probability": 0.97, "note": "Relative to audit_age_only the candidate only ever abstains, so the strict inequality fails only if no audit_age_only false assertion lands on an alarmed ONE_ROOT_ONLY case. Near-structural on its own; it counts as evidence only together with G1a and G2a."},
+      "G1c": {"expected_sum": 23.53, "sd_independent": 3.83, "sd_upper": 4.04, "threshold": ">= 1.425", "approx_pass_probability": "~1 (z ~5.8)"},
+      "G2c": {"required_sum_approx": "7.5-9.7", "approx_pass_probability": "~1 (z >= 3.6)"},
+      "G3b": {"expected_difference_missed_true": 28.0, "sd": 3.8, "approx_pass_probability": "~1"},
+      "G1d": {"vs_audit_age_only": {"expected_sum": "+0.87 to +1.05", "sd": "8.4-8.7", "approx_pass_probability": "0.54-0.55", "derivation": "W_drift sum 1.761 - telemetry over [32,150) 0.472 - false-alarm cost 0.24 (A2) to 0.42 (fallback always abstains)"}, "vs_fixed_voi": {"note": "Equals the audit_age_only clause plus the [0,32) conservative-minus-fixed_voi difference (0 under A2)."}, "vs_conservative": {"expected_sum": 32.7, "sd": 5.6, "approx_pass_probability": "~1"}},
+      "G4": {"clause_1_W_blind_stable": {"expected_sum": 60.69, "sd_independent": 6.16, "sd_upper": 6.51, "threshold": ">= 3.675", "approx_pass_probability": "~1 (z ~9)"}, "clause_2_W_whole_vs_conservative": {"expected_sum": 65.0, "sd": 6.4, "approx_pass_probability": "~1"}, "clause_3_false_assertions_vs_fixed_voi": {"approx_pass_probability": "1 under A2: the candidate differs from fixed_voi only by abstaining, or by conservative's identical deep check"}},
+      "G5": {"utility_part_expected_total": 0.832, "threshold": "<= 2.40", "note": "Telemetry 208 x 0.004. P(>= 18 pairs) <= 3e-5 per read, so other differences are ~0.", "approx_pass_probability": "~1"},
+      "G6": {"expected_total_u_conservative_minus_u_candidate": "-6.4 (A2 balanced) to -11.4 (A2 deep)", "sd": "15.4-16.3", "threshold": "<= 12.00", "approx_pass_probability": "0.87-0.94", "components": "[93,150): -16.92 (sd 7.3); W_drift: +8.58 (sd 13.2), i.e. 0.095 per case of drift-window regret (sd ~0.147 per case); a windowed 0.05 cap would pass ~38% of the time."},
+      "G8": {"clause_1_expected_sum_vs_conservative": 11.12, "sd": 17.0, "approx_pass_probability": 0.74, "clause_2": "1 under A2", "note": "fixed_voi's deep check on ONE_ROOT_ONLY with 30% rumor has expected utility +0.12 and high variance (E[u^2] = 2.93). A genuine harm check."},
+      "G9": {"expected_alarms": 45.5, "of": 48, "threshold": ">= 24", "approx_pass_probability": ">= 0.999 (treating the four 12-step lookback blocks as fully correlated within each block)"},
+      "G10": {"expected_alarms": 1.74, "of": 208, "threshold": "<= 52", "approx_pass_probability": "~1"}
+    },
+    "oracle_bound": {
+      "definition": "An oracle switch on W_drift that abstains on ONE_ROOT_ONLY exactly when fixed_voi's deep check has negative expected utility (s >= 178).",
+      "charged_0.004_per_read": {"expected_sum": 2.773, "sd": 8.26, "P_G1a": 0.53, "P_G2a": 0.05},
+      "uncharged": {"expected_sum": 3.133, "sd": 8.26, "P_G1a": 0.54, "P_G2a": 0.06},
+      "meaning": "One 90-case window cannot show value over audit_age_only at this confidence for ANY switch on this generator."
+    },
+    "P_GO_under_designed_mechanism": {
+      "option_A": "about 0.01-0.03 (P(G2a) x P(G6) x P(G8), with G1a, G1d and G3a nearly implied when G2a passes); upper bound ~0.04",
+      "option_B_R_113": "about 0.27, limited by G1a because the expected effect 0.0196 per case is below the 0.025 bar",
+      "pilot": "PASS is near-certain (E[PD1] = 11.1, E[PD2] = 16.2). The expected path under option A is pilot PASS, then holdout NO_GO with probability ~0.96 or more."
+    },
+    "nearest_control_ledger_expected_candidate_minus_audit_age_only": {
+      "outage_stable": {"W_whole": -1.39, "W_blind": -0.43, "W_drift": -0.68, "W_post_blind": -1.10, "worst_case_allowed_by_G10": "52 false alarms -> about -22.7 while G4 still passes"},
+      "outage_midstream_drift": {"W_whole": "+0.87 to +1.05", "W_blind": -0.43, "W_drift": 1.76, "W_post_blind": 1.33},
+      "outage_syndicated_drift": {"W_whole": -0.83, "W_blind": -0.23, "W_drift": -0.36, "W_post_blind": -0.59, "note": "telemetry only; P(alarm) <= 1.9e-5"},
+      "outage_raw_loss_drift": {"W_whole": -32.45, "sd": 10.1, "W_read_part_32_93": -4.87, "W_blind": -24.19, "W_drift": -3.39, "W_post_blind": -27.58, "note": "The fallback gives up audit_age_only's blind-window recovery."},
+      "healthy_midstream_drift": {"all_windows": 0.0},
+      "outage_shared_rumor": {"W_whole": -0.93, "W_blind": -0.26, "W_drift": -0.42, "W_post_blind": -0.68},
+      "break_even_frequency_ratio": "raw-loss loss / midstream-drift gain over W_whole = 32.45 / (0.87 to 1.05) = about 31-37. Apply beats simplify only if mid-outage drift is that much more frequent than raw-loss outages; real frequencies are UNKNOWN."
+    },
+    "designer_transparency": "This arithmetic was run as stdin heredocs. No file under /tmp/claude-0/ was read. Critics' scratch scripts were not read; their figures were reproduced independently, and the protocol's own figures are used where they differ."
+  },
+
+  "accounting": {
+    "utility_per_case": "(+1 correct assertion, -4 false assertion, 0 otherwise) - check cost - telemetry cost",
+    "false_assertion_penalty": 4,
+    "check_cost": "Decimal(str(channel.cost)) of the proposed probe: cheap 0.020, balanced 0.065, deep 0.115; 0 if no check",
+    "telemetry_cost_per_decision_reading_pairs": 0.004,
+    "telemetry_charge_rule": "Charged to unlabelled_disagreement as Decimal('0.004') on every decision where it reads pair telemetry, i.e. every decision with review age > 8 h, whatever the pair count, alarm or outcome. Never charged to any other policy. audit_age_only reads only the review timestamp, cost 0.",
+    "telemetry_cost_note": "0.004 is owner-fixed and synthetic. The real cost is UNKNOWN. The break-even cost is reported, not gated.",
+    "audit_timestamp_cost": 0,
+    "arithmetic": "Python Decimal on every utility and sum. Every per-case utility is a multiple of 0.001, so sums are exact. Reported values are quantized to 6 places with ROUND_HALF_EVEN; gates use unquantized values.",
+    "exact_gate_thresholds": {
+      "G1a": "sum over W_drift of (u_candidate - u_audit_age_only) >= Decimal('2.250')",
+      "G1b": "sum over W_drift of (u_candidate - u_fixed_voi) >= Decimal('2.250')",
+      "G1c": "sum over W_blind of (u_candidate - u_conservative) >= Decimal('1.425')",
+      "G1d": "each of the three sums over W_whole >= Decimal('0')",
+      "G2a_G2b_G2c": "bootstrap sims[50] > Decimal('0'), unquantized",
+      "G3a_G3b": "integer counts, strict <",
+      "G4": "window sum >= Decimal('3.675'); whole-regime sum >= Decimal('0'); integer false-assertion counts <=",
+      "G5": "every proposal equal; total over W_whole of (u_conservative - u_candidate) <= Decimal('2.40'); integer false-assertion counts <=",
+      "G6": "total over W_whole of (u_conservative - u_candidate) <= Decimal('12.00')",
+      "G7": "every proposal equal; integer telemetry_reads == 0",
+      "G8": "sum >= Decimal('0'); integer false-assertion counts <=",
+      "G9": "integer alarms in W_alarm >= 24 (of 48)",
+      "G10": "integer alarms in W_read <= 52 (of 208)"
+    },
+    "tie_rule": "Float never enters a gate. Thresholds are the Decimal string literals above, never computed from float products or Decimal(float). Equality passes for >= and <= and fails for > and <.",
+    "per_policy_metrics_per_regime_and_window": ["cases", "assertions", "correct_assertions", "false_assertions", "false_fraction_given_assertion", "assertion_coverage", "missed_true", "checks", "total_check_cost", "telemetry_reads", "total_telemetry_cost", "human_review_proposals", "utility_gross_total", "utility_net_total", "utility_net_per_case"],
+    "primary_metric": "Paired per-case utility difference, net of telemetry, candidate minus control on identical cases.",
+    "bootstrap": {
+      "draws": 2000,
+      "method": "Paired case resampling with replacement within the window. diffs = [u_candidate(s) - u_control(s) for s in the window in ascending step order] (random.choices output depends on population order). For each draw, sample = rng.choices(diffs, k=len(diffs)) and mean = sum(sample) / Decimal(len(diffs)) under decimal.localcontext(prec=28, rounding=ROUND_HALF_EVEN). Sort; lower = sims[int(0.025*draws)] = sims[50], upper = sims[min(draws-1, int(0.975*draws))] = sims[1950]. The gate uses the unquantized Decimal lower bound. Quantization could not flip its sign anyway: the smallest nonzero |mean| is 0.001/90.",
+      "seed_rule": "random.Random(str) with key 'kep-obs003|bootstrap|{base_seed}|{regime}|{window}|{candidate}-minus-{control}'. Distinct (regime, window, comparison) triples give distinct keys. Each distinct triple is bootstrapped once; a reported table that lists a gated triple shows the gated result. The 'bootstrap' token keeps these keys disjoint from generator keys. The evaluator asserts that all keys in a run are unique.",
+      "gated_keys_holdout": {
+        "G2a": "kep-obs003|bootstrap|202610181000|outage_midstream_drift|W_drift|unlabelled_disagreement-minus-audit_age_only",
+        "G2b": "kep-obs003|bootstrap|202610181000|outage_midstream_drift|W_drift|unlabelled_disagreement-minus-fixed_voi",
+        "G2c": "kep-obs003|bootstrap|202610181000|outage_midstream_drift|W_blind|unlabelled_disagreement-minus-conservative"
+      },
+      "reported_keys": "The same rule for every other (regime, window, control) the report lists: W_whole for all six regimes against conservative, fixed_voi and audit_age_only (these keys also serve the OBS-002-style whole-regime readings); W_blind_stable for outage_stable against conservative; W_drift for outage_syndicated_drift against conservative; and the nearest-control ledger (W_read, W_blind, W_drift, W_post_blind for every outage regime against audit_age_only).",
+      "caution": "Synthetic matched-case bootstrap, not independent real-world confidence."
+    }
+  },
+
+  "missing_data_rule": "Every gate and invariant FAILS if any input it needs is missing, None or NaN; if a key or regime is absent; if a window is empty or differs in size from timeline_arithmetic.windows; if a bootstrap has fewer than 2000 draws; or if an exception occurs while computing it. A holdout run that raises or dies after its output file exists makes every gate fail; the verdict is NO_GO and there is no re-run. A strict inequality on counts with both sides 0 fails.",
+
+  "hard_gates_all_required": {
+    "G1a_value_over_nearest_control": {"kind": "VALUE", "evidence_class": "TELEMETRY_VALUE (evidence item E1)", "regime": "outage_midstream_drift", "window": "W_drift", "condition": "sum over W_drift of (u_candidate - u_audit_age_only) >= Decimal('2.250'), net of telemetry", "also_attained_by_audit_age_only": "SELF_COMPARISON (audit_age_only minus itself = 0 < 2.250)", "obs_002_spirit": "G1, now against the nearest control"},
+    "G1b_value_over_fixed_voi": {"kind": "VALUE", "evidence_class": "TELEMETRY_VALUE_DUPLICATE of G1a (counts with E1)", "regime": "outage_midstream_drift", "window": "W_drift", "condition": "sum over W_drift of (u_candidate - u_fixed_voi) >= Decimal('2.250'), net of telemetry", "also_attained_by_audit_age_only": "NO: audit_age_only - fixed_voi = 0 on W_drift by S2/S9", "obs_002_spirit": "G1 vs fixed_voi"},
+    "G1c_value_over_conservative": {"kind": "NEAR_STRUCTURAL", "evidence_class": "NOT_EVIDENCE", "regime": "outage_midstream_drift", "window": "W_blind", "condition": "sum over W_blind of (u_candidate - u_conservative) >= Decimal('1.425'), net of telemetry", "why_near_structural": "Conservative is deterministically blind from s >= 93. The candidate equals fixed_voi except on a stable-world false alarm (0.0084 per read). Design-expected sum +23.5 (sd 3.8) against 1.425, z ~5.8.", "also_attained_by_audit_age_only": "YES by design (~+23.8, no telemetry charge)", "obs_002_spirit": "G1 vs conservative"},
+    "G1d_whole_regime_no_net_harm": {"kind": "NO_HARM", "evidence_class": "TELEMETRY_NO_HARM (audit_age_only clause); fixed_voi clause = audit_age_only clause plus the [0,32) difference; conservative clause NEAR_STRUCTURAL", "regime": "outage_midstream_drift", "window": "W_whole", "condition": "for each control X in {audit_age_only, fixed_voi, conservative}: sum over all 240 cases of (u_candidate - u_X) >= Decimal('0'), net of telemetry", "rationale": "Stops the windowed gates from hiding net harm, including telemetry charged on every read in [32,240). The audit_age_only clause is a genuine check (design-expected +0.87 to +1.05, P ~0.55).", "also_attained_by_audit_age_only": "audit_age_only clause SELF_COMPARISON; fixed_voi clause ~0 by design (they differ only on [0,32)); conservative clause YES"},
+    "G2a_paired_interval_nearest_control": {"kind": "VALUE", "evidence_class": "TELEMETRY_VALUE (evidence item E2)", "regime": "outage_midstream_drift", "window": "W_drift", "condition": "bootstrap 95% lower bound of candidate - audit_age_only > Decimal('0') (key G2a)", "also_attained_by_audit_age_only": "SELF_COMPARISON (all diffs 0; lower bound 0 fails)"},
+    "G2b_paired_interval_fixed_voi": {"kind": "VALUE", "evidence_class": "TELEMETRY_VALUE_DUPLICATE of G2a (counts with E2)", "regime": "outage_midstream_drift", "window": "W_drift", "condition": "bootstrap 95% lower bound of candidate - fixed_voi > Decimal('0') (key G2b)", "also_attained_by_audit_age_only": "NO (all diffs 0 by S2/S9)"},
+    "G2c_paired_interval_conservative": {"kind": "NEAR_STRUCTURAL", "evidence_class": "NOT_EVIDENCE", "regime": "outage_midstream_drift", "window": "W_blind", "condition": "bootstrap 95% lower bound of candidate - conservative > Decimal('0') (key G2c)", "why_near_structural": "Same mechanism as G1c; the required sum of ~7.5-9.7 sits about 3.6 or more sd below the design-expected 23.5.", "also_attained_by_audit_age_only": "YES by design"},
+    "G3a_distinct_mistake_vs_age_only_and_fixed": {"kind": "DISTINCT_MISTAKE", "evidence_class": "TELEMETRY_VALUE (evidence item E3); the fixed_voi clause duplicates the audit_age_only clause", "regime": "outage_midstream_drift", "window": "W_drift", "condition": "false_assertions(candidate) < false_assertions(audit_age_only) AND false_assertions(candidate) < false_assertions(fixed_voi)", "note": "Near-follows from any alarm firing (P ~0.97). It counts as evidence only together with G1a and G2a.", "also_attained_by_audit_age_only": "NO (equal false assertions to fixed_voi; strict < fails)"},
+    "G3b_distinct_mistake_vs_conservative": {"kind": "NEAR_STRUCTURAL", "evidence_class": "NOT_EVIDENCE", "regime": "outage_midstream_drift", "window": "W_blind", "condition": "missed_true(candidate) < missed_true(conservative)", "why_near_structural": "Conservative misses every true ONE_ROOT_ONLY case from s >= 93. Design-expected difference ~28 missed-true.", "also_attained_by_audit_age_only": "YES by design"},
+    "G4_stable_recovery": {"kind": "NEAR_STRUCTURAL", "evidence_class": "NOT_EVIDENCE", "regime": "outage_stable", "condition": "sum over W_blind_stable of (u_candidate - u_conservative) >= Decimal('3.675'), net of telemetry; AND over W_whole, sum of (u_candidate - u_conservative) >= Decimal('0'); AND over W_whole, false_assertions(candidate) <= false_assertions(fixed_voi)", "why_near_structural": "Clause 1: design-expected +60.7 (sd 6.2) against 3.675. Clause 2: ~+65. Clause 3: the candidate differs from fixed_voi only by abstaining, or by conservative's identical deep check while informed (A2).", "also_attained_by_audit_age_only": "YES by design", "obs_002_spirit": "G4, windowed where conservative is blind"},
+    "G5_raw_loss_safe_fallback": {"kind": "SANITY_STRUCTURAL", "evidence_class": "NOT_EVIDENCE", "regime": "outage_raw_loss_drift", "condition": "proposal(candidate, s) == proposal(conservative, s) for every s in W_rawloss_fallback; AND total over W_whole of (u_conservative - u_candidate) <= Decimal('2.40'); AND over W_whole, false_assertions(candidate) <= false_assertions(conservative)", "why_sanity": "From the constants the rule must fall back (0.347 expected pairs from step 36 against 18 required). The gate shows only no extra false assertions and a bounded utility loss against conservative. By design the candidate gives up audit_age_only's blind-window recovery in this regime (design-expected audit_age_only - candidate ~+32.4 over W_whole), which the nearest-control ledger reports. Required, not evidence.", "also_attained_by_audit_age_only": "NO (audit_age_only = fixed_voi from 32, so its proposals differ from conservative's)"},
+    "G6_syndication_harm_cap": {"kind": "HARM_CAP", "evidence_class": "INHERITED_AUDIT_AGE_COMPONENT (a genuine harm check of the package, not evidence that the telemetry bounds harm)", "regime": "outage_syndicated_drift", "window": "W_whole", "condition": "total over W_whole of (u_conservative - u_candidate) <= Decimal('12.00') (= 0.05 x 240)", "rationale": "Same operational net-regret cap as OBS-001/OBS-002: it bounds the net cost of adopting the selector in a world that defeats its signal. Credit from [93,150) (~-16.9) offsets the drift-window harm (~+8.6). The drift-window regret (design-expected ~0.095/case, sd ~0.147/case) is reported prominently under reported_not_gated, not gated: a windowed 0.05 cap would pass ~38% of the time, and the protocol does not add or drop gates because of design arithmetic.", "also_attained_by_audit_age_only": "YES by design (audit_age_only = fixed_voi from 32 without telemetry; its total is the candidate's minus ~0.83)"},
+    "G7_healthy_no_change": {"kind": "SANITY_STRUCTURAL", "evidence_class": "NOT_EVIDENCE", "regime": "healthy_midstream_drift", "window": "W_whole", "condition": "proposal(candidate, s) == proposal(conservative, s) for all 240 steps AND candidate telemetry_reads == 0", "why_sanity": "The review age is <= 1 h at every step, so the rule never reads. Required, not evidence.", "also_attained_by_audit_age_only": "YES (audit_age_only = conservative here)"},
+    "G8_rumor_no_net_harm": {"kind": "HARM_CAP", "evidence_class": "INHERITED_AUDIT_AGE_COMPONENT (a genuine harm check of the package; OBS-001 showed the signal does not detect the rumor)", "regime": "outage_shared_rumor", "window": "W_whole", "condition": "sum over W_whole of (u_candidate - u_conservative) >= Decimal('0') AND false_assertions(candidate) <= false_assertions(fixed_voi)", "also_attained_by_audit_age_only": "YES by design"},
+    "G9_alarm_recall": {"kind": "MECHANISM", "evidence_class": "MECHANISM_CHECK", "regime": "outage_midstream_drift", "window": "W_alarm", "condition": "integer number of decisions in W_alarm whose selector alarm flag is true >= 24 (of 48)", "also_attained_by_audit_age_only": "N/A (reads no telemetry)"},
+    "G10_stable_false_alarm": {"kind": "MECHANISM", "evidence_class": "MECHANISM_CHECK", "regime": "outage_stable", "window": "W_read", "condition": "integer number of decisions in W_read whose selector alarm flag is true <= 52 (of 208)", "also_attained_by_audit_age_only": "N/A (reads no telemetry)"}
+  },
+  "gate_evidence_counting": {
+    "telemetry_value_evidence": "Three items: E1 = {G1a, G1b}, E2 = {G2a, G2b}, E3 = {G3a}. Only these can show that the telemetry adds value over audit_age_only. Each duplicate pair counts as ONE item.",
+    "harm_checks": "G1d (its audit_age_only clause is the telemetry net-harm check), and G6 and G8 (INHERITED_AUDIT_AGE_COMPONENT: genuine, but attained by audit_age_only too, so a pass is not evidence that the telemetry bounds syndication or rumor harm).",
+    "mechanism_checks": "G9, G10.",
+    "not_evidence": "NEAR_STRUCTURAL G1c, G2c, G3b, G4 and SANITY_STRUCTURAL G5, G7. Required for validity only.",
+    "duplicate_split_rule": "Both members of each duplicate pair remain required. A split (G1a != G1b, G2a != G2b, or G3a's two clauses disagreeing) is NO_GO, and no redundancy argument can rescue it.",
+    "all_required": "Every hard gate is required for GO, whatever its evidence class."
+  },
+
+  "sanity_invariants_all_required": {
+    "S1_selector_inactive_before_read": "In every outage regime, for every s in W_pre: candidate telemetry_reads == 0 and proposal(candidate) == proposal(audit_age_only) == proposal(conservative).",
+    "S2_age_only_equals_fixed_after_read": "In every outage regime, for every s in W_read: proposal(audit_age_only) == proposal(fixed_voi).",
+    "S3_conservative_blind": "In every outage regime, for every s >= 93: conservative's action != 'PROPOSE_CHECK'.",
+    "S4_rule_consistency": "In every regime and step, using the selector's own branch and alarm flag: no read implies proposal(candidate) == proposal(conservative); a read with fewer than 18 entities or an alarm implies proposal(candidate) == proposal(conservative); a read with >= 18 entities and no alarm implies proposal(candidate) == proposal(fixed_voi).",
+    "S5_telemetry_charge": "The candidate is charged exactly Decimal('0.004') on every read and 0 otherwise. Its reads equal its decisions with review age > 8 h. Every other policy's telemetry cost is 0.",
+    "S6_window_sizes": "Every window has exactly the size given in timeline_arithmetic.windows.",
+    "S7_disjoint_entities": "Background entity ids are disjoint from current case ids, and no current case feeds its own telemetry.",
+    "S8_seed_hygiene": "All generator and bootstrap keys in the run are unique. The base seed equals the stage seed and is not in forbidden_seeds. The pilot seed appears only in stage pilot or in the holdout's step-3 recompute.",
+    "S9_duplicate_vectors_equal": "In every outage regime, for every s in W_read: the executed outcome records and net utilities of audit_age_only and fixed_voi are equal. So the G1a and G1b diff vectors (and the G2a and G2b inputs) are equal element by element on W_drift."
+  },
+  "sanity_invariant_failure_effect": "Any invariant failure gives the verdict NO_GO with reason EVALUATOR_OR_GENERATOR_INVARIANT_FAILED. No re-run and no fix.",
+
+  "verdict_rule": "Holdout: GO_FOR_FURTHER_RESEARCH_ONLY iff all 16 hard gate entries (G1a, G1b, G1c, G1d, G2a, G2b, G2c, G3a, G3b, G4-G10) and all 9 sanity invariants pass with no missing data; otherwise NO_GO. The 16 entries are not 16 independent tests: they are 3 telemetry-value evidence items, plus duplicates, harm checks, mechanism checks and structural checks (gate_evidence_counting). Pilot: see pilot.verdict_rule. Owner option C: CLOSED_BY_DESIGN_ARITHMETIC, with no data verdict.",
+
+  "reported_not_gated": [
+    "Full per-policy metric tables (accounting.per_policy_metrics_per_regime_and_window) for all five policies and the always_abstain reference, for every regime, W_whole and every window that applies.",
+    "For G1a, G2a and G3a: point estimate, interval and the pre-data pass probability from gate_design_arithmetic_from_constants, side by side.",
+    "audit_age_only substituted into every hard-gate formula (its telemetry charge 0), beside the candidate's value. Gates against audit_age_only itself are shown as SELF_COMPARISON.",
+    "Nearest-control ledger, shown as prominently as the syndication harm: candidate - audit_age_only for every regime over W_whole, W_read, W_blind, W_drift and W_post_blind, each with its paired bootstrap (accounting.bootstrap.reported_keys), beside the design expectations; plus the break-even regime-frequency ratio (raw-loss loss over midstream-drift gain).",
+    "Syndicated drift harm, made visible: outage_syndicated_drift over W_drift, candidate - conservative utility per case (design-expected regret ~0.095), false assertions of every policy, and the bootstrap interval.",
+    "OBS-002-style whole-regime readings, for comparability only: whole-regime candidate - fixed_voi and candidate - conservative against 0.025 per case, with bootstrap (W_whole keys).",
+    "Extra false assertions, candidate vs conservative, in every regime and window.",
+    "Break-even telemetry cost per regime: (gross utility gain over the control) / reads, for audit_age_only and conservative. null when reads == 0; 'NONE (no positive gross gain)' when the gross gain <= 0. 0.004 per read excludes the UNKNOWN fixed engineering and maintenance cost of a selector module.",
+    "Stable cost of the signal: outage_stable over W_read, candidate - audit_age_only (telemetry charges plus false-alarm effects).",
+    "Number of decisions with insufficient pairs, per regime.",
+    "Holdout telemetry: alarm fraction over W_transition, the first alarm step after drift onset (alarm lag), and the mean pair count when read, per regime.",
+    "Proposal-difference counts, candidate vs each control, per regime and window.",
+    "W_late_blind metrics (probabilistic conservative blindness).",
+    "never-control utility and the always_abstain reference.",
+    "Assumed audit labour: synthetic background audits available to conservative at the start of each window. Real reviewer labour: 0.",
+    "Engineering time spent (wall-clock per phase), test count and runtime (ADR-0028).",
+    "Learning ledger (issue #39 item 8): observed result, then the engineering decision taken, research time spent, and the question still open."
+  ],
+
+  "cost_and_expected_value_before_run": {
+    "estimated_engineering_time": "About one working session for option A: port the OBS-002 evaluator at 2a18772 to this protocol, targeted tests, independent audit, pilot, holdout, report. The exact effort is UNKNOWN. Option B adds R-fold holdout runtime. Option C costs only the closure record.",
+    "estimated_runtime": "Pilot under 2 minutes (53 steps x 4 planners). Option A holdout under 10 minutes on one interpreter, offline. Option B about 113 times that (UNKNOWN exactly).",
+    "probability_result_changes_decision": {
+      "real_world": "UNKNOWN; not invented.",
+      "simulator_bound_under_designed_mechanism": "Option A: P(GO) ~0.01-0.03, at most ~0.04. The expected verdict is NO_GO even if the mechanism works exactly as the constants imply; even an oracle switch gets P(G2a) ~0.05. Option B (R = 113): P(GO) ~0.27. Option C: no run.",
+      "engineering_decision": "GO and NO_GO both lead to nothing being built: a GO design issue stays parked under ADR-0028's standing instruction to stop real-data hunting. The run's decision value therefore lies in the record."
+    },
+    "value_of_avoided_misinvestment": "UNKNOWN; not invented",
+    "pre_test_value_formula_issue_39": "(P(change decision) x avoided misinvestment) / experiment cost. The simulator-side P(change decision) is low (above); avoided misinvestment is UNKNOWN. Under option A the expected pre-test value is low by construction. This is why the owner's confirmation is required before freezing.",
+    "which_results_change_which_decision": {
+      "GO": "Opens one optional-module design issue, parked until real validation is allowed. No code merged.",
+      "NO_GO": "Closes the selector question for this generator family and blocks any selector module build.",
+      "NO_GO_NOT_DISCRIMINATING": "Same as NO_GO, earlier and cheaper (holdout never run).",
+      "CLOSED_BY_DESIGN_ARITHMETIC": "Same engineering effect as NO_GO, at no run cost and without exposing either seed."
+    },
+    "why_uncertainty_remains": "OBS-001 found value over audit age only in degraded worlds, on a different generator with raw votes always delivered, an independent pair and zero telemetry cost. OBS-002's pilot never reached the blind window, drift or the alarm window. On this generator, the design arithmetic implies an expected value over audit age below the materiality bar."
+  },
+
+  "leakage_rules": [
+    "The policy-visible View has no truth and no hidden probe answers.",
+    "Selector inputs are only the View, ObservedVote(root, entity_id, observed_at, available_at, supports) rows and ReviewPulse(last_completed_at), all clocked at as_of.",
+    "Conservative receives only AuditFeedback with adjudicated_at <= as_of.",
+    "Votes with available_at > as_of are invisible, even if observed earlier.",
+    "Background entities never equal current case entities; the current case never feeds its own telemetry.",
+    "Reviewer outcomes never reach the selector; the pulse depends only on timestamps.",
+    "The pilot never calls an executor, never reads truth or hidden answers, never computes utility or gates, and plans only the 53 sampled steps.",
+    "Nobody runs the holdout seed, or any configuration containing it, except the single guarded holdout CLI run. Nobody runs the pilot seed except the single guarded pilot CLI run and the holdout's in-memory recompute.",
+    "Until the single holdout run, nobody, by any means (tests, scripts, notebook, REPL, the OBS-002 evaluator at 2a18772 or any port of it), generates, plans, executes, scores or computes pilot statistics on the uncompressed protocol timeline (n = 240 with the frozen outage, drift and window constants) on ANY seed, except the two guarded CLI runs.",
+    "The OBS-002 evaluator at 2a18772 is not executed with any retired seed, and not with n > 40 or the protocol timeline on any seed. Regression checks of the port use fixture seeds and compressed configs only.",
+    "Enforced in code: the non-pinned-config (test) path refuses cases_per_regime > 40; refuses any config whose (cases_per_regime, warmup_hours_before_first_case, outage_start_step, drift_onset_step, drift_ramp_hours, lookback) equals the protocol's for any regime; and refuses every stage seed and forbidden seed.",
+    "Tests and the audit use only fixture seeds below 1,000,000, or fabricated inputs, never the pilot or holdout seed. Tests that execute or score decisions use n <= 40 or fabricated compressed-timeline config copies. No test applies gate functions to generated data; gate functions are tested only on fabricated result dicts.",
+    "Closed-form arithmetic from protocol constants (exact probability DPs, no RNG, no generator, no planner calls) is permitted and is not a preview.",
+    "Nobody involved reads files under /tmp/claude-0/ (pilot outputs of an earlier study).",
+    "The evaluator refuses to run if the protocol SHA-256 differs from the pinned value, or if any evaluator constant differs from this file."
+  ],
+
+  "audit_requirements": {
+    "independent_auditor_not_designer_or_implementer": true,
+    "timing": "After the protocol is frozen and the evaluator and tests are committed, and BEFORE the pilot. Defects found before sign-off may be fixed only to make the code match this protocol; each fix is logged, then re-audited. Sign-off records the audited evaluator commit SHA. After sign-off nothing changes (procedural_outcome_table covers defects found later).",
+    "checks": [
+      "Leakage review against leakage_rules, including the test-path refusals and the seeding-function guard.",
+      "Reused Core modules byte-identical to reused_core_unchanged.modules_sha256_at_source_snapshot.",
+      "Every generator literal is read from this protocol; code-vs-protocol walk-through of draw order, clocks and boundaries.",
+      "The timeline arithmetic, window sizes and gate_design_arithmetic are reproduced independently from the constants, in closed form only.",
+      "Determinism: identical canonical JSON payload on Python 3.11 and 3.13 for fixture-seed compressed configs.",
+      "Full normal CI green; targeted test count and runtime reported (ADR-0028)."
+    ],
+    "mutants_each_must_be_caught_by_targeted_tests": [
+      "M1 truth field added to ObservedVote, or background vote supports set to truth instead of the publisher answer",
+      "M2 available_at filter removed or made exclusive (undelivered votes visible)",
+      "M3 current case entity admitted to telemetry",
+      "M4 reviewer outcome reaches the selector (pulse from 'correct' audits only, or from audit truth)",
+      "M5 telemetry cost not charged, charged only when pairs are sufficient or there is no alarm, or charged to audit_age_only",
+      "M6 any selector threshold altered (12 h, 18, 0.35, 8 h), a boundary flipped (inclusive/exclusive), the alarm decided by a float or rounded fraction instead of 20*mismatches > 7*pairs, or S4/G9/G10 using a recomputed alarm instead of the selector's flag",
+      "M7 proposal compared by action only (D1 regression), in the pilot, G5, G7 or S1-S4",
+      "M8 pilot PD1 compares against conservative, or against both controls, instead of audit_age_only",
+      "M9 pilot calls an executor, reads truth or hidden answers, or computes utility or gates",
+      "M10 pilot plans steps outside S_A and S_B (e.g. a timeline prefix)",
+      "M11 a window boundary off by one (W_blind 92/94, W_drift 149/151, W_alarm 191/193, W_read 31/33, W_rawloss 35/37)",
+      "M12 a gate passes on missing data (None, empty window, absent regime, STARTED-only record)",
+      "M13 a gate computed on gross rather than net utility, or a window gate computed on the whole regime",
+      "M14 conservative parameters changed (window_hours, min_class_n, mode)",
+      "M15 bootstrap seed collision (two comparisons share a key), integer seed offsets reintroduced, or diffs not in ascending step order",
+      "M16 a holdout, pilot or retired seed accepted by the tests or the test path; forbidden_seeds not enforced; or the seeding function generating pilot- or holdout-seed data without the stage output file created by this process (both the pilot and the holdout API paths)",
+      "M17 a guard bypassed on the pilot or holdout path: HEAD != audited SHA, dirty tree, O_EXCL removed, a Python-API call to stage pilot or holdout outside the CLI, the pilot file absent / not COMPLETE / not PASS / not byte-identical on recompute; or the output file absent after an injected mid-run exception (written only at the end)",
+      "M18 a generator literal hard-coded so that a changed protocol key has no effect (raw-loss 0.6, delay 4-20 h, 0.08, 0.04, offsets 90/60/45, reposts 0-3)",
+      "M19 syndication not applied to the current-case deep probe, or rumor not applied to probes or to the emitted claim",
+      "M20 raw loss applied before the outage or not at all",
+      "M21 drift onset or ramp wrong",
+      "M22 an S-invariant check disabled or inverted",
+      "M23 as_of set to the decision clock (query + max_wait_minutes), or any policy input clocked other than at view.query.at",
+      "M24 the test path accepts cases_per_regime > 40",
+      "M25 the test path accepts the protocol's timeline constants or a stage seed",
+      "M26 a gate threshold computed in float or Decimal(float), checked at an exact tie (e.g. G1c sum exactly 1.425, G4 window sum exactly 3.675, G5 total exactly 2.40)",
+      "M27 a duplicate-pair split (G1a != G1b or G2a != G2b) treated as a pass, or S9 disabled",
+      "M28 a delay rounded to whole minutes, or a delay built other than with timedelta(minutes=x) / timedelta(hours=x) from the float draw"
+    ],
+    "sign_off_rule": "Sign-off requires every listed mutant M1-M28 to be caught by a targeted test. A surviving mutant blocks sign-off until a targeted test catches it; no severity waiver. The report gives the caught fraction (which must be 100%), the survivors found during the audit and how each was resolved, not the test count.",
+    "audit_never_runs_pilot_or_holdout_seed": true
+  },
+
+  "procedural_outcome_table": {
+    "drafts_before_freeze": "Draft revisions before the freeze commit (including any revision for owner option B) are not amendments.",
+    "guard_refusal_before_output_file": "Not a run. Logged in the study PR thread; a retry is allowed from the same audited SHA after restoring the audited state with no tracked file changed. No protected-seed bytes exist.",
+    "pilot_raises_or_dies_after_output_file": "Final NO_GO_NOT_DISCRIMINATING (PILOT_EXCEPTION); holdout cancelled; no retry.",
+    "pilot_not_reproducible_at_holdout": "Final NO_GO (PILOT_NOT_REPRODUCIBLE); no holdout-seed data generated; no retry.",
+    "holdout_raises_or_dies_after_output_file": "Final NO_GO (HOLDOUT_EXCEPTION); no re-run.",
+    "code_defect_found_before_sign_off": "Fixed only to match the protocol, logged, re-audited.",
+    "code_defect_found_after_sign_off_before_pilot": "Fixed only to match the protocol, at a new audited SHA after a full re-audit (all mutants), logged. Allowed only while no pilot- or holdout-seed data and no uncompressed protocol timeline on any seed has been generated.",
+    "protocol_defect_found_before_pilot": "Exactly one versioned pre-exposure amendment is allowed: protocol_version 2, with the defect, the fix and the reason logged in the protocol, seeds unchanged, a new protocol SHA-256 pinned, and a full re-audit before the pilot. It is valid only while no pilot- or holdout-seed data and no uncompressed protocol timeline on any seed has been generated. A second protocol defect, or any protocol defect when that condition does not hold, gives WITHDRAWN_UNEXPOSED: seeds retired unused, ADR-0035 records the withdrawal, and any retry is a new study with new seeds.",
+    "deviation_found_after_pilot": "See deviation_policy.",
+    "mutant_survivor_at_audit": "Blocks sign-off until a targeted test catches it.",
+    "owner_option_C": "CLOSED_BY_DESIGN_ARITHMETIC: no pilot and no holdout; both seeds retired unused."
+  },
+
+  "outputs_and_paths": {
+    "evaluator_branch_only": "labs/core/benchmarks/obs_003_eval.py",
+    "tests_branch_only": ["labs/core/tests/test_obs_003_eval.py", "labs/core/tests/test_obs_003_audit.py"],
+    "pilot_output": "labs/core/reports/KEP_OBS_003_PILOT_PROPOSALS.json (created with O_EXCL before any pilot-seed data; record_state STARTED -> COMPLETE | EXCEPTION)",
+    "holdout_output": "labs/core/reports/KEP_OBS_003_HOLDOUT_FULL.json (created with O_EXCL before any protected-seed data; record_state STARTED -> COMPLETE | EXCEPTION | PILOT_NOT_REPRODUCIBLE)",
+    "external_hash_publication": "The SHA-256 of each output file is posted in the study PR and on issue #39 immediately after its run.",
+    "aggregate_report_main": "labs/core/reports/KEP_OBS_003_RESULT.json (includes the canonical SHA-256 of the pilot and holdout outputs and the audited SHA)",
+    "doc_main": "labs/core/docs/OBS_003_*.md",
+    "adr_main": "docs/adr/0035-*.md"
+  },
+
+  "disposition_rule": "Regardless of verdict, the experimental evaluator, its targeted tests and the full pilot/holdout outputs are kept only in branch history (commit SHA recorded in the report), following ADR-0028/0029/0030/0031. Main receives this protocol, the aggregate report, the doc and ADR-0035. No selector, module, test suite or CI job enters main. A negative result is published as prominently as a positive one.",
+
+  "deviation_policy": "Every deviation from this protocol is logged with its timing relative to the freeze, the audit sign-off, the pilot and the holdout. Before sign-off, only changes that make the code match this protocol are allowed (procedural_outcome_table covers protocol defects). After the pilot runs, the rule is outcome-independent. A deviation that touches code, data or semantics feeding PD1, PD2, V1-V4, any gate or any invariant makes GO impossible, without any recomputation: the verdict is NO_GO_NOT_DISCRIMINATING if it is found before the holdout runs (holdout cancelled), otherwise NO_GO. A deviation confined to report prose or reported-not-gated tables is corrected and logged. No pilot- or holdout-seed recomputation is permitted to assess a deviation's effect.",
+
+  "no_threshold_tuning_after_results": true,
+  "frozen_after_this_commit": {
+    "applies_when": "Only after owner_power_confirmation_required_before_freeze.recorded_choice is A or B and the freeze commit is made.",
+    "items": ["seeds", "generator literals, clocks and draw order", "regimes", "quality tables", "selector thresholds, integer alarm form and boundaries", "conservative parameters", "telemetry cost", "false-assertion penalty", "windows and their derivation", "pilot sampled steps, stride and minima", "gate conditions, exact Decimal thresholds and evidence classes", "bootstrap draws, ordering and seed keys", "proposal and outcome definitions", "guard order and refusal semantics", "procedural outcome table", "deviation policy", "verdict rules and report wording"]
+  },
+  "fail_safe_boundaries": {"real_human_reviews": 0, "source_downloads": 0, "model_calls": 0, "consumer_publish": false, "real_business_accuracy": null},
+  "original_main_untouched": true
+}
