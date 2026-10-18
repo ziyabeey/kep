@@ -30,13 +30,15 @@ ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_PATH = ROOT / 'sources/overture_third_release.json'
 # Frozen 2026-10-18, before the third release existed. Editing the protocol
 # after seeing data must fail loudly, not silently change the study.
-PROTOCOL_SHA256 = '61c71df2dcd3790c2d721e8c5fdeb6efd3ae327b43e6d0f46477bc9c8a9c7b4d'
+PROTOCOL_SHA256 = '254e38761aebc1744f710888cbc3bc23dc21129f11b20e5da280786f1350f7e4'
 STAC_BASE = 'https://stac.overturemaps.org/'
 MAX_CATALOG_BYTES = 200_000
 CATEGORY_FIELDS = frozenset({'basic_category', 'taxonomy_primary'})
-# Fields a v1.18 -> v2.0 migration does not change semantically.
-FACTUAL_FIELDS = frozenset({'name', 'address', 'locality', 'country',
-                            'operating_status', 'geometry'})
+# M4's field list lives in the hashed protocol (m4_factual_fields), not here,
+# so it cannot change after data arrives without failing load_protocol.
+KNOWN_CHANGE_FIELDS = frozenset({'name', 'address', 'basic_category', 'taxonomy_primary',
+                                 'operating_status', 'locality', 'country',
+                                 'source_provenance', 'geometry', 'cell'})
 CONFIDENCE_STEP = 0.05
 _CATALOG_HREF = re.compile(r'^https://stac\.overturemaps\.org/([0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]+)/catalog\.json$')
 
@@ -55,6 +57,10 @@ def load_protocol(path: str | Path = PROTOCOL_PATH, *,
             or protocol.get('frozen_before_any_third_release_data') is not True
             or {k: tuple(v) for k, v in protocol['cells'].items()} != PILOT):
         raise ValueError('Protocol boundary or sampling cells changed')
+    fields = protocol.get('m4_factual_fields')
+    if (not isinstance(fields, list) or not fields or len(set(fields)) != len(fields)
+            or not set(fields) <= KNOWN_CHANGE_FIELDS - CATEGORY_FIELDS):
+        raise ValueError('M4 factual fields must be known, non-category change fields')
     return protocol
 
 
@@ -147,15 +153,15 @@ def _index(rows: Iterable[dict], label: str) -> dict[str, dict]:
     return out
 
 
-def _factual_change(x: dict, y: dict) -> bool:
-    return bool(set(_changed(x, y)) & FACTUAL_FIELDS)
-
-
 def three_release_trajectories(first: list[dict], second: list[dict], third: list[dict], *,
-                               schema_comparable: bool) -> dict:
+                               schema_comparable: bool, protocol: dict | None = None) -> dict:
     """M1-M5 from the preregistered protocol. Aggregates only, never IDs."""
     if type(schema_comparable) is not bool:
         raise ValueError('Schema comparability must be explicit')
+    factual = frozenset((protocol or load_protocol())['m4_factual_fields'])
+
+    def _factual_change(x: dict, y: dict) -> bool:
+        return bool(set(_changed(x, y)) & factual)
     a, b, c = _index(first, 'first'), _index(second, 'second'), _index(third, 'third')
     union = a.keys() | b.keys() | c.keys()
     pattern = Counter(''.join('1' if rid in s else '0' for s in (a, b, c)) for rid in union)
@@ -207,7 +213,8 @@ def three_release_trajectories(first: list[dict], second: list[dict], third: lis
                                                persistence[(True, True)] + persistence[(True, False)]),
             'without_first_hop_revision': wilson(persistence[(False, True)],
                                                  persistence[(False, True)] + persistence[(False, False)]),
-            'fields_counted': sorted(FACTUAL_FIELDS),
+            'fields_counted': sorted(factual),
+            'field_list_source': 'protocol.m4_factual_fields',
         },
         'M5_confidence_reversal': {
             **wilson(reversal['reversed'], reversal['large_first_hop']),

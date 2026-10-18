@@ -21,6 +21,15 @@ On 2026-10-11 the user paused new data collection. This ADR only prepares code; 
 7. Acquisition is one manual `workflow_dispatch` workflow with fixed byte and request caps (16 MiB footers, 16 MiB / 128 requests event rows). Ordinary CI stays offline and runs a labelled synthetic dress rehearsal of the full compare path. The manual workflow was checked with actionlint 1.7.7; a failed Arrow pre-flight skips only the GERS step.
 8. Outputs are aggregates and ID-set digests. No metric is a business opening, closure or accuracy rate. No consumer publication, Web Push, paid API, model call or human label.
 
+## Pre-data protocol revisions
+
+All made on 2026-10-18, before the release existed, each re-pinning the protocol hash:
+
+1. Second commit (pre-run review): category fields excluded from M3's per-ID classification on a schema change; STAC `schema:version` cross-check; abstain on in-cell normalizer rejections.
+2. Third commit (owner review): M4's field list moved into the protocol (`m4_factual_fields`) with a note on why M3 and M4 differ on `source_provenance`; the operator schema is recorded at capture and fixed for later offline runs; a bad GERS capture makes only M6 abstain; a wrong confirmation string fails the workflow instead of skipping it.
+
+Protocol and analysis code were committed together, not protocol first. Blindness rests on the release not existing yet; the report states this (`preregistration_note`).
+
 ## Consequences
 
 The study can run within minutes of the release and its numbers cannot be tuned after the fact. The capture artifact lives 7 days, so a follow-up PR must pin it, as with August (ADR-0017/0018). If Overture ships an intermediate patch first, M6 abstains and M1-M5 still run. If the run happens after the November release becomes STAC latest, the capture stops; a historical S3 route like DATA-008 would be a separate study.

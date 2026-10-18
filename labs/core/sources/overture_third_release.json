@@ -3,6 +3,7 @@
   "title": "Third real Overture Places release: preregistered offline comparison and regional GERS reconciliation",
   "frozen_at": "2026-10-18",
   "frozen_before_any_third_release_data": true,
+  "preregistration_note": "Protocol and analysis code were committed together, before the release existed. Blindness rests on the release date, not on the protocol preceding the code. Pre-data edits are listed in ADR-0032.",
   "issue": "https://github.com/ziyabeey/kep/issues/22",
   "planned_release": {
     "release": "2026-10-21.0",
@@ -38,16 +39,22 @@
     "M1_relisting_after_removal": "Of IDs listed in 2026-08-19.0 and absent from 2026-09-23.1 inside the cells, the fraction listed again in the third release. Wilson 95% interval.",
     "M2_transient_additions": "Of IDs absent from 2026-08-19.0 and listed in 2026-09-23.1 inside the cells, the fraction absent again in the third release. Wilson 95% interval.",
     "M3_consecutive_source_delta": "Retained, newly listed, no-longer-listed, field-or-geometry-revised and confidence-only IDs between 2026-09-23.1 and the third release.",
-    "M4_revision_persistence": "Among IDs listed in all three releases, the fraction with a factual field or geometry revision in the second hop, split by whether the first hop also revised them. Category fields never count, because 2026-08-19.0 uses Places v1.18.",
+    "M4_revision_persistence": "Among IDs listed in all three releases, the fraction with a revision of an M4 factual field (listed in m4_factual_fields) in the second hop, split by whether the first hop also revised them. Category fields never count, because 2026-08-19.0 uses Places v1.18.",
     "M5_confidence_reversal": "Among IDs listed in all three releases whose confidence moved by more than 0.05 in the first hop, the fraction that moved more than 0.05 in the opposite direction in the second hop.",
     "M6_regional_membership_agreement": "Only when the STAC predecessor of the third release is 2026-09-23.1 and every selected added/removed row group was read: local newly listed and no-longer-listed IDs inside the cells that the official regional changelog lists with the same change type, divided by all local membership changes."
   },
+  "m4_factual_fields": ["address", "country", "geometry", "locality", "name", "operating_status"],
+  "field_scope_notes": [
+    "M3 uses the existing DATA-010 comparator: name, address, basic_category, taxonomy_primary, operating_status, locality, country, source_provenance, geometry and sample cell count as revisions; confidence alone is confidence-only.",
+    "M4 deliberately counts only m4_factual_fields. source_provenance is excluded because it describes the supplier list, not the place, and category fields are excluded because the first hop crosses the v1.18 to v2.0 schema change. So an ID can be revised in M3 and not in M4."
+  ],
   "decision_rules": [
     "If STAC latest is not the requested release, or its date is outside the accepted window, stop before any data read.",
     "If the third release's STAC prev link is not 2026-09-23.1, compute M1-M5 but report M6 as null with status REQUIRES_INTERMEDIATE_RELEASE.",
     "If the publisher schema version differs from v2.0.0, category fields are excluded from M3, including from the per-ID revised/confidence-only/unchanged classification, and reported as TECHNICAL_SCHEMA_REVIEW.",
-    "The schema version is taken from the release catalog's schema:version when present; an operator-entered version that contradicts it stops the comparison.",
+    "The schema version is taken from the release catalog's schema:version when present; an operator-entered version that contradicts it stops the run before Places data is read. The operator value is recorded in the capture receipt and every later offline comparison must use that recorded value.",
     "If third-release normalization rejects any record for a reason other than outside_sampling_cell, M1-M6 abstain and the rejection counts are reported, because dropped records would otherwise count as no longer listed. Fix the normalizer and capture again before the next release.",
+    "If the GERS capture is missing, incomplete, inconsistent with the Places capture or contains rows that fail validation, M6 abstains with the reason; M1-M5 are still reported.",
     "A STAC prev link is navigation evidence, not a publisher attestation of the changelog build baseline; M6 is always labelled that way.",
     "No metric is a business opening, closure, relocation or accuracy rate. removed != closed, added != opened.",
     "No consumer publication, Web Push, paid API, model call or human label is produced by this study."

@@ -50,6 +50,25 @@ class ProtocolFreeze(unittest.TestCase):
             with self.assertRaises(ValueError):
                 load_protocol(copy)
 
+    def test_m4_field_list_is_part_of_the_hashed_protocol(self):
+        p = load_protocol()
+        self.assertEqual(p['m4_factual_fields'],
+                         ['address', 'country', 'geometry', 'locality', 'name', 'operating_status'])
+        with TemporaryDirectory() as tmp:
+            copy = Path(tmp) / 'p.json'
+            raw = PROTOCOL_PATH.read_bytes().replace(b'"operating_status"]', b'"operating_status", "source_provenance"]')
+            self.assertNotEqual(raw, PROTOCOL_PATH.read_bytes())
+            copy.write_bytes(raw)
+            with self.assertRaises(ValueError):
+                load_protocol(copy)
+            # Even with a matching hash, category fields cannot enter M4.
+            doc = json.loads(PROTOCOL_PATH.read_bytes())
+            doc['m4_factual_fields'] = ['name', 'basic_category']
+            bad = json.dumps(doc).encode()
+            copy.write_bytes(bad)
+            with self.assertRaises(ValueError):
+                load_protocol(copy, expected_sha256=sha256(bad).hexdigest())
+
     def test_release_window(self):
         p = load_protocol()
         self.assertEqual(check_candidate_release('2026-10-21.0', p), '2026-10-21.0')
@@ -297,10 +316,11 @@ class Listing(unittest.TestCase):
 
 
 class OfflineRehearsal(unittest.TestCase):
-    def build(self, tmp, *, prev=PREV, complete=True):
+    def build(self, tmp, *, prev=PREV, complete=True, stac_schema=None, recorded='v2.0.0'):
         a, b = Shared.pair()
         c = synthetic_third(a, b)
-        write_places_dir(tmp / 'run', c, prev_href=prev)
+        write_places_dir(tmp / 'run', c, prev_href=prev, schema_version=stac_schema,
+                         publisher_schema_version=recorded)
         write_gers_dir(tmp / 'gers', b, c, complete=complete, prev_href=prev)
         return tmp / 'run', tmp / 'gers'
 
@@ -308,11 +328,15 @@ class OfflineRehearsal(unittest.TestCase):
         with TemporaryDirectory() as t, patch('urllib.request.OpenerDirector.open',
                                               side_effect=AssertionError('network')):
             run, gers = self.build(Path(t))
-            r = compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+            r = compare(run, gers_dir=gers)
         self.assertEqual(r['third_origin'], 'SYNTHETIC_REHEARSAL_NOT_A_REAL_RELEASE')
         self.assertEqual(r['status'], 'COMPARED')
+        self.assertEqual(r['publisher_schema_version'], 'v2.0.0')
+        self.assertIn('committed together', r['preregistration_note'])
         m1, m2 = r['trajectories']['M1_relisting_after_removal'], r['trajectories']['M2_transient_additions']
         self.assertEqual((m1['k'], m1['n'], m2['k'], m2['n']), (23, 69, 4, 222))
+        self.assertEqual(r['trajectories']['M4_revision_persistence']['field_list_source'],
+                         'protocol.m4_factual_fields')
         m6 = r['regional_gers']['M6_regional_membership_agreement']
         self.assertEqual((m6['k'], m6['n']), (169, 174))
         self.assertEqual(r['third_normalization_audit']['in_cell_rejections'], 0)
@@ -321,38 +345,67 @@ class OfflineRehearsal(unittest.TestCase):
         self.assertEqual(r['regional_gers']['counts']['local_removed_without_official_event'], 2)
         self.assertFalse(r['consumer_publish'])
 
-    def test_tampered_events_or_receipts_rejected(self):
-        with TemporaryDirectory() as t:
-            run, gers = self.build(Path(t))
-            p = gers / 'gers_regional_events.json'
-            p.write_bytes(p.read_bytes().replace(b'"added"', b'"removed"', 1))
-            with self.assertRaises(ValueError):
-                compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+    def test_tampered_places_capture_rejected(self):
         with TemporaryDirectory() as t:
             run, gers = self.build(Path(t))
             r = json.loads((run / 'places_receipt.json').read_bytes())
             (run / 'places_receipt.json').write_bytes(canonical(dict(r, origin='trust_me')))
             with self.assertRaises(ValueError):
-                compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+                compare(run, gers_dir=gers)
         with TemporaryDirectory() as t:
             run, gers = self.build(Path(t))
             m = run / 'places' / 'places_minimal.json'
             m.write_bytes(m.read_bytes().replace(b'Sentetik yer 1', b'Sentetik yer X', 1))
             with self.assertRaises(ValueError):
-                compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+                compare(run, gers_dir=gers)
+
+    def test_bad_gers_capture_abstains_but_keeps_m1_to_m5(self):
+        def tamper_events(gers):
+            p = gers / 'gers_regional_events.json'
+            p.write_bytes(p.read_bytes().replace(b'"added"', b'"removed"', 1))
+
+        def receipt(mutate):
+            def apply(gers):
+                g = json.loads((gers / 'gers_receipt.json').read_bytes())
+                (gers / 'gers_receipt.json').write_bytes(canonical(mutate(g)))
+            return apply
+
+        def bad_uuid(gers):
+            events = json.loads((gers / 'gers_regional_events.json').read_bytes())
+            events[0]['id'] = events[0]['id'].upper()
+            raw = canonical(events)
+            (gers / 'gers_regional_events.json').write_bytes(raw)
+            receipt(lambda g: dict(g, events_sha256=sha256(raw).hexdigest()))(gers)
+
+        cases = {
+            'events_altered': tamper_events,
+            'release': receipt(lambda g: dict(g, release='2026-10-28.1')),
+            'origin': receipt(lambda g: dict(g, origin='captured_public_GERS_rows')),
+            'predecessor': receipt(lambda g: dict(g, chain=dict(g['chain'], observed_predecessor='2026-10-14.0'))),
+            'noncanonical_uuid': bad_uuid,
+            'missing_receipt': lambda gers: (gers / 'gers_receipt.json').unlink(),
+        }
+        for name, mutate in cases.items():
+            with self.subTest(name=name), TemporaryDirectory() as t:
+                run, gers = self.build(Path(t))
+                mutate(gers)
+                r = compare(run, gers_dir=gers)
+                self.assertEqual(r['regional_gers']['status'], 'ABSTAIN_GERS_CAPTURE_INVALID')
+                self.assertIsNone(r['regional_gers']['M6_regional_membership_agreement'])
+                self.assertEqual(r['trajectories']['M1_relisting_after_removal']['n'], 69)
 
     def test_incomplete_capture_or_gap_abstains_and_schema_change_flags(self):
         with TemporaryDirectory() as t:
-            run, gers = self.build(Path(t), complete=False)
-            r = compare(run, publisher_schema_version='v2.1.0', gers_dir=gers)
+            run, gers = self.build(Path(t), complete=False, recorded='v2.1.0')
+            r = compare(run, gers_dir=gers)
+        self.assertEqual(r['regional_gers']['status'], 'ABSTAIN_INCOMPLETE_CAPTURE')
         self.assertIsNone(r['regional_gers']['M6_regional_membership_agreement'])
         self.assertFalse(r['trajectories']['category_semantics_comparable_second_to_third'])
         with TemporaryDirectory() as t:
             run, gers = self.build(Path(t), prev='https://stac.overturemaps.org/2026-10-14.0/catalog.json')
-            r = compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+            r = compare(run, gers_dir=gers)
         self.assertEqual(r['regional_gers']['status'], 'ABSTAIN_REQUIRES_INTERMEDIATE_RELEASE')
         self.assertIsNotNone(r['trajectories']['M1_relisting_after_removal']['fraction'])
-
 
     def test_normalization_rejections_abstain_instead_of_counting_as_removed(self):
         with TemporaryDirectory() as t:
@@ -362,7 +415,7 @@ class OfflineRehearsal(unittest.TestCase):
             m['audit'] = dict(m['audit'], rows_read=m['audit']['rows_read'] + 2,
                               rejected={'outside_sampling_cell': 3, 'invalid_operating_status': 2})
             path.write_bytes(canonical(m))
-            r = compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+            r = compare(run, gers_dir=gers)
             self.assertEqual(r['status'], 'ABSTAIN_NORMALIZATION_REJECTED_IN_CELL_RECORDS')
             self.assertIsNone(r['trajectories'])
             self.assertIsNone(r['regional_gers'])
@@ -371,38 +424,29 @@ class OfflineRehearsal(unittest.TestCase):
             m['audit'] = dict(m['audit'], rows_read=1)
             path.write_bytes(canonical(m))
             with self.assertRaises(ValueError):
-                compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+                compare(run, gers_dir=gers)
 
-    def test_schema_version_cross_checked_with_stac(self):
-        a, b = Shared.pair()
-        c = synthetic_third(a, b)
+    def test_schema_is_fixed_at_capture_and_checked_against_stac(self):
         with TemporaryDirectory() as t:
-            write_places_dir(Path(t) / 'run', c, schema_version='2.1.0')
-            with self.assertRaises(ValueError):
-                compare(Path(t) / 'run', publisher_schema_version='v2.0.0', gers_dir=None)
-            r = compare(Path(t) / 'run', publisher_schema_version='v2.1.0', gers_dir=None)
+            run, _ = self.build(Path(t), stac_schema='2.1.0', recorded='v2.1.0')
+            r = compare(run, gers_dir=None)
             self.assertFalse(r['category_semantics_comparable'])
             self.assertEqual(r['stac_schema_version'], '2.1.0')
-        with TemporaryDirectory() as t:
-            write_places_dir(Path(t) / 'run', c, schema_version='2.0.0')
-            r = compare(Path(t) / 'run', publisher_schema_version='2.0.0', gers_dir=None)
-            self.assertTrue(r['category_semantics_comparable'])
+            # A later offline re-run cannot swap the schema after seeing results.
             with self.assertRaises(ValueError):
-                compare(Path(t) / 'run', publisher_schema_version='  ', gers_dir=None)
-
-    def test_gers_capture_must_match_places_capture(self):
-        cases = {
-            'release': lambda g: dict(g, release='2026-10-28.1'),
-            'origin': lambda g: dict(g, origin='captured_public_GERS_rows'),
-            'predecessor': lambda g: dict(g, chain=dict(g['chain'], observed_predecessor='2026-10-14.0')),
-        }
-        for name, mutate in cases.items():
-            with self.subTest(name=name), TemporaryDirectory() as t:
-                run, gers = self.build(Path(t))
-                g = json.loads((gers / 'gers_receipt.json').read_bytes())
-                (gers / 'gers_receipt.json').write_bytes(canonical(mutate(g)))
-                with self.assertRaises(ValueError):
-                    compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+                compare(run, gers_dir=None, publisher_schema_version='v2.0.0')
+            self.assertEqual(compare(run, gers_dir=None, publisher_schema_version='2.1.0')['status'], 'COMPARED')
+        with TemporaryDirectory() as t:
+            run, _ = self.build(Path(t), stac_schema='2.1.0', recorded='v2.0.0')
+            with self.assertRaises(ValueError):
+                compare(run, gers_dir=None)
+        with TemporaryDirectory() as t:
+            run, _ = self.build(Path(t), stac_schema='2.0.0', recorded='2.0.0')
+            self.assertTrue(compare(run, gers_dir=None)['category_semantics_comparable'])
+        with TemporaryDirectory() as t:
+            run, _ = self.build(Path(t), recorded='  ')
+            with self.assertRaises(ValueError):
+                compare(run, gers_dir=None)
 
     def test_stored_chain_must_replay_exactly(self):
         with TemporaryDirectory() as t:
@@ -411,7 +455,7 @@ class OfflineRehearsal(unittest.TestCase):
             cat.write_bytes(cat.read_bytes().replace(PREV.encode(),
                             b'https://stac.overturemaps.org/2026-10-14.0/catalog.json'))
             with self.assertRaises(ValueError):
-                compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+                compare(run, gers_dir=gers)
 
 
 class CliSafety(unittest.TestCase):

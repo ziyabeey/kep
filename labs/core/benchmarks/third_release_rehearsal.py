@@ -63,7 +63,8 @@ def synthetic_third(first: list[dict], second: list[dict]) -> list[dict]:
 
 
 def write_places_dir(target: Path, rows: list[dict], *, prev_href: str = PREV,
-                     schema_version: str | None = None) -> None:
+                     schema_version: str | None = None,
+                     publisher_schema_version: str = 'v2.0.0') -> None:
     places = target / 'places'
     places.mkdir(parents=True)
     data = canonical({'dataset': 'KEP-DATA-001', 'release': RELEASE, 'study_only': True,
@@ -94,6 +95,8 @@ def write_places_dir(target: Path, rows: list[dict], *, prev_href: str = PREV,
     chain = verify_release_chain(root, cat, release=RELEASE, protocol=load_protocol())
     receipt = {'study': 'KEP-DATA-018', 'release': RELEASE, 'origin': 'synthetic_rehearsal',
                'chain': chain, 'rows_accepted': len(rows), 'normalized_sha256': normalized,
+               'publisher_schema_version': publisher_schema_version,
+               'stac_schema_version': schema_version,
                'population_sha256': population, 'downloaded_at_utc': OBSERVED_AT,
                'consumer_publish': False, 'human_verified_labels': 0}
     (target / 'places_receipt.json').write_bytes(canonical(receipt))
@@ -137,7 +140,7 @@ def rehearse() -> dict:
         root = Path(tmp)
         write_places_dir(root / 'run', third)
         write_gers_dir(root / 'gers', list(second.records), third)
-        return compare(root / 'run', publisher_schema_version='v2.0.0', gers_dir=root / 'gers')
+        return compare(root / 'run', gers_dir=root / 'gers')
 
 
 if __name__ == '__main__':

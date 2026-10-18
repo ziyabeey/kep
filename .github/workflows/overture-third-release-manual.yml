@@ -30,7 +30,6 @@ concurrency:
 
 jobs:
   third-release:
-    if: ${{ inputs.research_confirmation == 'RESEARCH_ONLY' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
@@ -38,9 +37,17 @@ jobs:
         shell: bash  # -eo pipefail: a failing command inside a pipe fails the step
         working-directory: labs/core
     env:
+      RESEARCH_CONFIRMATION: ${{ inputs.research_confirmation }}
       RELEASE: ${{ inputs.release }}
       SCHEMA_VERSION: ${{ inputs.publisher_schema_version }}
     steps:
+      - name: Require explicit research confirmation (fail, never skip silently)
+        working-directory: .
+        run: |
+          if [ "$RESEARCH_CONFIRMATION" != "RESEARCH_ONLY" ]; then
+            echo "::error::research_confirmation must be exactly RESEARCH_ONLY; nothing was read."
+            exit 1
+          fi
       - uses: actions/checkout@v4
       - name: Run directory under runner temp
         run: echo "RUN_DIR=$RUNNER_TEMP/kep-data-018" >> "$GITHUB_ENV"
@@ -61,7 +68,8 @@ jobs:
         run: |
           mkdir -p "$RUN_DIR"
           python scripts/capture_third_release.py places --fetch \
-            --research-confirmation RESEARCH_ONLY --release "$RELEASE" --output "$RUN_DIR/run"
+            --research-confirmation RESEARCH_ONLY --release "$RELEASE" \
+            --publisher-schema-version "$SCHEMA_VERSION" --output "$RUN_DIR/run"
       - name: Bounded regional GERS added/removed rows (16 MiB cap)
         id: gers
         if: ${{ steps.arrow.outcome == 'success' }}
@@ -74,8 +82,7 @@ jobs:
           GERS_ARGS=()
           if [ -f "$RUN_DIR/gers/gers_receipt.json" ]; then GERS_ARGS=(--gers-dir "$RUN_DIR/gers"); fi
           python scripts/capture_third_release.py compare --places-dir "$RUN_DIR/run" \
-            "${GERS_ARGS[@]}" --publisher-schema-version "$SCHEMA_VERSION" \
-            --output "$RUN_DIR/third_release_report.json" > /dev/null
+            "${GERS_ARGS[@]}" --output "$RUN_DIR/third_release_report.json" > /dev/null
           python - <<'PY'
           import json, os, pathlib
           r = json.loads((pathlib.Path(os.environ['RUN_DIR']) / 'third_release_report.json').read_bytes())
@@ -85,6 +92,9 @@ jobs:
           print('status', r['status'], '| regional GERS', (r['regional_gers'] or {}).get('status'))
           if r['status'] != 'COMPARED':
               print('::warning::' + r['status'] + ' - see docs/OVERTURE_THIRD_RELEASE.md before the next release')
+          g = r['regional_gers'] or {}
+          if g.get('status') == 'ABSTAIN_GERS_CAPTURE_INVALID':
+              print('::warning::M6 abstained: ' + g.get('reason', ''))
           PY
       - name: Upload research capture (7 days; pin in a follow-up PR)
         if: always()

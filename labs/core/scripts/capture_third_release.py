@@ -79,17 +79,31 @@ def capture_chain(release: str, protocol: dict, output: Path) -> dict:
     return chain
 
 
-def run_places(release: str, output: Path) -> dict:
+def check_schema_against_stac(release_raw: bytes, publisher_schema_version: str) -> str | None:
+    """Operator input must agree with STAC schema:version when STAC has one."""
+    stac_schema = json.loads(release_raw).get('schema:version')
+    if stac_schema is not None and _schema_core(stac_schema) != _schema_core(publisher_schema_version):
+        raise ValueError(f'Operator schema {publisher_schema_version} contradicts STAC schema:version {stac_schema}')
+    return stac_schema
+
+
+def run_places(release: str, output: Path, *, publisher_schema_version: str) -> dict:
     protocol = load_protocol()
     check_candidate_release(release, protocol)
+    _schema_core(publisher_schema_version)
     out = _fresh(output)
     chain = capture_chain(release, protocol, out)
+    # Stop before any Places data is read if the operator's schema is wrong.
+    stac_schema = check_schema_against_stac((out / 'stac_release.json').read_bytes(),
+                                            publisher_schema_version)
     from scripts.overture_istanbul import execute
     result = execute(output=out / 'places', inputs=None, fetch=True, seed_file=None,
                      release=release)
     manifest = json.loads((out / 'places' / 'manifest.json').read_bytes())
     receipt = {'study': STUDY, 'release': release, 'origin': 'captured_overture_cli',
                'chain': chain, 'rows_accepted': result['rows_accepted'],
+               'publisher_schema_version': publisher_schema_version,
+               'stac_schema_version': stac_schema,
                'normalized_sha256': manifest['normalized_sha256'],
                'population_sha256': manifest['population_sha256'],
                'downloaded_at_utc': manifest['acquisition']['downloaded_at_utc'],
@@ -262,7 +276,39 @@ def normalization_audit(manifest: dict, accepted: int) -> dict:
             'in_cell_rejections': sum(in_cell.values()), 'in_cell_rejection_reasons': in_cell}
 
 
-def compare(places_dir: Path, *, publisher_schema_version: str, gers_dir: Path | None) -> dict:
+def _regional_abstain(reason: str) -> dict:
+    return {'study': STUDY, 'status': 'ABSTAIN_GERS_CAPTURE_INVALID', 'reason': reason[:300],
+            'M6_regional_membership_agreement': None, 'added_agreement': None,
+            'removed_agreement': None, 'physical_business_openings': None,
+            'physical_business_closures': None, 'consumer_publish': False}
+
+
+def _regional(gers_dir: Path, *, release: str, receipt: dict, chain: dict,
+              second: list[dict], third: list[dict]) -> dict:
+    g, _ = _read_json(gers_dir / 'gers_receipt.json', 200_000)
+    events, events_raw = _read_json(gers_dir / 'gers_regional_events.json', 16_000_000)
+    if g.get('release') != release or g.get('events_sha256') != sha256(events_raw).hexdigest():
+        raise ValueError('GERS capture does not belong to this release or was altered')
+    if GERS_ORIGIN_FOR.get(receipt['origin']) != g.get('origin'):
+        raise ValueError('GERS capture origin does not match the Places capture origin')
+    g_chain = g.get('chain') if isinstance(g.get('chain'), dict) else {}
+    if g_chain.get('observed_predecessor') != chain['observed_predecessor']:
+        raise ValueError('GERS and Places captures saw different release predecessors')
+    if not isinstance(events, list) or any(not isinstance(e, dict) for e in events):
+        raise ValueError('Malformed GERS event file')
+    complete = g.get('status') == 'REGIONAL_ROWS_CAPTURED_NOT_COMPLETE_ID_UNION'
+    pairs = [(e.get('change_type'), {k: e.get(k) for k in ('id', 'bbox', 'columns_changed')})
+             for e in events]
+    result = regional_membership_reconciliation(second, third, pairs, chain=chain,
+                                                capture_complete=complete)
+    result['capture'] = {k: g.get(k) for k in (
+        'status', 'scanned_rows', 'regional_rows', 'event_body_bytes', 'event_requests',
+        'footer_body_bytes', 'failure_type')}
+    return result
+
+
+def compare(places_dir: Path, *, gers_dir: Path | None,
+            publisher_schema_version: str | None = None) -> dict:
     """OFFLINE. Same-run hashes are internal consistency, not upstream attestation."""
     from kepcore.gers_reconciliation import load_pinned_pair
     from kepcore.overture_delta import load_operator_research_bundle
@@ -277,11 +323,16 @@ def compare(places_dir: Path, *, publisher_schema_version: str, gers_dir: Path |
     replay = verify_release_chain(root_raw, release_raw, release=release, protocol=protocol)
     if replay != {k: v for k, v in chain.items() if k != 'retrieved_at'}:
         raise ValueError('Stored release chain does not replay')
-    stac_schema = json.loads(release_raw).get('schema:version')
-    operator_schema = _schema_core(publisher_schema_version)
-    if stac_schema is not None and _schema_core(stac_schema) != operator_schema:
-        raise ValueError(f'Operator schema {publisher_schema_version} contradicts STAC schema:version {stac_schema}')
-    schema_ok = operator_schema == _schema_core(protocol['reference_schema_version'])
+    recorded = receipt.get('publisher_schema_version')
+    _schema_core(recorded)
+    if publisher_schema_version is not None and _schema_core(publisher_schema_version) != _schema_core(recorded):
+        raise ValueError(f'Schema {publisher_schema_version} differs from {recorded} recorded at capture; '
+                         'the capture-time value is fixed')
+    stac_schema = check_schema_against_stac(release_raw, recorded)
+    if receipt.get('stac_schema_version') != stac_schema:
+        raise ValueError('Receipt STAC schema does not match the stored catalog')
+    publisher_schema_version = recorded
+    schema_ok = _schema_core(recorded) == _schema_core(protocol['reference_schema_version'])
     third = load_operator_research_bundle(places_dir / 'places', expected_release=release,
                                           expected_normalized_sha256=receipt['normalized_sha256'],
                                           expected_observed_at=receipt['downloaded_at_utc'])
@@ -296,6 +347,7 @@ def compare(places_dir: Path, *, publisher_schema_version: str, gers_dir: Path |
               'third_population_n': len(third.records),
               'third_population_sha256': third.population_sha256,
               'third_hash_source': 'SAME_RUN_RECEIPT_NOT_INDEPENDENT',
+              'preregistration_note': protocol['preregistration_note'],
               'third_normalization_audit': audit,
               'status': 'COMPARED', 'trajectories': None,
               'regional_gers': None, 'research_only': True, 'consumer_publish': False}
@@ -303,25 +355,16 @@ def compare(places_dir: Path, *, publisher_schema_version: str, gers_dir: Path |
         report['status'] = 'ABSTAIN_NORMALIZATION_REJECTED_IN_CELL_RECORDS'
         return report
     report['trajectories'] = three_release_trajectories(
-        list(first.records), list(second.records), list(third.records), schema_comparable=schema_ok)
+        list(first.records), list(second.records), list(third.records),
+        schema_comparable=schema_ok, protocol=protocol)
     if gers_dir is not None:
-        g, _ = _read_json(gers_dir / 'gers_receipt.json', 200_000)
-        events, events_raw = _read_json(gers_dir / 'gers_regional_events.json', 16_000_000)
-        if g.get('release') != release or g.get('events_sha256') != sha256(events_raw).hexdigest():
-            raise ValueError('GERS capture does not belong to this release or was altered')
-        if GERS_ORIGIN_FOR.get(receipt['origin']) != g.get('origin'):
-            raise ValueError('GERS capture origin does not match the Places capture origin')
-        g_chain = g.get('chain') if isinstance(g.get('chain'), dict) else {}
-        if g_chain.get('observed_predecessor') != chain['observed_predecessor']:
-            raise ValueError('GERS and Places captures saw different release predecessors')
-        complete = g.get('status') == 'REGIONAL_ROWS_CAPTURED_NOT_COMPLETE_ID_UNION'
-        pairs = ((e['change_type'], {k: e[k] for k in ('id', 'bbox', 'columns_changed')})
-                 for e in events)
-        report['regional_gers'] = regional_membership_reconciliation(
-            list(second.records), list(third.records), pairs, chain=chain, capture_complete=complete)
-        report['regional_gers']['capture'] = {k: g.get(k) for k in (
-            'status', 'scanned_rows', 'regional_rows', 'event_body_bytes', 'event_requests',
-            'footer_body_bytes', 'failure_type')}
+        # A bad GERS capture must not cost the one-shot M1-M5 report.
+        try:
+            report['regional_gers'] = _regional(gers_dir, release=release, receipt=receipt,
+                                                chain=chain, second=list(second.records),
+                                                third=list(third.records))
+        except (ValueError, KeyError, TypeError) as exc:
+            report['regional_gers'] = _regional_abstain(f'{type(exc).__name__}: {exc}')
     return report
 
 
@@ -335,11 +378,14 @@ def main() -> None:
         p.add_argument('--research-confirmation', required=True, choices=[confirmation])
         p.add_argument('--release', required=True)
         p.add_argument('--output', type=Path, required=True)
+        if name == 'places':
+            p.add_argument('--publisher-schema-version', required=True,
+                           help='From the release notes, e.g. v2.0.0; recorded in the receipt')
     c = sub.add_parser('compare')
     c.add_argument('--places-dir', type=Path, required=True)
     c.add_argument('--gers-dir', type=Path)
-    c.add_argument('--publisher-schema-version', required=True,
-                   help='From the release notes, e.g. v2.0.0; a different value excludes category fields')
+    c.add_argument('--publisher-schema-version',
+                   help='Optional; must equal the value recorded at capture time')
     c.add_argument('--output', type=Path, help='New file for the aggregate report')
     args = parser.parse_args()
     if args.command is None:
@@ -350,15 +396,16 @@ def main() -> None:
                          ensure_ascii=False, indent=2))
         return
     if args.command == 'places':
-        result = run_places(args.release, args.output)
+        result = run_places(args.release, args.output,
+                            publisher_schema_version=args.publisher_schema_version)
     elif args.command == 'gers':
         result = run_gers(args.release, args.output)
         if result['status'] != 'REGIONAL_ROWS_CAPTURED_NOT_COMPLETE_ID_UNION':
             print(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True))
             raise SystemExit(3)
     else:
-        result = compare(args.places_dir, publisher_schema_version=args.publisher_schema_version,
-                         gers_dir=args.gers_dir)
+        result = compare(args.places_dir, gers_dir=args.gers_dir,
+                         publisher_schema_version=args.publisher_schema_version)
         if args.output is not None:
             if args.output.exists() or args.output.is_symlink():
                 parser.error('Report output must be a new file')
