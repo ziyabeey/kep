@@ -1,0 +1,86 @@
+{
+  "study": "KEP-OBS-002",
+  "issue": "KEP-GATE-001 (#39)",
+  "verdict": "NO_GO_NOT_DISCRIMINATING",
+  "verdict_kind": "PROCEDURAL_STOP_RULE_FIRED_AT_PILOT",
+  "evidence_about_signal_in_degraded_worlds": "NONE: the 60-step pilot could not reach the mechanism",
+  "holdout": {
+    "seed": 202610180615,
+    "cases_per_regime": 240,
+    "status": "CANCELLED_NEVER_RUN_NEVER_TO_BE_REUSED",
+    "outputs_seen_by_anyone": false
+  },
+  "commits": {
+    "preregistration": "9dad81a544603507ba6e97c73cb8a651bcc13d7d",
+    "protocol_sha256": "e8445240f230cec8377441b88aefd92d26d4c931ee78bc3ed844e7236e8423fe",
+    "evaluator_before_pilot": "62cf01f67d8d3a97588ca297e041551f3674794c",
+    "post_pilot_deviation_d1": "b8a794e3f19459021f625fc5ab8cda5a69022577",
+    "audited_evaluator_and_tests_for_replay": "2a1877261020af62fce2be1a7511729842419e9a",
+    "pr": "https://github.com/ziyabeey/kep/pull/46",
+    "ci_run_on_audited_commit": "https://github.com/ziyabeey/kep/actions/runs/39104469538"
+  },
+  "pilot": {
+    "seed": 202610180001,
+    "cases_per_regime": 60,
+    "regimes": 6,
+    "cases": 360,
+    "pilot_results_are_not_evidence": true,
+    "reading_at_pilot_time_action_only": {
+      "candidate_identical_to_conservative_all_regimes": true,
+      "candidate_identical_to_audit_age_only_all_regimes": true,
+      "verdict": "NO_GO_NOT_DISCRIMINATING"
+    },
+    "reading_after_d1_action_and_probe": {
+      "candidate_differs_from_conservative": {"outage_syndicated_drift": 5, "all_other_regimes": 0},
+      "candidate_differs_from_audit_age_only": 0,
+      "telemetry_changed_any_decision_vs_audit_age_only": false,
+      "verdict_if_d1_accepted": "PILOT_ONLY_NOT_EVIDENCE"
+    },
+    "telemetry_reads_per_outage_regime": 28,
+    "alarms_raised": 0,
+    "raw_loss_regime_insufficient_pair_decisions": 28,
+    "mean_pairs_when_read": {"outage_stable": 35.929, "outage_midstream_drift": 38.964, "outage_syndicated_drift": 38.107, "outage_raw_loss_drift": 1.464, "outage_shared_rumor": 38.25},
+    "g9_window_reached": false,
+    "pilot_json_sha256_identical_py311_py313": "2d18f2d87c49bcd1fa1e2acb7c180e71d102f39ae52b3e17b94b47da027355b4"
+  },
+  "deviations": {
+    "D1": {
+      "change": "Proposal comparison for discriminability and G7 changed from action string to (action, probe_id).",
+      "timing": "Made after the pilot returned NO_GO_NOT_DISCRIMINATING; verified to flip the verdict before commit.",
+      "classification": "POST_PILOT_INTERPRETIVE_DEVIATION, NOT an allowed bug fix: the protocol never defined 'proposal' and reused code records action only.",
+      "decided_by": "independent methodology panel (3 lenses + 1 adversarial refuter), protocol owner ruling requested",
+      "effect_on_record": "none; the action-only verdict stands"
+    },
+    "D2": {
+      "change": "G9/G10 fail on missing alarm data instead of passing.",
+      "timing": "After the pilot, from the independent audit; stricter; no effect on any recorded verdict."
+    }
+  },
+  "independent_audit": {
+    "auditor_distinct_from_designer": true,
+    "leakage_found": false,
+    "reused_core_modules_unchanged": true,
+    "preregistered_mutant_families": 6,
+    "original_7_tests": "caught the simplest form of each fault family; subtler variants of truth exposure, reviewer-outcome visibility, telemetry charging, boundaries, gates and generator fidelity survived",
+    "after_13_audit_tests": "every drafted variant caught except a redundant overlap guard (harmless) and the D1 comparison itself",
+    "full_suite_tests_on_audited_commit": 900
+  },
+  "protocol_design_failures_derivable_from_frozen_constants": [
+    "Pilot length 60 ends before conservative loses its audit history (~step 86), before drift onset (150) and before the G9 window (180).",
+    "Discriminability was defined against BOTH controls, so a candidate that only reproduces audit_age_only could pass; the telemetry signal must be tested against audit_age_only.",
+    "'Proposal' was not defined."
+  ],
+  "learning_ledger": {
+    "observed_result": "Stop rule fired; the disagreement signal changed zero of 360 pilot decisions versus audit-age-only.",
+    "engineering_decision": "No selector, module, test suite or CI job admitted. Evaluator kept only in branch history.",
+    "research_time": "one session: prereg, evaluator, independent audit, methodology panel",
+    "open_question": "Does the signal add value over audit-age-only in degraded or syndicated worlds? Untested; needs a NEW preregistration with a new seed (not this holdout)."
+  },
+  "fail_safe_boundaries": {
+    "real_human_reviews": 0,
+    "source_downloads": 0,
+    "model_calls": 0,
+    "consumer_publish": false,
+    "real_business_accuracy": null
+  }
+}
