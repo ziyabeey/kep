@@ -39,6 +39,24 @@ class AvailabilityTests(unittest.TestCase):
         r=sample_place();r['price']=100;r['field_evidence']={'price':proof(100)}
         r['field_evidence']['price']['valid_until']='2026-10-10T18:00:00+03:00'
         self.assertFalse(field_is_fresh(r,'price',dt('2026-10-10T18:00:00+03:00'),48))
+    def test_loose_clock_text_is_not_open(self):
+        # int() accepted ' 9', '+9' and non-Latin digits, so these hours read as OPEN.
+        for bad in [' 9:00','+9:00','٠٩:٠٠','09: 0']:
+            with self.subTest(text=bad):
+                r=sample_place();r['opening_hours']=schedule([[bad,'20:00']])
+                d=decide([r],Query(city='İstanbul',kind='place',open_now=True))
+                self.assertEqual(d.action,'REFRESH')
+                self.assertIn('OPENING_HOURS_UNKNOWN',d.blocked[r['id']])
+    def test_malformed_freshness_proof_fails_closed(self):
+        # A live record without a usable timestamp used to raise AttributeError mid-decision.
+        when=dt('2026-10-10T18:00:00+03:00')
+        r=sample_place();r['price']=100;del r['source_observed_at']
+        self.assertFalse(field_is_fresh(r,'price',when,48))
+        self.assertEqual(decide([r],Query(city='İstanbul',kind='place',budget=500)).action,'REFRESH')
+        for bad in [dict(observed_at=1700000000),dict(valid_until=5),dict(valid_until=0),dict(valid_until=''),dict(status=['disputed'])]:
+            with self.subTest(proof=bad):
+                r=sample_place();r['price']=100;r['field_evidence']={'price':{**proof(100),**bad}}
+                self.assertFalse(field_is_fresh(r,'price',when,48))
     def test_proof_bound_to_value(self):
         r=sample_place();r['price']=200;r['field_evidence']={'price':proof(100)}
         self.assertFalse(field_is_fresh(r,'price',dt('2026-10-10T18:00:00+03:00'),48))
