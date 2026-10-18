@@ -41333,30 +41333,17 @@
    "policy": "query_aware",
    "expect": {
     "ok": {
-     "action": "DISCOVER",
-     "selected": [
-      {
-       "id": "wikidata:Q1463961",
-       "name": "İstanbul Modern",
-       "city": "İstanbul",
-       "kind": "place",
-       "source_url": "https://www.wikidata.org/wiki/Q1463961",
-       "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004",
-       "distance_km": null,
-       "distance_type": null,
-       "caveats": [
-        "LIVE_STATUS_UNVERIFIED",
-        "ADMISSION_NOT_CONFIRMED"
-       ],
-       "price": null,
-       "evidence_status": "source_recorded"
-      }
-     ],
+     "action": "REFRESH",
+     "selected": [],
      "reasons": [
-      "REQUIRED_FIELDS_CHECKED"
+      "OPENING_HOURS_UNKNOWN"
      ],
      "considered": 1,
-     "blocked": {},
+     "blocked": {
+      "wikidata:Q1463961": [
+       "OPENING_HOURS_UNKNOWN"
+      ]
+     },
      "model_used": false,
      "policy_version": "query_aware_v0.3"
     }
@@ -41455,30 +41442,126 @@
    "policy": "query_aware",
    "expect": {
     "ok": {
-     "action": "DISCOVER",
-     "selected": [
-      {
-       "id": "wikidata:Q1463961",
-       "name": "İstanbul Modern",
-       "city": "İstanbul",
-       "kind": "place",
-       "source_url": "https://www.wikidata.org/wiki/Q1463961",
-       "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004",
-       "distance_km": null,
-       "distance_type": null,
-       "caveats": [
-        "LIVE_STATUS_UNVERIFIED",
-        "ADMISSION_NOT_CONFIRMED"
-       ],
-       "price": null,
-       "evidence_status": "source_recorded"
-      }
-     ],
+     "action": "REFRESH",
+     "selected": [],
      "reasons": [
-      "REQUIRED_FIELDS_CHECKED"
+      "OPENING_HOURS_UNKNOWN"
      ],
      "considered": 1,
-     "blocked": {},
+     "blocked": {
+      "wikidata:Q1463961": [
+       "OPENING_HOURS_UNKNOWN"
+      ]
+     },
+     "model_used": false,
+     "policy_version": "query_aware_v0.3"
+    }
+   }
+  },
+  {
+   "name": "place_loose_clock_'٠٩:٠٠'",
+   "catalog": [
+    {
+     "id": "wikidata:Q1463961",
+     "name": "İstanbul Modern",
+     "city": "İstanbul",
+     "category": "museum",
+     "lat": 41.026,
+     "lon": 28.98293889,
+     "source_url": "https://www.wikidata.org/wiki/Q1463961",
+     "license": "CC0-1.0",
+     "source_id": "wikidata",
+     "source_coordinates": "41°1'33.60\"N,28°58'58.58\"E",
+     "geo_warning": "Community coordinate; current entrance/location not independently verified.",
+     "opening_hours": {
+      "timezone": "Europe/Istanbul",
+      "weekly": {
+       "1": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "2": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "3": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "4": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "5": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ],
+       "6": [
+        [
+         "٠٩:٠٠",
+         "20:00"
+        ]
+       ],
+       "7": [
+        [
+         "09:00",
+         "20:00"
+        ]
+       ]
+      },
+      "exceptions": {}
+     },
+     "admission_price": null,
+     "crowd": null,
+     "source_observed_at": "2026-10-10T17:50:00+03:00",
+     "origin_live_verified": true,
+     "acquired_date": "2026-10-10",
+     "coordinate_accuracy_m": null,
+     "kind": "place",
+     "rights_scope": "open_attribution",
+     "publisher_root": "wikimedia",
+     "evidence_status": "source_recorded",
+     "lifecycle": "listed_claim",
+     "price": null,
+     "currency": "TRY",
+     "synthetic": true,
+     "flags": [
+      "PRICE_AMOUNT_UNKNOWN",
+      "OPENING_HOURS_UNKNOWN",
+      "CROWD_UNKNOWN"
+     ],
+     "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004"
+    }
+   ],
+   "query": {
+    "city": "İstanbul",
+    "kind": "place",
+    "open_now": true
+   },
+   "policy": "query_aware",
+   "expect": {
+    "ok": {
+     "action": "REFRESH",
+     "selected": [],
+     "reasons": [
+      "OPENING_HOURS_UNKNOWN"
+     ],
+     "considered": 1,
+     "blocked": {
+      "wikidata:Q1463961": [
+       "OPENING_HOURS_UNKNOWN"
+      ]
+     },
      "model_used": false,
      "policy_version": "query_aware_v0.3"
     }
@@ -41577,30 +41660,17 @@
    "policy": "query_aware",
    "expect": {
     "ok": {
-     "action": "DISCOVER",
-     "selected": [
-      {
-       "id": "wikidata:Q1463961",
-       "name": "İstanbul Modern",
-       "city": "İstanbul",
-       "kind": "place",
-       "source_url": "https://www.wikidata.org/wiki/Q1463961",
-       "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004",
-       "distance_km": null,
-       "distance_type": null,
-       "caveats": [
-        "LIVE_STATUS_UNVERIFIED",
-        "ADMISSION_NOT_CONFIRMED"
-       ],
-       "price": null,
-       "evidence_status": "source_recorded"
-      }
-     ],
+     "action": "REFRESH",
+     "selected": [],
      "reasons": [
-      "REQUIRED_FIELDS_CHECKED"
+      "OPENING_HOURS_UNKNOWN"
      ],
      "considered": 1,
-     "blocked": {},
+     "blocked": {
+      "wikidata:Q1463961": [
+       "OPENING_HOURS_UNKNOWN"
+      ]
+     },
      "model_used": false,
      "policy_version": "query_aware_v0.3"
     }
@@ -41649,7 +41719,21 @@
    },
    "policy": "query_aware",
    "expect": {
-    "raises": "AttributeError"
+    "ok": {
+     "action": "REFRESH",
+     "selected": [],
+     "reasons": [
+      "PRICE_FRESHNESS_UNVERIFIED"
+     ],
+     "considered": 1,
+     "blocked": {
+      "wikidata:Q1463961": [
+       "PRICE_FRESHNESS_UNVERIFIED"
+      ]
+     },
+     "model_used": false,
+     "policy_version": "query_aware_v0.3"
+    }
    }
   },
   {
@@ -41703,7 +41787,21 @@
    },
    "policy": "query_aware",
    "expect": {
-    "raises": "AttributeError"
+    "ok": {
+     "action": "REFRESH",
+     "selected": [],
+     "reasons": [
+      "PRICE_FRESHNESS_UNVERIFIED"
+     ],
+     "considered": 1,
+     "blocked": {
+      "wikidata:Q1463961": [
+       "PRICE_FRESHNESS_UNVERIFIED"
+      ]
+     },
+     "model_used": false,
+     "policy_version": "query_aware_v0.3"
+    }
    }
   },
   {
@@ -41759,30 +41857,17 @@
    "policy": "query_aware",
    "expect": {
     "ok": {
-     "action": "DISCOVER",
-     "selected": [
-      {
-       "id": "wikidata:Q1463961",
-       "name": "İstanbul Modern",
-       "city": "İstanbul",
-       "kind": "place",
-       "source_url": "https://www.wikidata.org/wiki/Q1463961",
-       "source_record_hash": "3707ddcc42f1d2251ad979681bded54c10d4374b439eec89ce2f28a36ebab004",
-       "distance_km": null,
-       "distance_type": null,
-       "caveats": [
-        "LIVE_STATUS_UNVERIFIED",
-        "ADMISSION_NOT_CONFIRMED"
-       ],
-       "price": 100,
-       "evidence_status": "source_recorded"
-      }
-     ],
+     "action": "REFRESH",
+     "selected": [],
      "reasons": [
-      "REQUIRED_FIELDS_CHECKED"
+      "PRICE_FRESHNESS_UNVERIFIED"
      ],
      "considered": 1,
-     "blocked": {},
+     "blocked": {
+      "wikidata:Q1463961": [
+       "PRICE_FRESHNESS_UNVERIFIED"
+      ]
+     },
      "model_used": false,
      "policy_version": "query_aware_v0.3"
     }
@@ -41842,7 +41927,21 @@
    },
    "policy": "query_aware",
    "expect": {
-    "raises": "TypeError"
+    "ok": {
+     "action": "REFRESH",
+     "selected": [],
+     "reasons": [
+      "PRICE_FRESHNESS_UNVERIFIED"
+     ],
+     "considered": 1,
+     "blocked": {
+      "wikidata:Q1463961": [
+       "PRICE_FRESHNESS_UNVERIFIED"
+      ]
+     },
+     "model_used": false,
+     "policy_version": "query_aware_v0.3"
+    }
    }
   },
   {

@@ -11,15 +11,13 @@ use kep_core::isotime::{parse_iso, parse_reference_timestamp};
 use serde_json::{Value, json};
 
 /// Cases where Rust deliberately differs from Python. Each one is stricter
-/// than Python, so a timestamp or clock time is rejected instead of trusted.
+/// than Python, so a timestamp is rejected instead of trusted.
 const KNOWN_GAPS: &[(&str, &str)] = &[
     ("isotime", "iso_'20261010T175000+0300'"), // basic date format
     ("isotime", "iso_'2026-W41-6T17:50:00+03:00'"), // ISO week date
     ("isotime", "iso_'2026-10-10T175000+03:00'"), // basic time format
     ("isotime", "iso_'2026-10-10T17:50:00 +03:00'"), // space before offset
     ("isotime", "iso_'2026-10-10T17:50:00+03:00:30.5'"), // fractional-second offset
-    ("minute", "minute_'٠٩:٣٠'_False"),        // non-ASCII digits in int()
-    ("minute", "minute_'٠٩:٣٠'_True"),
 ];
 
 fn vectors() -> Value {

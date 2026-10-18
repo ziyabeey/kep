@@ -405,8 +405,7 @@ def decide_cases(catalog):
     add('empty_catalog', {'city': 'İstanbul'}, records=[])
 
     # Malformed availability input reaching a decision end to end.
-    # ('٠٩:٠٠' is left out: Rust already rejects non-ASCII digits, see KNOWN_GAPS in parity.rs.)
-    for text in [' 9:00', '+9:00', '09: 0']:
+    for text in [' 9:00', '+9:00', '٠٩:٠٠', '09: 0']:
         r = copy.deepcopy(base); r['opening_hours'] = schedule([[text, '20:00']])
         add(f'place_loose_clock_{text!r}', {'city': 'İstanbul', 'kind': 'place', 'open_now': True}, records=[r])
     no_stamp = copy.deepcopy(base); no_stamp['price'] = 100; del no_stamp['source_observed_at']

@@ -41,23 +41,6 @@ pub fn py_isspace(c: char) -> bool {
     c.is_whitespace() || ('\u{1c}'..='\u{1f}').contains(&c)
 }
 
-/// Python's `int(text)` for short decimal strings: surrounding whitespace and
-/// one sign are allowed. Only ASCII digits are accepted; Python also accepts
-/// other Unicode decimal digits (a documented parity gap, see ADR-0034).
-pub fn py_int(text: &str) -> Option<i64> {
-    let t = text.trim_matches(py_isspace);
-    let (negative, digits) = match t.as_bytes().first() {
-        Some(b'-') => (true, &t[1..]),
-        Some(b'+') => (false, &t[1..]),
-        _ => (false, t),
-    };
-    if digits.is_empty() || !digits.bytes().all(|b| b.is_ascii_digit()) {
-        return None;
-    }
-    let n: i64 = digits.parse().ok()?;
-    Some(if negative { -n } else { n })
-}
-
 /// `d.get(key)` as Python sees it: a missing key and JSON null are both `None`.
 pub fn pyget<'a>(map: &'a Map<String, Value>, key: &str) -> Option<&'a Value> {
     map.get(key).filter(|v| !v.is_null())

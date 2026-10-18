@@ -64,10 +64,10 @@ Bu Rust kararı yalnız KEP içindir; başka projelere emsal oluşturmaz.
 
 ## Faz 0 bulguları
 
-İlk port Python referansında, şimdilik birebir taklit edilen iki davranış ortaya çıkardı. Bunlar ayrı, küçük Python değişiklikleriyle (önce Python, sonra vektör, sonra Rust) ele alınmalı:
+İlk port Python referansında iki tuhaflık ortaya çıkardı. İkisi de kuralına uygun şekilde önce Python'da düzeltildi (#47), vektörler yeniden üretildi, Rust da ardından aynı davranışa çekildi:
 
-- `availability.minute` Python'un `int()` gevşekliğini miras alıyor: `" 9:30"`, `"+9:30"`, `"09: 5"`, `"-0:00"` ve Arapça-Hint rakamlı `"٠٩:٣٠"` geçerli saat sayılıyor.
-- `field_is_fresh`, `origin_live_verified` doğru ama `source_observed_at` eksik veya sayı olan bir kayıtta `False` dönmek yerine `AttributeError` fırlatıyor; geçersiz tipte `valid_until` ve liste tipinde `status` için de aynısı geçerli.
+- `availability.minute` Python'un `int()` gevşekliği yüzünden `" 9:30"`, `"+9:30"`, `"09: 5"` ve Arapça-Hint rakamlı `"٠٩:٣٠"` değerlerini geçerli saat sayıyordu. Artık her iki tarafta tam iki ASCII rakam gerekiyor; Unicode rakam farkı da kalmadı.
+- `field_is_fresh` bozuk kanıtta (`source_observed_at` eksik canlı kayıt, string olmayan `observed_at`/`valid_until`, liste tipinde `status`) karar ortasında çöküyordu; `0` gibi falsy bir `valid_until` ise "son tarih yok" sayılıyordu. Artık hepsi "taze değil".
 
 ## Faz 1 durumu
 

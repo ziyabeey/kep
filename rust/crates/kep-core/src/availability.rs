@@ -6,7 +6,7 @@
 //! Unsupported/malformed input is UNKNOWN, never an implicit open flag.
 
 use crate::isotime::parse_reference_timestamp;
-use crate::pyval::{PyError, py_int, truthy};
+use crate::pyval::{PyError, truthy};
 use chrono::{DateTime, Datelike, Days, FixedOffset, Timelike};
 use chrono_tz::Tz;
 use kep_canon::stable_hash;
@@ -150,16 +150,17 @@ impl OpeningStatus {
 }
 
 /// `HH:MM` to minutes after midnight; `24:00` only as an interval end.
+/// Exactly two ASCII digits on each side (no spaces, signs or other scripts).
 pub fn minute(text: &Value, end: bool) -> Result<i64, PyError> {
     let Value::String(text) = text else {
         return Err(PyError::ValueError);
     };
-    let chars: Vec<char> = text.chars().collect();
-    if chars.len() != 5 || chars[2] != ':' {
+    let b = text.as_bytes();
+    if b.len() != 5 || b[2] != b':' || ![b[0], b[1], b[3], b[4]].iter().all(u8::is_ascii_digit) {
         return Err(PyError::ValueError);
     }
-    let h = py_int(&chars[..2].iter().collect::<String>()).ok_or(PyError::ValueError)?;
-    let m = py_int(&chars[3..].iter().collect::<String>()).ok_or(PyError::ValueError)?;
+    let digit = |i: usize| i64::from(b[i] - b'0');
+    let (h, m) = (digit(0) * 10 + digit(1), digit(3) * 10 + digit(4));
     if end && h == 24 && m == 0 {
         return Ok(1440);
     }
@@ -250,8 +251,8 @@ fn status_inner(hours: &Value, at: &DateTime<FixedOffset>) -> Option<OpeningStat
 ///
 /// Explicit field evidence overrides the broad record timestamp and must be
 /// bound to the current value by hash. Acquisition time is never substituted
-/// for observation time. `Err` reproduces an exception the reference raises
-/// (for example a missing or non-string `observed_at` on a live record).
+/// for observation time. Malformed proofs are not fresh. `Err` only when the
+/// record itself is not an object.
 pub fn field_is_fresh(
     record: &Value,
     field: &str,
@@ -295,18 +296,14 @@ pub fn field_is_fresh(
     if !truthy(proof.get("origin_live_verified")) {
         return Ok(false);
     }
+    // A malformed (non-string) status is not evidence of a clean field.
     match proof.get("status") {
-        Some(Value::Array(_) | Value::Object(_)) => return Err(PyError::TypeError), // unhashable
-        Some(Value::String(s)) if matches!(s.as_str(), "disputed" | "unknown" | "retracted") => {
-            return Ok(false);
-        }
-        _ => {}
+        None | Some(Value::Null) => {}
+        Some(Value::String(s)) if !matches!(s.as_str(), "disputed" | "unknown" | "retracted") => {}
+        Some(_) => return Ok(false),
     }
-    let Some(observed) = proof.get("observed_at") else {
-        return Ok(false); // KeyError, caught by the reference
-    };
-    let Value::String(observed) = observed else {
-        return Err(PyError::AttributeError); // `.replace` on a non-string
+    let Some(Value::String(observed)) = proof.get("observed_at") else {
+        return Ok(false); // missing or not a string
     };
     let Some(stamp) = parse_reference_timestamp(observed).and_then(|t| t.aware()) else {
         return Ok(false);
@@ -318,15 +315,16 @@ pub fn field_is_fresh(
     if !(age.is_finite() && 0.0 <= age && age <= max_hours) {
         return Ok(false);
     }
-    let until = proof.get("valid_until");
-    if truthy(until) {
-        let Some(Value::String(until)) = until else {
-            return Err(PyError::AttributeError);
-        };
-        match parse_reference_timestamp(until).and_then(|t| t.aware()) {
-            Some(deadline) if *at < deadline => {}
-            _ => return Ok(false),
+    // Only a missing or null valid_until means "no deadline".
+    match proof.get("valid_until") {
+        None | Some(Value::Null) => {}
+        Some(Value::String(until)) => {
+            match parse_reference_timestamp(until).and_then(|t| t.aware()) {
+                Some(deadline) if *at < deadline => {}
+                _ => return Ok(false),
+            }
         }
+        Some(_) => return Ok(false),
     }
     Ok(true)
 }
