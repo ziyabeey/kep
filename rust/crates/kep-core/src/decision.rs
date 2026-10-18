@@ -5,7 +5,9 @@
 use crate::availability::{OpeningStatus, field_is_fresh, opening_status_ist};
 use crate::distance::{haversine_km, round4};
 use crate::isotime::{IstDateTime, istanbul_dt};
-use crate::pyval::{PyError, dedupe, pyfloat, pyget, pyindex, pystr, python_str, truthy};
+use crate::pyval::{
+    PyError, PyNum, dedupe, py_num, pyfloat, pyget, pyindex, pystr, python_str, truthy,
+};
 use crate::query::Query;
 use crate::text::fold;
 use serde_json::{Map, Value, json};
@@ -376,83 +378,30 @@ pub fn decide(catalog: &[Value], q: &Query, policy: &str) -> Result<Decision, Py
 }
 
 /// A JSON scalar compared as Python does (`1 == 1.0 == True`). Integers stay
-/// exact, as Python's are; an integer beyond `i128` falls back to float.
+/// exact, as Python's are.
 #[derive(Debug, Clone)]
 enum PyKey {
     None,
-    Int(i128),
-    Float(f64),
+    Num(PyNum),
     Str(String),
-}
-
-/// 2^127 as f64: floats at or beyond it are outside `i128`.
-const I128_BOUND: f64 = 170_141_183_460_469_231_731_687_303_715_884_105_728.0;
-
-/// Exact comparison of an int with a float, as Python does.
-fn cmp_int_float(i: i128, f: f64) -> std::cmp::Ordering {
-    use std::cmp::Ordering::{Equal, Greater, Less};
-    if f.is_nan() {
-        return Equal; // unordered in Python; keep input order
-    }
-    if f >= I128_BOUND {
-        return Less;
-    }
-    if f < -I128_BOUND {
-        return Greater;
-    }
-    let t = f.trunc();
-    match i.cmp(&(t as i128)) {
-        Equal if f > t => Less,
-        Equal if f < t => Greater,
-        other => other,
-    }
-}
-
-fn cmp_num(a: &PyKey, b: &PyKey) -> Option<std::cmp::Ordering> {
-    Some(match (a, b) {
-        (PyKey::Int(x), PyKey::Int(y)) => x.cmp(y),
-        (PyKey::Float(x), PyKey::Float(y)) => x.total_cmp(y),
-        (PyKey::Int(x), PyKey::Float(y)) => cmp_int_float(*x, *y),
-        (PyKey::Float(x), PyKey::Int(y)) => cmp_int_float(*y, *x).reverse(),
-        _ => return None,
-    })
 }
 
 impl PartialEq for PyKey {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (PyKey::None, PyKey::None) => true,
+            (PyKey::Num(a), PyKey::Num(b)) => a == b,
             (PyKey::Str(a), PyKey::Str(b)) => a == b,
-            (PyKey::Float(a), PyKey::Float(b)) => a == b,
-            _ => {
-                let nan = matches!(self, PyKey::Float(f) if f.is_nan())
-                    || matches!(other, PyKey::Float(f) if f.is_nan());
-                !nan && cmp_num(self, other) == Some(std::cmp::Ordering::Equal)
-            }
+            _ => false,
         }
-    }
-}
-
-impl PyKey {
-    fn is_num(&self) -> bool {
-        matches!(self, PyKey::Int(_) | PyKey::Float(_))
     }
 }
 
 fn py_key(v: &Value) -> Result<PyKey, PyError> {
     match v {
         Value::Null => Ok(PyKey::None),
-        Value::Bool(b) => Ok(PyKey::Int(i128::from(*b))),
-        Value::Number(n) => {
-            let text = n.to_string();
-            let is_int = !text.contains(['.', 'e', 'E']);
-            match text.parse::<i128>() {
-                Ok(i) if is_int => Ok(PyKey::Int(i)),
-                _ => Ok(PyKey::Float(pyfloat(v)?)),
-            }
-        }
         Value::String(s) => Ok(PyKey::Str(s.clone())),
-        _ => Err(PyError::TypeError), // unhashable
+        _ => py_num(v).map(PyKey::Num).ok_or(PyError::TypeError), // unhashable
     }
 }
 
@@ -467,14 +416,15 @@ fn sorted_set(values: impl Iterator<Item = Value>) -> Result<Vec<Value>, PyError
         }
     }
     if uniq.len() > 1 {
-        let all_num = uniq.iter().all(|(k, _)| k.is_num());
+        let all_num = uniq.iter().all(|(k, _)| matches!(k, PyKey::Num(_)));
         let all_str = uniq.iter().all(|(k, _)| matches!(k, PyKey::Str(_)));
         if !(all_num || all_str) {
             return Err(PyError::TypeError);
         }
         uniq.sort_by(|(a, _), (b, _)| match (a, b) {
             (PyKey::Str(x), PyKey::Str(y)) => x.cmp(y),
-            _ => cmp_num(a, b).unwrap_or(std::cmp::Ordering::Equal),
+            (PyKey::Num(x), PyKey::Num(y)) => x.py_cmp(y).unwrap_or(std::cmp::Ordering::Equal),
+            _ => std::cmp::Ordering::Equal,
         });
     }
     Ok(uniq.into_iter().map(|(_, v)| v).collect())

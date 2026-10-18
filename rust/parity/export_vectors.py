@@ -30,6 +30,8 @@ from kepcore.availability import field_is_fresh, intervals, minute, opening_stat
 from kepcore.core import (Query, check_model_selection, decide, dt, fold, haversine_km,  # noqa: E402
                           load_catalog, load_json, normalize_events, reconcile_claims, stable_hash,
                           temporal_state)
+from kepcore.model_boundary import context_for_model, validate_structured_reply  # noqa: E402
+from kepcore.scheduler import SourceClock, due_sources  # noqa: E402
 
 AT = '2026-10-10T18:00:00+03:00'  # Saturday, as in tests/test_v03.py
 
@@ -504,7 +506,138 @@ def build_core():
     }
 
 
-OUTPUTS = {'availability.json': build_availability, 'core.json': build_core}
+def context_queries():
+    return [
+        {'city': 'İstanbul', 'lat': GALATA[0], 'lon': GALATA[1], 'radius_km': 3, 'limit': 3},
+        {'city': 'İstanbul', 'budget': 100, 'limit': 2},
+        {'city': 'İzmir', 'at': '2026-08-10T12:00:00+03:00', 'category': 'cinema'},
+        {'city': 'İstanbul', 'kind': 'place', 'open_now': True},
+        {'city': 'Nowhere'},
+        {'city': 'İstanbul', 'proactive': True, 'mode': 'work'},
+    ]
+
+
+def reply_cases(catalog):
+    ctx = context_for_model(decide(catalog, Query(**context_queries()[0])))
+    c0, c1 = ctx['candidates'][0], ctx['candidates'][1]
+    ok_claim = {'id': c0['id'], 'field': 'name', 'value': c0['facts']['name'],
+                'source_record_hash': c0['source_record_hash']}
+    fact_field = next(f for f in ('distance_km', 'price', 'kind') if f in c0['facts'])
+    replies = {
+        'not_object': [c0['id']],
+        'extra_field': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [], 'note': 'hi'},
+        'stale': {'snapshot_hash': 'x' * 64, 'selected_ids': [c0['id']]},
+        'missing_hash': {'selected_ids': [c0['id']]},
+        'ok_ids_only': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c1['id'], c0['id']]},
+        'ok_empty': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': []},
+        'ids_missing': {'snapshot_hash': ctx['snapshot_hash']},
+        'ids_not_list': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': c0['id']},
+        'ids_non_str': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id'], 7]},
+        'ids_duplicate': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id'], c0['id']]},
+        'ids_unknown': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': ['wikidata:Q0']},
+        'claims_null': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': None},
+        'claims_dict': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': {}},
+        'claim_ok': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': [ok_claim]},
+        'claim_numeric_fact': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': [
+            {**ok_claim, 'field': fact_field, 'value': c0['facts'][fact_field]}]},
+        'claim_float_vs_int': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': [
+            {**ok_claim, 'field': fact_field, 'value': float(c0['facts'][fact_field])
+             if isinstance(c0['facts'][fact_field], int) else c0['facts'][fact_field]}]},
+        'claim_extra_key': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': [
+            {**ok_claim, 'why': 'x'}]},
+        'claim_not_object': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': ['x']},
+        'claim_id_type': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': [
+            {**ok_claim, 'id': 1}]},
+        'claim_unselected': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c1['id']], 'claims': [ok_claim]},
+        'claim_unknown_field': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': [
+            {**ok_claim, 'field': 'opening_hours'}]},
+        'claim_wrong_revision': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': [
+            {**ok_claim, 'source_record_hash': '0' * 64}]},
+        'claim_wrong_value': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': [
+            {**ok_claim, 'value': 'Somewhere else'}]},
+        'claim_bool_for_zero': {'snapshot_hash': ctx['snapshot_hash'], 'selected_ids': [c0['id']], 'claims': [
+            {**ok_claim, 'field': fact_field, 'value': False}]},
+    }
+    out = [{'name': f'reply_{k}', 'context': ctx, 'reply': v, 'expect': outcome(validate_structured_reply, ctx, v)}
+           for k, v in replies.items()]
+    # Hand-built contexts reach the reference's error paths.
+    ok = {'snapshot_hash': 'h', 'selected_ids': ['a'], 'claims': [
+        {'id': 'a', 'field': 'name', 'value': 'A', 'source_record_hash': 'r'}]}
+    row = {'id': 'a', 'source_record_hash': 'r', 'facts': {'name': 'A'}}
+    contexts = {
+        'no_hash': {'candidates': [row]},
+        'no_candidates': {'snapshot_hash': 'h'},
+        'candidates_null': {'snapshot_hash': 'h', 'candidates': None},
+        'candidates_empty_str': {'snapshot_hash': 'h', 'candidates': ''},
+        'candidates_str': {'snapshot_hash': 'h', 'candidates': 'a'},
+        'candidate_not_object': {'snapshot_hash': 'h', 'candidates': [['a']]},
+        'candidate_no_id': {'snapshot_hash': 'h', 'candidates': [{'source_record_hash': 'r'}]},
+        'candidate_list_id': {'snapshot_hash': 'h', 'candidates': [{'id': ['a']}]},
+        'candidate_int_id': {'snapshot_hash': 'h', 'candidates': [{'id': 1}, row]},
+        'duplicate_ids_last_wins': {'snapshot_hash': 'h', 'candidates': [row, {**row, 'source_record_hash': 's'}]},
+        'facts_missing': {'snapshot_hash': 'h', 'candidates': [{'id': 'a', 'source_record_hash': 'r'}]},
+        'facts_list': {'snapshot_hash': 'h', 'candidates': [{**row, 'facts': ['name']}]},
+        'facts_str': {'snapshot_hash': 'h', 'candidates': [{**row, 'facts': 'surname'}]},
+        'facts_null': {'snapshot_hash': 'h', 'candidates': [{**row, 'facts': None}]},
+        'row_no_revision': {'snapshot_hash': 'h', 'candidates': [{'id': 'a', 'facts': {'name': 'A'}}]},
+        'hash_int_float': {'snapshot_hash': 1, 'candidates': [row]},
+        'context_list': [row],
+    }
+    for k, c in contexts.items():
+        reply = {**ok, 'snapshot_hash': 1.0} if k == 'hash_int_float' else ok
+        out.append({'name': f'context_{k}', 'context': c, 'reply': reply,
+                    'expect': outcome(validate_structured_reply, c, reply)})
+    return out
+
+
+def scheduler_cases():
+    s = lambda sid, e, lo=1, hi=24, **kw: {'source_id': sid, 'elapsed_hours': e,  # noqa: E731
+                                           'min_interval_hours': lo, 'max_interval_hours': hi, **kw}
+    sets = {
+        'empty': ([], 3),
+        'too_soon': ([s('a', 0.5)], 3),
+        'at_min': ([s('a', 1)], 3),
+        'overdue_beats_popular': ([s('pop', 10, priority=50, observed_change_rate=3), s('beat', 24)], 1),
+        'overdue_ratio_order': ([s('x', 30), s('y', 48), s('z', 25, hi=12)], 3),
+        'score_order': ([s('a', 5, priority=2), s('b', 5, observed_change_rate=1.5), s('c', 6)], 3),
+        'tie_by_id': ([s('b', 5), s('a', 5), s('c', 5)], 3),
+        'zero_priority_tie': ([s('b', 5, priority=0), s('a', 5, priority=-0.0)], 2),
+        'negative_priority': ([s('a', 5, priority=-1), s('b', 5)], 2),
+        'budget_cut': ([s('a', 5), s('b', 6), s('c', 7)], 2),
+        'budget_zero': ([s('a', 5)], 0),
+        'not_approved': ([s('a', 5, approved=False), s('b', 5)], 2),
+        'daily_cap': ([s('a', 5, calls_today=24), s('b', 5, calls_today=3, daily_cap=3), s('c', 5, calls_today=2)], 3),
+        'retry_after': ([s('a', 50, retry_after_hours=0.5), s('b', 5)], 2),
+        'float_counts': ([s('a', 5, calls_today=2.5, daily_cap=3)], 1),
+        'negative_budget': ([s('a', 5)], -1),
+        'bad_min': ([s('a', 5, lo=0)], 1),
+        'bad_max': ([s('a', 5, lo=4, hi=3)], 1),
+        'bad_elapsed': ([s('a', -1)], 1),
+        'bad_rate': ([s('a', 5, observed_change_rate=-0.1)], 1),
+        'unknown_field': ([{**s('a', 5), 'popularity': 1}], 1),
+        'missing_field': ([{'source_id': 'a', 'elapsed_hours': 5}], 1),
+    }
+
+    def run(raw, budget):
+        return due_sources([SourceClock(**r) for r in raw], budget)
+    return [{'name': f'due_{k}', 'sources': v, 'budget': b, 'expect': outcome(run, v, b)}
+            for k, (v, b) in sets.items()]
+
+
+def build_boundary():
+    catalog = load_catalog()
+    return {
+        'reference': 'labs/core/kepcore/{model_boundary,scheduler}.py (Python); see docs/adr/0034-rust-core-port.md',
+        'context': [{'name': f'context_{i}', 'query': q,
+                     'expect': outcome(lambda q: context_for_model(decide(catalog, Query(**q))), q)}
+                    for i, q in enumerate(context_queries())],
+        'reply': reply_cases(catalog),
+        'due_sources': scheduler_cases(),
+    }
+
+
+OUTPUTS = {'availability.json': build_availability, 'core.json': build_core,
+           'boundary.json': build_boundary}
 
 
 def render(data):

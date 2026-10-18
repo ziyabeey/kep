@@ -12,8 +12,10 @@ pub mod catalog;
 pub mod decision;
 pub mod distance;
 pub mod isotime;
+pub mod model_boundary;
 pub mod pyval;
 pub mod query;
+pub mod scheduler;
 pub mod text;
 
 pub use catalog::load_catalog;
