@@ -64,10 +64,18 @@ Bu Rust kararı yalnız KEP içindir; başka projelere emsal oluşturmaz.
 
 ## Faz 0 bulguları
 
-İlk port Python referansında, şimdilik birebir taklit edilen iki davranış ortaya çıkardı. Bunlar ayrı, küçük Python değişiklikleriyle (önce Python, sonra vektör, sonra Rust) ele alınmalı:
+İlk port Python referansında iki tuhaflık ortaya çıkardı. İkisi de kuralına uygun şekilde önce Python'da düzeltildi (#47), vektörler yeniden üretildi, Rust da ardından aynı davranışa çekildi:
 
-- `availability.minute` Python'un `int()` gevşekliğini miras alıyor: `" 9:30"`, `"+9:30"`, `"09: 5"`, `"-0:00"` ve Arapça-Hint rakamlı `"٠٩:٣٠"` geçerli saat sayılıyor.
-- `field_is_fresh`, `origin_live_verified` doğru ama `source_observed_at` eksik veya sayı olan bir kayıtta `False` dönmek yerine `AttributeError` fırlatıyor; geçersiz tipte `valid_until` ve liste tipinde `status` için de aynısı geçerli.
+- `availability.minute` Python'un `int()` gevşekliği yüzünden `" 9:30"`, `"+9:30"`, `"09: 5"` ve Arapça-Hint rakamlı `"٠٩:٣٠"` değerlerini geçerli saat sayıyordu. Artık her iki tarafta tam iki ASCII rakam gerekiyor; Unicode rakam farkı da kalmadı.
+- `field_is_fresh` bozuk kanıtta (`source_observed_at` eksik canlı kayıt, string olmayan `observed_at`/`valid_until`, liste tipinde `status`) karar ortasında çöküyordu; `0` gibi falsy bir `valid_until` ise "son tarih yok" sayılıyordu. Artık hepsi "taze değil".
+
+## Faz 1 durumu
+
+`core.py` ve `query.py` taşındı (`kep-core::{catalog, query, decision, distance, text}`, `kep-cli`). Python'un ürettiği ~380 karar vakası, katalog normalizasyonu, sorgu doğrulama, uzlaşma ve model koruması Rust'ta birebir tutuyor; `kep-query` örnek sorgularda `query.py` ile bayt bayt aynı çıktıyı veriyor.
+
+- **Mesafe:** `geo::Haversine` 200 bin rastgele nokta çiftinde Python'la `round(d, 4)` düzeyinde %100 aynı, ham değerde ise ~%70 bit-bit aynı (son bit farkı). Yarıçap karşılaştırması ham mesafeyle yapıldığı için sınırdan bir ulp uzaklıktaki bir kayıt iki tarafta farklı karar alabilir; pratikte ihmal edilebilir, vektörlerde 1 km sınırının iki yanı ayrıca sınanıyor.
+- **İstanbul saatleri:** Python aynı `tzinfo`'yu paylaşan iki zamanı duvar saatine göre karşılaştırır ve çıkarır, DST boşluğundaki naif saati de olduğu gibi tutar. Rust `IstDateTime` aynı kuralı izler (2016 öncesi geçiş anları dahil); başka bölgelerle karşılaştırmada Python'un `utcoffset()` değeri kullanılır.
+- **Sorgu tipleri:** Python `Query` tip kontrolü yapmaz (ör. `limit: true` geçer); Rust yanlış tipli alanları `TypeError` ile reddeder.
 
 ## Faz geçiş ölçütü
 

@@ -11,7 +11,9 @@
 //! fail closed (not fresh) rather than open. The parity vectors list each case.
 //! An empty fraction (`17:50:00.`) is rejected; Python 3.11 accepts it but 3.13 does not.
 
-use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
+use crate::pyval::PyError;
+use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, Offset, TimeZone};
+use chrono_tz::Europe::Istanbul;
 
 /// A parsed timestamp; Python returns a naive datetime when no offset is given.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -160,4 +162,99 @@ fn parse_offset(s: &str) -> Option<FixedOffset> {
         return None;
     }
     FixedOffset::east_opt(sign * total)
+}
+
+/// A datetime with `tzinfo=ZoneInfo("Europe/Istanbul")`, as `core.dt()` returns.
+///
+/// Python compares and subtracts two datetimes that share a tzinfo by their
+/// wall time, and `replace(tzinfo=IST)` keeps a wall time that falls in a DST
+/// gap as given. So this type keeps the wall time plus the UTC offset Python
+/// reports for it: equality, ordering and subtraction use the wall time, and
+/// [`IstDateTime::instant`] gives the moment for comparisons with other zones.
+#[derive(Debug, Clone, Copy)]
+pub struct IstDateTime {
+    wall: NaiveDateTime,
+    offset: FixedOffset,
+}
+
+impl IstDateTime {
+    /// Local wall-clock fields (`here.hour`, `.date()` in Python).
+    pub fn wall(&self) -> NaiveDateTime {
+        self.wall
+    }
+
+    /// `.date()`.
+    pub fn date_naive(&self) -> NaiveDate {
+        self.wall.date()
+    }
+
+    /// The instant, using the offset Python's `utcoffset()` reports.
+    pub fn instant(&self) -> DateTime<FixedOffset> {
+        DateTime::from_naive_utc_and_offset(self.wall - self.offset, self.offset)
+    }
+}
+
+impl PartialEq for IstDateTime {
+    fn eq(&self, other: &Self) -> bool {
+        self.wall == other.wall
+    }
+}
+
+impl Eq for IstDateTime {}
+
+impl PartialOrd for IstDateTime {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for IstDateTime {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.wall.cmp(&other.wall)
+    }
+}
+
+impl std::ops::Sub for IstDateTime {
+    type Output = chrono::TimeDelta;
+    fn sub(self, other: Self) -> chrono::TimeDelta {
+        self.wall - other.wall
+    }
+}
+
+/// `core.dt()`: parse a timestamp and express it in Europe/Istanbul.
+/// A timestamp without an offset is read as Istanbul local time, as
+/// `replace(tzinfo=IST)` does with `fold=0`: an ambiguous time takes the
+/// earlier offset, and a time inside a DST gap keeps its wall time with the
+/// offset in force just before the gap.
+pub fn istanbul_dt(text: &str) -> Result<IstDateTime, PyError> {
+    match parse_reference_timestamp(text).ok_or(PyError::ValueError)? {
+        IsoDateTime::Aware(dt) => {
+            let local = dt.with_timezone(&Istanbul);
+            Ok(IstDateTime {
+                wall: local.naive_local(),
+                offset: local.offset().fix(),
+            })
+        }
+        IsoDateTime::Naive(n) => {
+            let offset = match Istanbul.from_local_datetime(&n).earliest() {
+                Some(dt) => dt.offset().fix(),
+                None => {
+                    // DST gap: use the offset of the wall time a few hours earlier.
+                    let before = n - chrono::Duration::hours(6);
+                    Istanbul
+                        .from_local_datetime(&before)
+                        .earliest()
+                        .ok_or(PyError::ValueError)?
+                        .offset()
+                        .fix()
+                }
+            };
+            Ok(IstDateTime { wall: n, offset })
+        }
+    }
+}
+
+/// `datetime.isoformat()` for an Istanbul datetime.
+pub fn isoformat_tz(dt: &IstDateTime) -> String {
+    IsoDateTime::Aware(dt.instant()).python_isoformat()
 }

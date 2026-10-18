@@ -35,6 +35,50 @@ pub fn sha256_hex(bytes: &[u8]) -> String {
     hex
 }
 
+/// `json.dumps(value, ensure_ascii=False, indent=indent)`: keys in insertion
+/// order (Python dict order), `,` between items and `": "` after keys.
+pub fn python_json_pretty(value: &Value, indent: usize) -> String {
+    let mut out = String::new();
+    write_pretty(&mut out, value, indent, 0);
+    out
+}
+
+fn write_pretty(out: &mut String, value: &Value, indent: usize, depth: usize) {
+    let pad = |out: &mut String, d: usize| {
+        out.push('\n');
+        out.extend(std::iter::repeat_n(' ', indent * d));
+    };
+    match value {
+        Value::Array(items) if !items.is_empty() => {
+            out.push('[');
+            for (i, item) in items.iter().enumerate() {
+                if i > 0 {
+                    out.push(',');
+                }
+                pad(out, depth + 1);
+                write_pretty(out, item, indent, depth + 1);
+            }
+            pad(out, depth);
+            out.push(']');
+        }
+        Value::Object(map) if !map.is_empty() => {
+            out.push('{');
+            for (i, (key, item)) in map.iter().enumerate() {
+                if i > 0 {
+                    out.push(',');
+                }
+                pad(out, depth + 1);
+                write_string(out, key);
+                out.push_str(": ");
+                write_pretty(out, item, indent, depth + 1);
+            }
+            pad(out, depth);
+            out.push('}');
+        }
+        other => write_value(out, other),
+    }
+}
+
 fn write_value(out: &mut String, value: &Value) {
     match value {
         Value::Null => out.push_str("null"),

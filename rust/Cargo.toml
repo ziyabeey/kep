@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/kep-canon", "crates/kep-core"]
+members = ["crates/kep-canon", "crates/kep-core", "crates/kep-cli"]
 
 [workspace.package]
 edition = "2024"
@@ -8,12 +8,16 @@ rust-version = "1.85"
 publish = false
 
 [workspace.dependencies]
+# preserve_order keeps object keys in insertion order, like Python dicts.
 # arbitrary_precision keeps JSON number literals so int/float can be told apart
 # exactly as Python's json module does (1 vs 1.0 hash differently).
-serde_json = { version = "1", features = ["arbitrary_precision"] }
+serde_json = { version = "1", features = ["arbitrary_precision", "preserve_order"] }
 sha2 = "0.10"
 chrono = { version = "0.4", default-features = false, features = ["std"] }
 chrono-tz = "0.10"
+# georust: geographic primitives and distances (Ziya's choice for all geo work in KEP).
+geo = { version = "0.31", default-features = false }
+unicode-normalization = "0.1"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
