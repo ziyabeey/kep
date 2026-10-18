@@ -38,6 +38,9 @@ _TOP_LABEL = re.compile(r'[a-z][a-z0-9-]*')
 def _public_https(url: str) -> str:
     """Reject non-web, local, credentialed or nonstandard-ported URLs.
 
+    The host must be an ASCII DNS name (IDN in punycode). Every IP literal,
+    public or private, is rejected, so an IP-only source cannot be registered.
+
     This syntactic check alone is NOT a DNS rebinding / egress firewall.
     """
     if not isinstance(url, str) or not url or any(ch.isspace() or ord(ch) < 32 for ch in url):
