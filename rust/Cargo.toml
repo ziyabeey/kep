@@ -1,0 +1,22 @@
+[workspace]
+resolver = "3"
+members = ["crates/kep-canon", "crates/kep-core"]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.85"
+publish = false
+
+[workspace.dependencies]
+# arbitrary_precision keeps JSON number literals so int/float can be told apart
+# exactly as Python's json module does (1 vs 1.0 hash differently).
+serde_json = { version = "1", features = ["arbitrary_precision"] }
+sha2 = "0.10"
+chrono = { version = "0.4", default-features = false, features = ["std"] }
+chrono-tz = "0.10"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }

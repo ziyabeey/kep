@@ -42,3 +42,6 @@ labs/core/data/field_reviews_private/adjudications/
 # Generic guard for private material named in CLAUDE.md: any *_private/ or .local/ folder
 **/*_private/
 **/.local/
+
+# Rust build output
+rust/target/
