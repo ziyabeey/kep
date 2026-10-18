@@ -17,6 +17,7 @@ from urllib.error import HTTPError
 import hashlib
 import ipaddress
 import json
+import re
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTERED_USES = frozenset({'research_ingest', 'consumer_display'})
@@ -26,6 +27,12 @@ EVENT_FIELDS = ('Id', 'Tur', 'Adi', 'EtkinlikBaslamaTarihi',
                 'EtkinlikBitisTarihi', 'EtkinlikMerkezi', 'UcretsizMi',
                 'EtkinlikUrl', 'BiletSatisLinki')
 MANDATORY_EVENT_FIELDS = EVENT_FIELDS[:6]
+
+
+# One DNS label: ASCII letters, digits and inner hyphens. The last label must
+# start with a letter, so inet_aton forms such as 127.1 or 0x7f.0.0.1 never pass.
+_DNS_LABEL = re.compile(r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?')
+_TOP_LABEL = re.compile(r'[a-z][a-z0-9-]*')
 
 
 def _public_https(url: str) -> str:
@@ -44,6 +51,12 @@ def _public_https(url: str) -> str:
     if (u.scheme != 'https' or not host or u.username or u.password or u.fragment
             or port not in (None, 443) or '\\' in url):
         raise ValueError('Only plain HTTPS origins are allowed')
+    labels = host.split('.')
+    if (not host.isascii() or not all(_DNS_LABEL.fullmatch(x) for x in labels)
+            or not _TOP_LABEL.fullmatch(labels[-1])):
+        # Unicode hosts (IDNA could map 'x.local。' to 'x.local') must be
+        # registered in punycode; numeric hosts may resolve to loopback.
+        raise ValueError('Only ASCII DNS host names are allowed')
     if host in {'localhost'} or host.endswith(('.localhost', '.local', '.internal')) or '.' not in host:
         raise ValueError('Local origins are forbidden')
     try:

@@ -43,7 +43,10 @@ class RegistryTests(unittest.TestCase):
         for url in ['http://example.com', 'https://localhost/', 'https://127.0.0.1/',
                     'https://10.1.1.9/data', 'https://example.local/x',
                     'https://alice:secret@example.org/', 'https://example.org:8080/',
-                    'https://example.org/path#fragment', 'https://example.com\\@evil.com']:
+                    'https://example.org/path#fragment', 'https://example.com\\@evil.com',
+                    # inet_aton and IDNA forms that resolve to loopback or .local
+                    'https://127.1/', 'https://0x7f.0.0.1/', 'https://127.000.0.1/',
+                    'https://1.0x7f/', 'https://x.local\u3002/']:
             with self.subTest(url=url),self.assertRaises(ValueError):
                 _public_https(url)
 

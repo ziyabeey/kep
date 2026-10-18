@@ -51,6 +51,26 @@ fn is_ipv4(host: &str) -> bool {
         })
 }
 
+/// An ASCII DNS name whose labels are letters, digits and inner hyphens, and
+/// whose last label starts with a letter. Unicode hosts (IDNA could map
+/// `x.local。` to `x.local`) and inet_aton forms such as `127.1` or
+/// `0x7f.0.0.1` never pass.
+fn is_dns_name(host: &str) -> bool {
+    let labels: Vec<&str> = host.split('.').collect();
+    let label_ok = |l: &&str| {
+        let b = l.as_bytes();
+        (1..=63).contains(&b.len())
+            && b.iter()
+                .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || *c == b'-')
+            && b[0] != b'-'
+            && b[b.len() - 1] != b'-'
+    };
+    labels.iter().all(label_ok)
+        && labels
+            .last()
+            .is_some_and(|t| t.as_bytes()[0].is_ascii_lowercase())
+}
+
 /// `_public_https()`: the lowercased host of a plain public HTTPS URL, or
 /// ValueError. This syntactic check alone is NOT an egress firewall.
 pub fn public_https(url: &str) -> Result<String, PyError> {
@@ -119,6 +139,9 @@ pub fn public_https(url: &str) -> Result<String, PyError> {
     let host = lowered.trim_end_matches('.');
     if host.is_empty() {
         return Err(bad());
+    }
+    if !is_dns_name(host) {
+        return Err(bad()); // only ASCII DNS host names
     }
     if host == "localhost"
         || [".localhost", ".local", ".internal"]
