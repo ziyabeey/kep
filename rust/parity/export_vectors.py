@@ -758,6 +758,10 @@ def url_cases():
         'https://example.org/\tx', 'https://example.org/x\u00a0', 'https://İzmir.example.org/',
         'https://xn--zmir-5qa.example.org/', 'https://exa\u2100mple.org/', 'https://example.org?x#y',
         'https://a.b@c.example.org/', 'https://example.org@', 'https://Example.ORG/Path?Q#',
+        # inet_aton / IDNA forms that resolve to loopback or .local (review on #51)
+        'https://127.1/', 'https://0x7f.0.0.1/', 'https://127.000.0.1/', 'https://1.0x7f/',
+        'https://x.local\u3002/', 'https://example.123/', 'https://-a.example.org/',
+        'https://a_b.example.org/', 'https://xn--p1ai/', 'https://a..example.org/',
     ]
     return [{'name': f'url_{i:02d}', 'url': u, 'expect': outcome(_public_https, u)} for i, u in enumerate(urls)]
 

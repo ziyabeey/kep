@@ -187,21 +187,21 @@
    "name": "url_26",
    "url": "https://01.2.3.4/",
    "expect": {
-    "ok": "01.2.3.4"
+    "raises": "ValueError"
    }
   },
   {
    "name": "url_27",
    "url": "https://1.2.3.256/",
    "expect": {
-    "ok": "1.2.3.256"
+    "raises": "ValueError"
    }
   },
   {
    "name": "url_28",
    "url": "https://1.2.3/",
    "expect": {
-    "ok": "1.2.3"
+    "raises": "ValueError"
    }
   },
   {
@@ -299,7 +299,7 @@
    "name": "url_42",
    "url": "https://İzmir.example.org/",
    "expect": {
-    "ok": "i̇zmir.example.org"
+    "raises": "ValueError"
    }
   },
   {
@@ -342,6 +342,76 @@
    "url": "https://Example.ORG/Path?Q#",
    "expect": {
     "ok": "example.org"
+   }
+  },
+  {
+   "name": "url_49",
+   "url": "https://127.1/",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "url_50",
+   "url": "https://0x7f.0.0.1/",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "url_51",
+   "url": "https://127.000.0.1/",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "url_52",
+   "url": "https://1.0x7f/",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "url_53",
+   "url": "https://x.local。/",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "url_54",
+   "url": "https://example.123/",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "url_55",
+   "url": "https://-a.example.org/",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "url_56",
+   "url": "https://a_b.example.org/",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "url_57",
+   "url": "https://xn--p1ai/",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "url_58",
+   "url": "https://a..example.org/",
+   "expect": {
+    "raises": "ValueError"
    }
   }
  ],
