@@ -37,6 +37,11 @@ impl SourceClock {
     /// `SourceClock(**object)`: TypeError for unknown, missing or ill-typed
     /// fields (the reference does not type-check; numbers here are JSON
     /// numbers, not bools); ValueError for what `__post_init__` rejects.
+    ///
+    /// Known gap, failing closed: Python schedules `approved: 1`,
+    /// `elapsed_hours: true` or a numeric `source_id`; Rust rejects them.
+    /// Counters are f64, so integers above 2^53 may compare equal and the
+    /// source is skipped.
     pub fn from_json(value: &Value) -> Result<SourceClock, PyError> {
         let obj = value.as_object().ok_or(PyError::TypeError)?;
         if obj.keys().any(|k| !FIELDS.contains(&k.as_str())) {
