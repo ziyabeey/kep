@@ -1,4 +1,6 @@
-# ADR-0015: Provider confidence drift must not dominate field verification
+# ADR-0033: Provider confidence drift must not dominate field verification
+
+> **Numara notu (2026-10-18):** Bu karar ilk olarak yanlışlıkla `ADR-0015` numarasıyla yazıldı (commit 21b7f25, 2026-10-11) ve aynı gün daha önce kabul edilen [ADR-0015 historical S3 preflight](0015-pinned-historical-s3-object-preflight.md) ile çakıştı. İçerik değişmedi; yalnız numara 0033'e taşındı. ADR-0016'daki "ADR-0015" atfı S3 preflight kararını kastediyor.
 
 **Status:** Accepted as offline research policy, pending CI and external field validation  
 **Date:** 2026-10-11
