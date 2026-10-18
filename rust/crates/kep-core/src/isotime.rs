@@ -9,6 +9,7 @@
 //! Python also accepts basic (`20261010T175000`) and week (`2026-W41-6`) dates
 //! and a few other spellings. Rust rejects those, which makes freshness checks
 //! fail closed (not fresh) rather than open. The parity vectors list each case.
+//! An empty fraction (`17:50:00.`) is rejected; Python 3.11 accepts it but 3.13 does not.
 
 use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
 
