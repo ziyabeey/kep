@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_PATH = ROOT / 'sources/overture_third_release.json'
 # Frozen 2026-10-18, before the third release existed. Editing the protocol
 # after seeing data must fail loudly, not silently change the study.
-PROTOCOL_SHA256 = '24cada00664857b6c981a5c3c2b1bdb8c5083252a58de64919d09eca9cc6b9f3'
+PROTOCOL_SHA256 = '61c71df2dcd3790c2d721e8c5fdeb6efd3ae327b43e6d0f46477bc9c8a9c7b4d'
 STAC_BASE = 'https://stac.overturemaps.org/'
 MAX_CATALOG_BYTES = 200_000
 CATEGORY_FIELDS = frozenset({'basic_category', 'taxonomy_primary'})
@@ -185,10 +185,14 @@ def three_release_trajectories(first: list[dict], second: list[dict], third: lis
 
     delta = compare_source_records(list(b.values()), list(c.values()))
     if not schema_comparable:
-        counts = dict(delta['field_change_counts'])
-        excluded = {k: counts.pop(k) for k in sorted(CATEGORY_FIELDS) if k in counts}
-        delta = {**delta, 'field_change_counts': counts,
-                 'category_fields_excluded_technical_schema_review': excluded}
+        # Re-classify every ID with category fields blanked on both sides, so a
+        # taxonomy migration cannot turn unchanged IDs into "revised" ones.
+        raw_counts = delta['field_change_counts']
+        blank = {k: None for k in CATEGORY_FIELDS}
+        delta = compare_source_records([{**r, **blank} for r in b.values()],
+                                       [{**r, **blank} for r in c.values()])
+        delta['category_fields_excluded_technical_schema_review'] = {
+            k: raw_counts[k] for k in sorted(CATEGORY_FIELDS) if k in raw_counts}
     return {
         'study': STUDY,
         'scope': 'two_fixed_sampling_cells_not_districts',

@@ -117,6 +117,14 @@ class Trajectories(unittest.TestCase):
         delta = r['M3_consecutive_source_delta']
         self.assertNotIn('basic_category', delta['field_change_counts'])
         self.assertEqual(delta['category_fields_excluded_technical_schema_review']['basic_category'], len(b))
+        # Category-only changes must not count as revisions at the ID level either.
+        self.assertEqual(delta['field_or_geometry_revised_ids'], 0)
+        self.assertEqual(delta['unchanged_ids'], delta['retained_ids'])
+        mixed = [dict(x, basic_category='changed', confidence=None) for x in b]
+        delta = three_release_trajectories(a, b, mixed, schema_comparable=False)['M3_consecutive_source_delta']
+        self.assertEqual(delta['confidence_only_revised_ids'], len(b))
+        comparable = three_release_trajectories(a, b, c, schema_comparable=True)['M3_consecutive_source_delta']
+        self.assertEqual(comparable['field_or_geometry_revised_ids'], len(b))
 
     def test_repeated_ids_and_foreign_cells_rejected(self):
         a, b = Shared.pair()
@@ -182,6 +190,26 @@ class RegionalReconciliation(unittest.TestCase):
                                                chain=self.chain, capture_complete=True)
         self.assertEqual(r['counts']['official_regional_added'], len(self.events))
         self.assertEqual(UUID_RE.findall(canonical({k: v for k, v in r.items() if k != 'id_set_sha256'})), [])
+
+    def test_cross_type_events_do_not_count_as_agreement(self):
+        old = {r['overture_id']: r for r in self.b}
+        new = {r['overture_id']: r for r in self.c}
+        added = sorted(new.keys() - old.keys())
+        gone = sorted(old.keys() - new.keys())
+        events = ([_event('removed', new[r]) for r in added[:5]]
+                  + [_event('added', new[r]) for r in added[5:]]
+                  + [_event('added', old[r]) for r in gone[:4]]
+                  + [_event('removed', old[r]) for r in gone[4:]])
+        r = regional_membership_reconciliation(self.b, self.c, events, chain=self.chain,
+                                               capture_complete=True)
+        self.assertEqual(r['status'], 'REGIONAL_SCOPE_RECONCILED')
+        self.assertEqual(r['counts']['added_confirmed'], len(added) - 5)
+        self.assertEqual(r['counts']['removed_confirmed'], len(gone) - 4)
+        self.assertEqual((r['removed_agreement']['k'], r['removed_agreement']['n']), (len(gone) - 4, len(gone)))
+        m6 = r['M6_regional_membership_agreement']
+        self.assertEqual((m6['k'], m6['n']), (len(added) + len(gone) - 9, len(added) + len(gone)))
+        self.assertEqual(r['counts']['official_added_already_in_second_snapshot'], 4)
+        self.assertEqual(r['counts']['official_removed_still_in_third_snapshot'], 5)
 
     def test_unknown_event_kinds_rejected(self):
         kind, row = self.events[0]
@@ -273,7 +301,7 @@ class OfflineRehearsal(unittest.TestCase):
         a, b = Shared.pair()
         c = synthetic_third(a, b)
         write_places_dir(tmp / 'run', c, prev_href=prev)
-        write_gers_dir(tmp / 'gers', b, c, complete=complete)
+        write_gers_dir(tmp / 'gers', b, c, complete=complete, prev_href=prev)
         return tmp / 'run', tmp / 'gers'
 
     def test_end_to_end_synthetic_rehearsal_is_labelled(self):
@@ -282,7 +310,12 @@ class OfflineRehearsal(unittest.TestCase):
             run, gers = self.build(Path(t))
             r = compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
         self.assertEqual(r['third_origin'], 'SYNTHETIC_REHEARSAL_NOT_A_REAL_RELEASE')
-        self.assertEqual(r['trajectories']['M1_relisting_after_removal']['k'], 23)
+        self.assertEqual(r['status'], 'COMPARED')
+        m1, m2 = r['trajectories']['M1_relisting_after_removal'], r['trajectories']['M2_transient_additions']
+        self.assertEqual((m1['k'], m1['n'], m2['k'], m2['n']), (23, 69, 4, 222))
+        m6 = r['regional_gers']['M6_regional_membership_agreement']
+        self.assertEqual((m6['k'], m6['n']), (169, 174))
+        self.assertEqual(r['third_normalization_audit']['in_cell_rejections'], 0)
         self.assertEqual(r['regional_gers']['status'], 'REGIONAL_SCOPE_RECONCILED')
         self.assertEqual(r['regional_gers']['counts']['local_added_without_official_event'], 3)
         self.assertEqual(r['regional_gers']['counts']['local_removed_without_official_event'], 2)
@@ -319,6 +352,66 @@ class OfflineRehearsal(unittest.TestCase):
             r = compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
         self.assertEqual(r['regional_gers']['status'], 'ABSTAIN_REQUIRES_INTERMEDIATE_RELEASE')
         self.assertIsNotNone(r['trajectories']['M1_relisting_after_removal']['fraction'])
+
+
+    def test_normalization_rejections_abstain_instead_of_counting_as_removed(self):
+        with TemporaryDirectory() as t:
+            run, gers = self.build(Path(t))
+            path = run / 'places' / 'manifest.json'
+            m = json.loads(path.read_bytes())
+            m['audit'] = dict(m['audit'], rows_read=m['audit']['rows_read'] + 2,
+                              rejected={'outside_sampling_cell': 3, 'invalid_operating_status': 2})
+            path.write_bytes(canonical(m))
+            r = compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+            self.assertEqual(r['status'], 'ABSTAIN_NORMALIZATION_REJECTED_IN_CELL_RECORDS')
+            self.assertIsNone(r['trajectories'])
+            self.assertIsNone(r['regional_gers'])
+            self.assertEqual(r['third_normalization_audit']['in_cell_rejection_reasons'],
+                             {'invalid_operating_status': 2})
+            m['audit'] = dict(m['audit'], rows_read=1)
+            path.write_bytes(canonical(m))
+            with self.assertRaises(ValueError):
+                compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+
+    def test_schema_version_cross_checked_with_stac(self):
+        a, b = Shared.pair()
+        c = synthetic_third(a, b)
+        with TemporaryDirectory() as t:
+            write_places_dir(Path(t) / 'run', c, schema_version='2.1.0')
+            with self.assertRaises(ValueError):
+                compare(Path(t) / 'run', publisher_schema_version='v2.0.0', gers_dir=None)
+            r = compare(Path(t) / 'run', publisher_schema_version='v2.1.0', gers_dir=None)
+            self.assertFalse(r['category_semantics_comparable'])
+            self.assertEqual(r['stac_schema_version'], '2.1.0')
+        with TemporaryDirectory() as t:
+            write_places_dir(Path(t) / 'run', c, schema_version='2.0.0')
+            r = compare(Path(t) / 'run', publisher_schema_version='2.0.0', gers_dir=None)
+            self.assertTrue(r['category_semantics_comparable'])
+            with self.assertRaises(ValueError):
+                compare(Path(t) / 'run', publisher_schema_version='  ', gers_dir=None)
+
+    def test_gers_capture_must_match_places_capture(self):
+        cases = {
+            'release': lambda g: dict(g, release='2026-10-28.1'),
+            'origin': lambda g: dict(g, origin='captured_public_GERS_rows'),
+            'predecessor': lambda g: dict(g, chain=dict(g['chain'], observed_predecessor='2026-10-14.0')),
+        }
+        for name, mutate in cases.items():
+            with self.subTest(name=name), TemporaryDirectory() as t:
+                run, gers = self.build(Path(t))
+                g = json.loads((gers / 'gers_receipt.json').read_bytes())
+                (gers / 'gers_receipt.json').write_bytes(canonical(mutate(g)))
+                with self.assertRaises(ValueError):
+                    compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
+
+    def test_stored_chain_must_replay_exactly(self):
+        with TemporaryDirectory() as t:
+            run, gers = self.build(Path(t))
+            cat = run / 'stac_release.json'
+            cat.write_bytes(cat.read_bytes().replace(PREV.encode(),
+                            b'https://stac.overturemaps.org/2026-10-14.0/catalog.json'))
+            with self.assertRaises(ValueError):
+                compare(run, publisher_schema_version='v2.0.0', gers_dir=gers)
 
 
 class CliSafety(unittest.TestCase):

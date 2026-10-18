@@ -19,14 +19,15 @@ Hepsi iki sabit örnekleme hücresinde **kaynak kayıt** ölçümüdür. Geri ge
 
 ## Sürüm çıkınca ne yapılacak
 
-1. Sürüm notlarından şema sürümünü öğren (ör. `v2.0.0`).
+1. Sürüm notlarından şema sürümünü öğren (ör. `v2.0.0`). STAC kataloğunda `schema:version` varsa karşılaştırma bu değeri de okur; girdiğin değer onunla çelişirse rapor üretilmez.
 2. GitHub → Actions → **Overture third release capture (manual research, KEP-DATA-018)** → Run workflow, `main` dalı:
    - `research_confirmation`: `RESEARCH_ONLY`
    - `release`: STAC'te görünen tam kimlik (planlanan `2026-10-21.0`)
    - `publisher_schema_version`: 1. adımdaki değer
 3. Bu iş **Kasım sürümü (planlanan 2026-11-18) STAC'te latest olmadan önce** çalışmalı. Sonra çalışırsa STAC kontrolü işi durdurur.
-4. İş önce offline testleri çalıştırır, sonra iki hücreyi indirir, sonra 16 MiB sınırlı GERS okumasını yapar ve offline karşılaştırma raporunu üretir. GERS adımı başarısız olursa Places verisi yine yüklenir ve M6 boş kalır.
-5. Artifact 7 gün yaşar. İndirip bir takip PR'ıyla `data/real/` altına SHA-256 ile sabitlemek gerekir (Ağustos'taki gibi).
+4. İş önce offline testleri çalıştırır, sonra iki hücreyi indirir, sonra 16 MiB sınırlı GERS okumasını yapar ve offline karşılaştırma raporunu üretir. Arrow ön testi ya da GERS adımı başarısız olursa Places verisi yine yüklenir ve M6 boş kalır.
+5. Raporun `status` alanı `COMPARED` değilse iş bir uyarı basar. `ABSTAIN_NORMALIZATION_REJECTED_IN_CELL_RECORDS`, yeni sürümde normalleştiricinin bazı hücre içi kayıtları reddettiği anlamına gelir (ör. yeni şema alanı). Bu durumda hiçbir metrik hesaplanmaz, çünkü düşen kayıtlar yanlışlıkla "listeden çıktı" sayılırdı. Normalleştiriciyi düzeltip Kasım sürümünden önce işi yeniden çalıştırmak gerekir.
+6. Artifact 7 gün yaşar. İndirip bir takip PR'ıyla `data/real/` altına SHA-256 ile sabitlemek gerekir (Ağustos'taki gibi).
 
 ## Offline prova
 

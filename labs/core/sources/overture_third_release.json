@@ -45,7 +45,9 @@
   "decision_rules": [
     "If STAC latest is not the requested release, or its date is outside the accepted window, stop before any data read.",
     "If the third release's STAC prev link is not 2026-09-23.1, compute M1-M5 but report M6 as null with status REQUIRES_INTERMEDIATE_RELEASE.",
-    "If the publisher schema version differs from v2.0.0, category fields are excluded from M3 and reported as TECHNICAL_SCHEMA_REVIEW.",
+    "If the publisher schema version differs from v2.0.0, category fields are excluded from M3, including from the per-ID revised/confidence-only/unchanged classification, and reported as TECHNICAL_SCHEMA_REVIEW.",
+    "The schema version is taken from the release catalog's schema:version when present; an operator-entered version that contradicts it stops the comparison.",
+    "If third-release normalization rejects any record for a reason other than outside_sampling_cell, M1-M6 abstain and the rejection counts are reported, because dropped records would otherwise count as no longer listed. Fix the normalizer and capture again before the next release.",
     "A STAC prev link is navigation evidence, not a publisher attestation of the changelog build baseline; M6 is always labelled that way.",
     "No metric is a business opening, closure, relocation or accuracy rate. removed != closed, added != opened.",
     "No consumer publication, Web Push, paid API, model call or human label is produced by this study."

@@ -36,6 +36,8 @@ STAC_ROOT = 'https://stac.overturemaps.org/catalog.json'
 ARROW_VERSION = '21.0.0'
 ORIGINS = {'captured_overture_cli': 'REAL_OVERTURE_CAPTURE',
            'synthetic_rehearsal': 'SYNTHETIC_REHEARSAL_NOT_A_REAL_RELEASE'}
+GERS_ORIGIN_FOR = {'captured_overture_cli': 'captured_public_GERS_rows',
+                   'synthetic_rehearsal': 'synthetic_rehearsal'}
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -234,6 +236,32 @@ def _read_json(path: Path, limit: int) -> tuple[dict | list, bytes]:
     return obj, raw
 
 
+def _schema_core(version: object) -> str:
+    if not isinstance(version, str) or not version.strip():
+        raise ValueError('Schema version must be a non-empty string such as v2.0.0')
+    v = version.strip()
+    return v[1:] if v.startswith('v') else v
+
+
+def normalization_audit(manifest: dict, accepted: int) -> dict:
+    """Records dropped by the normalizer would masquerade as 'no longer listed'."""
+    audit = manifest.get('audit') if isinstance(manifest, dict) else None
+    if not isinstance(audit, dict):
+        raise ValueError('Third-release manifest lacks its normalization audit')
+    rejected = audit.get('rejected')
+    if (not isinstance(rejected, dict)
+            or any(not isinstance(k, str) or type(v) is not int or v < 0 for k, v in rejected.items())
+            or audit.get('accepted') != accepted
+            or audit.get('rows_read') != accepted + audit.get('duplicate_identical_ids', -1)
+            + sum(rejected.values())):
+        raise ValueError('Third-release normalization audit does not add up')
+    in_cell = {k: v for k, v in sorted(rejected.items()) if k != 'outside_sampling_cell' and v}
+    return {'rows_read': audit['rows_read'], 'accepted': accepted,
+            'duplicate_identical_ids': audit['duplicate_identical_ids'],
+            'rejected': dict(sorted(rejected.items())),
+            'in_cell_rejections': sum(in_cell.values()), 'in_cell_rejection_reasons': in_cell}
+
+
 def compare(places_dir: Path, *, publisher_schema_version: str, gers_dir: Path | None) -> dict:
     """OFFLINE. Same-run hashes are internal consistency, not upstream attestation."""
     from kepcore.gers_reconciliation import load_pinned_pair
@@ -246,28 +274,46 @@ def compare(places_dir: Path, *, publisher_schema_version: str, gers_dir: Path |
     chain = receipt['chain']
     root_raw = _read_bytes(places_dir / 'stac_root.json', 200_000)
     release_raw = _read_bytes(places_dir / 'stac_release.json', 200_000)
-    if verify_release_chain(root_raw, release_raw, release=release, protocol=protocol)['status'] != chain['status']:
+    replay = verify_release_chain(root_raw, release_raw, release=release, protocol=protocol)
+    if replay != {k: v for k, v in chain.items() if k != 'retrieved_at'}:
         raise ValueError('Stored release chain does not replay')
+    stac_schema = json.loads(release_raw).get('schema:version')
+    operator_schema = _schema_core(publisher_schema_version)
+    if stac_schema is not None and _schema_core(stac_schema) != operator_schema:
+        raise ValueError(f'Operator schema {publisher_schema_version} contradicts STAC schema:version {stac_schema}')
+    schema_ok = operator_schema == _schema_core(protocol['reference_schema_version'])
     third = load_operator_research_bundle(places_dir / 'places', expected_release=release,
                                           expected_normalized_sha256=receipt['normalized_sha256'],
                                           expected_observed_at=receipt['downloaded_at_utc'])
+    manifest, _ = _read_json(places_dir / 'places' / 'manifest.json', 1_000_000)
+    audit = normalization_audit(manifest, len(third.records))
     first, second = load_pinned_pair()
-    schema_ok = publisher_schema_version == protocol['reference_schema_version']
     report = {'study': STUDY, 'release': release, 'chain': chain,
               'third_origin': ORIGINS[receipt['origin']],
               'publisher_schema_version': publisher_schema_version,
+              'stac_schema_version': stac_schema,
+              'category_semantics_comparable': schema_ok,
               'third_population_n': len(third.records),
               'third_population_sha256': third.population_sha256,
               'third_hash_source': 'SAME_RUN_RECEIPT_NOT_INDEPENDENT',
-              'trajectories': three_release_trajectories(list(first.records), list(second.records),
-                                                         list(third.records),
-                                                         schema_comparable=schema_ok),
+              'third_normalization_audit': audit,
+              'status': 'COMPARED', 'trajectories': None,
               'regional_gers': None, 'research_only': True, 'consumer_publish': False}
+    if audit['in_cell_rejections']:
+        report['status'] = 'ABSTAIN_NORMALIZATION_REJECTED_IN_CELL_RECORDS'
+        return report
+    report['trajectories'] = three_release_trajectories(
+        list(first.records), list(second.records), list(third.records), schema_comparable=schema_ok)
     if gers_dir is not None:
         g, _ = _read_json(gers_dir / 'gers_receipt.json', 200_000)
         events, events_raw = _read_json(gers_dir / 'gers_regional_events.json', 16_000_000)
         if g.get('release') != release or g.get('events_sha256') != sha256(events_raw).hexdigest():
             raise ValueError('GERS capture does not belong to this release or was altered')
+        if GERS_ORIGIN_FOR.get(receipt['origin']) != g.get('origin'):
+            raise ValueError('GERS capture origin does not match the Places capture origin')
+        g_chain = g.get('chain') if isinstance(g.get('chain'), dict) else {}
+        if g_chain.get('observed_predecessor') != chain['observed_predecessor']:
+            raise ValueError('GERS and Places captures saw different release predecessors')
         complete = g.get('status') == 'REGIONAL_ROWS_CAPTURED_NOT_COMPLETE_ID_UNION'
         pairs = ((e['change_type'], {k: e[k] for k in ('id', 'bbox', 'columns_changed')})
                  for e in events)

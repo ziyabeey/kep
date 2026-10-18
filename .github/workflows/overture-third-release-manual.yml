@@ -35,13 +35,15 @@ jobs:
     timeout-minutes: 30
     defaults:
       run:
+        shell: bash  # -eo pipefail: a failing command inside a pipe fails the step
         working-directory: labs/core
     env:
       RELEASE: ${{ inputs.release }}
       SCHEMA_VERSION: ${{ inputs.publisher_schema_version }}
-      RUN_DIR: ${{ runner.temp }}/kep-data-018
     steps:
       - uses: actions/checkout@v4
+      - name: Run directory under runner temp
+        run: echo "RUN_DIR=$RUNNER_TEMP/kep-data-018" >> "$GITHUB_ENV"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
@@ -52,6 +54,8 @@ jobs:
       - name: Pinned optional research dependencies (manual only)
         run: python -m pip install --disable-pip-version-check "overturemaps==1.0.2" "pyarrow==21.0.0"
       - name: Arrow capture path against fake S3 (must run, not skip)
+        id: arrow
+        continue-on-error: true  # a broken Arrow path skips GERS only; Places still runs
         run: python -m unittest tests.test_third_release_arrow -v 2>&1 | tee "$RUNNER_TEMP/arrow.log" && ! grep -q skipped "$RUNNER_TEMP/arrow.log"
       - name: STAC chain + two preregistered Places cells
         run: |
@@ -60,6 +64,7 @@ jobs:
             --research-confirmation RESEARCH_ONLY --release "$RELEASE" --output "$RUN_DIR/run"
       - name: Bounded regional GERS added/removed rows (16 MiB cap)
         id: gers
+        if: ${{ steps.arrow.outcome == 'success' }}
         continue-on-error: true
         run: |
           python scripts/capture_third_release.py gers --fetch \
@@ -76,7 +81,10 @@ jobs:
           r = json.loads((pathlib.Path(os.environ['RUN_DIR']) / 'third_release_report.json').read_bytes())
           assert r['third_origin'] == 'REAL_OVERTURE_CAPTURE' and r['consumer_publish'] is False
           print('release', r['release'], 'chain', r['chain']['status'], 'n', r['third_population_n'])
-          print('regional GERS', (r['regional_gers'] or {}).get('status'))
+          print('normalization', r['third_normalization_audit'])
+          print('status', r['status'], '| regional GERS', (r['regional_gers'] or {}).get('status'))
+          if r['status'] != 'COMPARED':
+              print('::warning::' + r['status'] + ' - see docs/OVERTURE_THIRD_RELEASE.md before the next release')
           PY
       - name: Upload research capture (7 days; pin in a follow-up PR)
         if: always()

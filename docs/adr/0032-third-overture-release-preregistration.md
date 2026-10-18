@@ -15,10 +15,11 @@ On 2026-10-11 the user paused new data collection. This ADR only prepares code; 
 1. Freeze the protocol before any third-release data exists: `labs/core/sources/overture_third_release.json`, SHA-256 pinned in `kepcore/overture_third_release.py`. Any later edit fails the offline tests.
 2. Accept a release only when STAC latest equals it, its date is in 2026-10-14..2026-11-17, and it differs from both reference releases. Otherwise stop before reading data.
 3. Compute six preregistered metrics (M1-M6). M1-M5 are three-release source-record trajectories inside the two cells. M6 compares local membership changes with official regional added/removed changelog rows, only when the STAC prev link is 2026-09-23.1 and every selected row group was read.
-4. If the publisher schema is not v2.0.0, category fields are excluded from the second-hop comparison. August-to-September category changes never count.
-5. A STAC prev link is navigation evidence, not an attested changelog build baseline. M6 is reported with that label and as same-publisher evidence.
-6. Acquisition is one manual `workflow_dispatch` workflow with fixed byte and request caps (16 MiB footers, 16 MiB / 128 requests event rows). Ordinary CI stays offline and runs a labelled synthetic dress rehearsal of the full compare path.
-7. Outputs are aggregates and ID-set digests. No metric is a business opening, closure or accuracy rate. No consumer publication, Web Push, paid API, model call or human label.
+4. If the publisher schema is not v2.0.0, category fields are excluded from the second-hop comparison, including the per-ID revised/unchanged classification. When the release catalog carries `schema:version`, an operator input that contradicts it stops the comparison. August-to-September category changes never count.
+5. If the third-release normalizer rejects any in-cell record (anything other than `outside_sampling_cell`), all metrics abstain: a dropped record would otherwise read as "no longer listed".
+6. A STAC prev link is navigation evidence, not an attested changelog build baseline. M6 is reported with that label and as same-publisher evidence.
+7. Acquisition is one manual `workflow_dispatch` workflow with fixed byte and request caps (16 MiB footers, 16 MiB / 128 requests event rows). Ordinary CI stays offline and runs a labelled synthetic dress rehearsal of the full compare path. The manual workflow was checked with actionlint 1.7.7; a failed Arrow pre-flight skips only the GERS step.
+8. Outputs are aggregates and ID-set digests. No metric is a business opening, closure or accuracy rate. No consumer publication, Web Push, paid API, model call or human label.
 
 ## Consequences
 

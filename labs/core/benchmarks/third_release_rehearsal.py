@@ -20,7 +20,8 @@ OBSERVED_AT = '2026-10-22T06:00:00+00:00'
 PREV = 'https://stac.overturemaps.org/2026-09-23.1/catalog.json'
 
 
-def stac_pair(release: str = RELEASE, prev_href: str = PREV) -> tuple[bytes, bytes]:
+def stac_pair(release: str = RELEASE, prev_href: str = PREV,
+              schema_version: str | None = None) -> tuple[bytes, bytes]:
     root = {'type': 'Catalog', 'stac_version': '1.1.0', 'id': 'overture-releases', 'latest': release,
             'links': [{'rel': 'child', 'latest': True,
                        'href': f'https://stac.overturemaps.org/{release}/catalog.json'}]}
@@ -28,6 +29,8 @@ def stac_pair(release: str = RELEASE, prev_href: str = PREV) -> tuple[bytes, byt
            'links': [{'rel': 'self', 'href': f'https://stac.overturemaps.org/{release}/catalog.json'},
                      {'rel': 'child', 'href': f'https://stac.overturemaps.org/{release}/places/catalog.json'},
                      {'rel': 'prev', 'href': prev_href}]}
+    if schema_version is not None:
+        cat['schema:version'] = schema_version
     return canonical(root), canonical(cat)
 
 
@@ -59,7 +62,8 @@ def synthetic_third(first: list[dict], second: list[dict]) -> list[dict]:
     return sorted(rows, key=lambda r: r['overture_id'])
 
 
-def write_places_dir(target: Path, rows: list[dict], *, prev_href: str = PREV) -> None:
+def write_places_dir(target: Path, rows: list[dict], *, prev_href: str = PREV,
+                     schema_version: str | None = None) -> None:
     places = target / 'places'
     places.mkdir(parents=True)
     data = canonical({'dataset': 'KEP-DATA-001', 'release': RELEASE, 'study_only': True,
@@ -79,9 +83,11 @@ def write_places_dir(target: Path, rows: list[dict], *, prev_href: str = PREV) -
                                 'synthetic_rehearsal': True},
                 'source_files': [{'cell': c, 'sha256': '0' * 64, 'bytes': 1} for c in sorted(PILOT)],
                 'normalized_sha256': normalized, 'population_sha256': population,
+                'audit': {'rows_read': len(rows) + 3, 'accepted': len(rows),
+                          'duplicate_identical_ids': 0, 'rejected': {'outside_sampling_cell': 3}},
                 'human_verified_labels': 0, 'no_automatic_entity_merge': True}
     (places / 'manifest.json').write_bytes(canonical(manifest))
-    root, cat = stac_pair(prev_href=prev_href)
+    root, cat = stac_pair(prev_href=prev_href, schema_version=schema_version)
     (target / 'stac_root.json').write_bytes(root)
     (target / 'stac_release.json').write_bytes(cat)
     from kepcore.overture_third_release import load_protocol, verify_release_chain
@@ -93,7 +99,8 @@ def write_places_dir(target: Path, rows: list[dict], *, prev_href: str = PREV) -
     (target / 'places_receipt.json').write_bytes(canonical(receipt))
 
 
-def write_gers_dir(target: Path, second: list[dict], third: list[dict], *, complete: bool = True) -> None:
+def write_gers_dir(target: Path, second: list[dict], third: list[dict], *, complete: bool = True,
+                   prev_href: str = PREV) -> None:
     target.mkdir(parents=True)
     old = {r['overture_id']: r for r in second}
     new = {r['overture_id']: r for r in third}
@@ -109,7 +116,11 @@ def write_gers_dir(target: Path, second: list[dict], third: list[dict], *, compl
     events = sorted(added + removed + [outside], key=lambda e: (e['change_type'], e['id']))
     raw = canonical(events)
     (target / 'gers_regional_events.json').write_bytes(raw)
+    from kepcore.overture_third_release import load_protocol, verify_release_chain
+    root, cat = stac_pair(prev_href=prev_href)
+    chain = verify_release_chain(root, cat, release=RELEASE, protocol=load_protocol())
     receipt = {'study': 'KEP-DATA-018', 'release': RELEASE, 'origin': 'synthetic_rehearsal',
+               'chain': chain,
                'status': ('REGIONAL_ROWS_CAPTURED_NOT_COMPLETE_ID_UNION' if complete
                           else 'INCOMPLETE_EVENT_CAPTURE'),
                'events_sha256': sha256(raw).hexdigest(), 'scanned_rows': len(events),
