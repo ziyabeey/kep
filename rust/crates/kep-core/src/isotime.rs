@@ -12,7 +12,7 @@
 //! An empty fraction (`17:50:00.`) is rejected; Python 3.11 accepts it but 3.13 does not.
 
 use crate::pyval::PyError;
-use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
+use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, Offset, TimeZone};
 use chrono_tz::{Europe::Istanbul, Tz};
 
 /// A parsed timestamp; Python returns a naive datetime when no offset is given.
@@ -165,14 +165,28 @@ fn parse_offset(s: &str) -> Option<FixedOffset> {
 }
 
 /// `core.dt()`: parse a timestamp and express it in Europe/Istanbul.
-/// A timestamp without an offset is read as Istanbul local time.
+/// A timestamp without an offset is read as Istanbul local time, as
+/// `replace(tzinfo=IST)` does with `fold=0`: an ambiguous time takes the
+/// earlier offset, and a time inside a DST gap takes the offset in force just
+/// before the gap. The instant matches Python; for gap times Python keeps the
+/// non-existent wall time in `isoformat()` while Rust shows the real one.
 pub fn istanbul_dt(text: &str) -> Result<DateTime<Tz>, PyError> {
     match parse_reference_timestamp(text).ok_or(PyError::ValueError)? {
         IsoDateTime::Aware(dt) => Ok(dt.with_timezone(&Istanbul)),
-        IsoDateTime::Naive(n) => Istanbul
-            .from_local_datetime(&n)
-            .earliest()
-            .ok_or(PyError::ValueError),
+        IsoDateTime::Naive(n) => match Istanbul.from_local_datetime(&n).earliest() {
+            Some(dt) => Ok(dt),
+            None => {
+                // DST gap: use the offset of the instant a few hours earlier.
+                let before = n - chrono::Duration::hours(6);
+                let offset = Istanbul
+                    .from_local_datetime(&before)
+                    .earliest()
+                    .ok_or(PyError::ValueError)?;
+                let secs = offset.offset().fix().local_minus_utc();
+                let utc = n - chrono::Duration::seconds(i64::from(secs));
+                Ok(Istanbul.from_utc_datetime(&utc))
+            }
+        },
     }
 }
 

@@ -20,6 +20,9 @@ cargo clippy --all-targets -- -D warnings
 cargo run -p kep-cli -- --query ../labs/core/examples/galata_nearby.json
 ```
 
+`kep-query` finds the lab catalog through the checkout it was built from. A
+copied binary needs `--lab-root path/to/labs/core` or `KEP_LAB_ROOT`.
+
 ## Parity vectors
 
 `parity/export_vectors.py` runs the Python reference on a fixed input set and

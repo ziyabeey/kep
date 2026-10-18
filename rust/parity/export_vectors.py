@@ -403,6 +403,21 @@ def decide_cases(catalog):
     dup = [copy.deepcopy(base), copy.deepcopy(base)]; dup[1]['rights_scope'] = 'none'
     add('place_duplicate_ids', {'city': 'İstanbul'}, records=dup)
     add('empty_catalog', {'city': 'İstanbul'}, records=[])
+
+    # Malformed availability input reaching a decision end to end.
+    # ('٠٩:٠٠' is left out: Rust already rejects non-ASCII digits, see KNOWN_GAPS in parity.rs.)
+    for text in [' 9:00', '+9:00', '09: 0']:
+        r = copy.deepcopy(base); r['opening_hours'] = schedule([[text, '20:00']])
+        add(f'place_loose_clock_{text!r}', {'city': 'İstanbul', 'kind': 'place', 'open_now': True}, records=[r])
+    no_stamp = copy.deepcopy(base); no_stamp['price'] = 100; del no_stamp['source_observed_at']
+    add('place_live_without_timestamp', {'city': 'İstanbul', 'budget': 500}, records=[no_stamp])
+    for bad in [{'observed_at': 1700000000}, {'valid_until': 0}, {'status': ['disputed']}]:
+        r = copy.deepcopy(base); r['price'] = 100; r['field_evidence'] = {'price': {**proof(100), **bad}}
+        add(f'place_malformed_price_proof_{sorted(bad)[0]}', {'city': 'İstanbul', 'budget': 500}, records=[r])
+
+    # Naive times are Istanbul local; 2015-03-29 03:30 fell in a DST gap.
+    for at in ['2015-03-29T03:30:00', '2015-11-08T03:30:00', '2026-10-10T18:00:00']:
+        add(f'naive_at_{at}', {'city': 'İstanbul', 'at': at}, records=[base])
     return cases
 
 
