@@ -8,6 +8,8 @@ KEP Core's product kernel, ported module by module from the Python lab in
 |---|---|---|
 | `kep-canon` | Canonical JSON and SHA-256, byte-identical to `stable_hash` | `kepcore/core.py` |
 | `kep-core` | `availability` (opening hours, field freshness), `isotime` | `kepcore/availability.py` |
+| `kep-core` | `catalog`, `query`, `decision` (gates, `decide`, `reconcile_claims`, model guard), `distance` (georust `geo::Haversine`), `text` | `kepcore/core.py` |
+| `kep-cli` | `kep-query`, same JSON output as `query.py` | `query.py` |
 
 ## Run
 
@@ -15,12 +17,13 @@ KEP Core's product kernel, ported module by module from the Python lab in
 cd rust
 cargo test                    # unit tests + parity with the Python vectors
 cargo clippy --all-targets -- -D warnings
+cargo run -p kep-cli -- --query ../labs/core/examples/galata_nearby.json
 ```
 
 ## Parity vectors
 
 `parity/export_vectors.py` runs the Python reference on a fixed input set and
-writes `parity/availability.json`. The Rust tests must reproduce every case.
+writes `parity/availability.json` and `parity/core.json`. The Rust tests must reproduce every case.
 Cases where Rust is deliberately stricter are listed in `KNOWN_GAPS` in
 `crates/kep-core/tests/parity.rs`, each with its reason.
 

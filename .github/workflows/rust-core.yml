@@ -5,12 +5,18 @@ on:
     paths:
       - 'rust/**'
       - 'labs/core/kepcore/**'
+      - 'labs/core/data/raw/**'
+      - 'labs/core/examples/**'
+      - 'labs/core/benchmarks/edge_cases.py'
       - '.github/workflows/rust-core.yml'
   push:
     branches: [main]
     paths:
       - 'rust/**'
       - 'labs/core/kepcore/**'
+      - 'labs/core/data/raw/**'
+      - 'labs/core/examples/**'
+      - 'labs/core/benchmarks/edge_cases.py'
       - '.github/workflows/rust-core.yml'
 
 permissions:

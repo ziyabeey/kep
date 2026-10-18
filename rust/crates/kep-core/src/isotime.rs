@@ -11,7 +11,9 @@
 //! fail closed (not fresh) rather than open. The parity vectors list each case.
 //! An empty fraction (`17:50:00.`) is rejected; Python 3.11 accepts it but 3.13 does not.
 
+use crate::pyval::PyError;
 use chrono::{DateTime, FixedOffset, NaiveDate, NaiveDateTime, NaiveTime, TimeZone};
+use chrono_tz::{Europe::Istanbul, Tz};
 
 /// A parsed timestamp; Python returns a naive datetime when no offset is given.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -160,4 +162,21 @@ fn parse_offset(s: &str) -> Option<FixedOffset> {
         return None;
     }
     FixedOffset::east_opt(sign * total)
+}
+
+/// `core.dt()`: parse a timestamp and express it in Europe/Istanbul.
+/// A timestamp without an offset is read as Istanbul local time.
+pub fn istanbul_dt(text: &str) -> Result<DateTime<Tz>, PyError> {
+    match parse_reference_timestamp(text).ok_or(PyError::ValueError)? {
+        IsoDateTime::Aware(dt) => Ok(dt.with_timezone(&Istanbul)),
+        IsoDateTime::Naive(n) => Istanbul
+            .from_local_datetime(&n)
+            .earliest()
+            .ok_or(PyError::ValueError),
+    }
+}
+
+/// `datetime.isoformat()` for an Istanbul datetime.
+pub fn isoformat_tz(dt: &DateTime<Tz>) -> String {
+    IsoDateTime::Aware(dt.fixed_offset()).python_isoformat()
 }

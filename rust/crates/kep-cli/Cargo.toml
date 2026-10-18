@@ -1,0 +1,19 @@
+[package]
+name = "kep-cli"
+version = "0.1.0"
+description = "kep-query: the Rust counterpart of labs/core/query.py"
+edition.workspace = true
+rust-version.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "kep-query"
+path = "src/main.rs"
+
+[dependencies]
+kep-canon = { path = "../kep-canon" }
+kep-core = { path = "../kep-core" }
+serde_json.workspace = true
+
+[lints]
+workspace = true

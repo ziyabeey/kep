@@ -8,7 +8,15 @@
 //! through this boundary, unlike Python objects built in memory.
 
 pub mod availability;
+pub mod catalog;
+pub mod decision;
+pub mod distance;
 pub mod isotime;
 pub mod pyval;
+pub mod query;
+pub mod text;
 
+pub use catalog::load_catalog;
+pub use decision::{Decision, decide};
 pub use pyval::PyError;
+pub use query::Query;
