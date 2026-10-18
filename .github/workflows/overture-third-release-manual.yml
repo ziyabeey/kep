@@ -1,0 +1,98 @@
+name: Overture third release capture (manual research, KEP-DATA-018)
+
+# Manual only. Run after Overture publishes the October 2026 release and
+# BEFORE the next monthly release replaces it as STAC latest (planned
+# 2026-11-18). The script stops if STAC latest is not the requested release.
+
+on:
+  workflow_dispatch:
+    inputs:
+      research_confirmation:
+        description: "Type RESEARCH_ONLY for bounded third-release source research"
+        required: true
+        type: string
+      release:
+        description: "Exact release ID shown by STAC latest (planned 2026-10-21.0)"
+        required: true
+        default: '2026-10-21.0'
+        type: string
+      publisher_schema_version:
+        description: "Schema version from the release notes, e.g. v2.0.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: overture-third-release-manual-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  third-release:
+    if: ${{ inputs.research_confirmation == 'RESEARCH_ONLY' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: labs/core
+    env:
+      RELEASE: ${{ inputs.release }}
+      SCHEMA_VERSION: ${{ inputs.publisher_schema_version }}
+      RUN_DIR: ${{ runner.temp }}/kep-data-018
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Offline gates first (protocol hash, rehearsal)
+        run: |
+          python -m unittest tests.test_third_release -q
+          python scripts/capture_third_release.py > /dev/null
+      - name: Pinned optional research dependencies (manual only)
+        run: python -m pip install --disable-pip-version-check "overturemaps==1.0.2" "pyarrow==21.0.0"
+      - name: Arrow capture path against fake S3 (must run, not skip)
+        run: python -m unittest tests.test_third_release_arrow -v 2>&1 | tee "$RUNNER_TEMP/arrow.log" && ! grep -q skipped "$RUNNER_TEMP/arrow.log"
+      - name: STAC chain + two preregistered Places cells
+        run: |
+          mkdir -p "$RUN_DIR"
+          python scripts/capture_third_release.py places --fetch \
+            --research-confirmation RESEARCH_ONLY --release "$RELEASE" --output "$RUN_DIR/run"
+      - name: Bounded regional GERS added/removed rows (16 MiB cap)
+        id: gers
+        continue-on-error: true
+        run: |
+          python scripts/capture_third_release.py gers --fetch \
+            --research-confirmation REGIONAL_MEMBERSHIP_16MIB --release "$RELEASE" --output "$RUN_DIR/gers"
+      - name: Offline three-release comparison (aggregate only)
+        run: |
+          GERS_ARGS=()
+          if [ -f "$RUN_DIR/gers/gers_receipt.json" ]; then GERS_ARGS=(--gers-dir "$RUN_DIR/gers"); fi
+          python scripts/capture_third_release.py compare --places-dir "$RUN_DIR/run" \
+            "${GERS_ARGS[@]}" --publisher-schema-version "$SCHEMA_VERSION" \
+            --output "$RUN_DIR/third_release_report.json" > /dev/null
+          python - <<'PY'
+          import json, os, pathlib
+          r = json.loads((pathlib.Path(os.environ['RUN_DIR']) / 'third_release_report.json').read_bytes())
+          assert r['third_origin'] == 'REAL_OVERTURE_CAPTURE' and r['consumer_publish'] is False
+          print('release', r['release'], 'chain', r['chain']['status'], 'n', r['third_population_n'])
+          print('regional GERS', (r['regional_gers'] or {}).get('status'))
+          PY
+      - name: Upload research capture (7 days; pin in a follow-up PR)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: overture-third-release-research-${{ github.run_id }}
+          retention-days: 7
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/kep-data-018/run/places/places_minimal.json
+            ${{ runner.temp }}/kep-data-018/run/places/manifest.json
+            ${{ runner.temp }}/kep-data-018/run/places_receipt.json
+            ${{ runner.temp }}/kep-data-018/run/release_chain.json
+            ${{ runner.temp }}/kep-data-018/run/stac_root.json
+            ${{ runner.temp }}/kep-data-018/run/stac_release.json
+            ${{ runner.temp }}/kep-data-018/gers/gers_receipt.json
+            ${{ runner.temp }}/kep-data-018/gers/gers_regional_events.json
+            ${{ runner.temp }}/kep-data-018/gers/release_chain.json
+            ${{ runner.temp }}/kep-data-018/third_release_report.json

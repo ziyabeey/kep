@@ -1,0 +1,60 @@
+{
+  "study": "KEP-DATA-018",
+  "title": "Third real Overture Places release: preregistered offline comparison and regional GERS reconciliation",
+  "frozen_at": "2026-10-18",
+  "frozen_before_any_third_release_data": true,
+  "issue": "https://github.com/ziyabeey/kep/issues/22",
+  "planned_release": {
+    "release": "2026-10-21.0",
+    "evidence_url": "https://docs.overturemaps.org/release-calendar/",
+    "evidence_observed_at": "2026-10-18",
+    "publisher_schema_version": "TBD",
+    "status": "PLANNED_NOT_OBSERVED"
+  },
+  "accepted_release_window": {
+    "earliest_release_date": "2026-10-14",
+    "latest_release_date": "2026-11-17",
+    "note": "The exact ID is read from STAC at run time. A November or later release is a different study and stops the run."
+  },
+  "expected_predecessor": "2026-09-23.1",
+  "reference_releases": ["2026-08-19.0", "2026-09-23.1"],
+  "reference_schema_version": "v2.0.0",
+  "cells": {
+    "besiktas_center": [29.002, 41.04, 29.01, 41.0455],
+    "karakoy_center": [28.97, 41.02, 28.981, 41.0275]
+  },
+  "max_records_total": 12000,
+  "gers": {
+    "changelog_prefix_template": "changelog/{release}/theme=places/type=place/change_type={kind}/",
+    "captured_change_types": ["added", "removed"],
+    "projected_columns": ["id", "bbox", "columns_changed"],
+    "max_footer_body_bytes": 16777216,
+    "max_event_body_bytes": 16777216,
+    "max_event_requests": 128,
+    "max_event_rows_scanned": 1000000,
+    "scope": "bbox_intersecting_rows_only_not_global_id_union"
+  },
+  "metrics": {
+    "M1_relisting_after_removal": "Of IDs listed in 2026-08-19.0 and absent from 2026-09-23.1 inside the cells, the fraction listed again in the third release. Wilson 95% interval.",
+    "M2_transient_additions": "Of IDs absent from 2026-08-19.0 and listed in 2026-09-23.1 inside the cells, the fraction absent again in the third release. Wilson 95% interval.",
+    "M3_consecutive_source_delta": "Retained, newly listed, no-longer-listed, field-or-geometry-revised and confidence-only IDs between 2026-09-23.1 and the third release.",
+    "M4_revision_persistence": "Among IDs listed in all three releases, the fraction with a factual field or geometry revision in the second hop, split by whether the first hop also revised them. Category fields never count, because 2026-08-19.0 uses Places v1.18.",
+    "M5_confidence_reversal": "Among IDs listed in all three releases whose confidence moved by more than 0.05 in the first hop, the fraction that moved more than 0.05 in the opposite direction in the second hop.",
+    "M6_regional_membership_agreement": "Only when the STAC predecessor of the third release is 2026-09-23.1 and every selected added/removed row group was read: local newly listed and no-longer-listed IDs inside the cells that the official regional changelog lists with the same change type, divided by all local membership changes."
+  },
+  "decision_rules": [
+    "If STAC latest is not the requested release, or its date is outside the accepted window, stop before any data read.",
+    "If the third release's STAC prev link is not 2026-09-23.1, compute M1-M5 but report M6 as null with status REQUIRES_INTERMEDIATE_RELEASE.",
+    "If the publisher schema version differs from v2.0.0, category fields are excluded from M3 and reported as TECHNICAL_SCHEMA_REVIEW.",
+    "A STAC prev link is navigation evidence, not a publisher attestation of the changelog build baseline; M6 is always labelled that way.",
+    "No metric is a business opening, closure, relocation or accuracy rate. removed != closed, added != opened.",
+    "No consumer publication, Web Push, paid API, model call or human label is produced by this study."
+  ],
+  "rights": {
+    "attribution_url": "https://docs.overturemaps.org/attribution/",
+    "license_families": ["CDLA-Permissive-2.0", "Apache-2.0", "CC0-1.0"],
+    "note": "Preserve per-provider licensing. Overture data is not proof of active business, hours or events."
+  },
+  "research_only": true,
+  "consumer_display_approved": false
+}

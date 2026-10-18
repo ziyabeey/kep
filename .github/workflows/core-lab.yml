@@ -171,3 +171,9 @@ jobs:
           path: ${{ runner.temp }}/core003-${{ matrix.python-version }}.json
           retention-days: 7
           if-no-files-found: error
+
+      - name: DATA-018 third Overture release dress rehearsal (offline, synthetic release)
+        run: |
+          python -m unittest tests.test_third_release -q
+          python scripts/capture_third_release.py > /dev/null
+          python -m benchmarks.third_release_rehearsal > /dev/null

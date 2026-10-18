@@ -74,13 +74,17 @@ def validate_range(status, headers, start, end, size, etag, body):
         raise ValueError('Range status, extent, length, encoding or ETag mismatch')
 
 
-def validate_objects(objects):
-    """Reject incomplete schemas, repeated observations and invalid chunk extents."""
+def validate_objects(objects, releases=RELEASES):
+    """Reject incomplete schemas, repeated observations and invalid chunk extents.
+
+    `releases` defaults to the reviewed DATA-014 pair; DATA-018 passes its one
+    protocol-checked third release explicitly.
+    """
     if not isinstance(objects,list) or not objects or len(objects)>256:
         raise ValueError('Missing or unbounded object inventory')
     seen=set()
     for o in objects:
-        if not isinstance(o,dict) or o.get('release') not in RELEASES or o.get('change_type') not in KINDS:
+        if not isinstance(o,dict) or o.get('release') not in releases or o.get('change_type') not in KINDS:
             raise ValueError('Unreviewed release or partition')
         key=o.get('key','')
         prefix=f"changelog/{o['release']}/theme=places/type=place/change_type={o['change_type']}/"

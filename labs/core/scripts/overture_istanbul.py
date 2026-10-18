@@ -19,7 +19,7 @@ import urllib.request
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from kepcore.overture_places import (
-    PILOT, MAX_INPUT_BYTES, canonical, ingest_geojson,
+    PILOT, MAX_INPUT_BYTES, canonical, check_release, ingest_geojson,
     pilot_audit_plan, valid_stac_catalog,
 )
 
@@ -69,9 +69,12 @@ def acquire(paths: dict, release: str, *, timeout_seconds: int = 180) -> dict:
             'stac_catalog_sha256_after':post['stac_sha256']}
 
 
-def execute(*, output: Path, inputs: dict | None, fetch: bool, seed_file: Path | None) -> dict:
+def execute(*, output: Path, inputs: dict | None, fetch: bool, seed_file: Path | None,
+            release: str | None = None) -> dict:
+    """`release` overrides the DATA-001 pin only for a caller that has already
+    checked it against its own frozen protocol (DATA-018 third release)."""
     config = json.loads(CONFIG.read_text(encoding='utf-8'))
-    release = config['release']
+    release = config['release'] if release is None else check_release(release)
     if set(config['cells']) != set(PILOT) or any(tuple(config['cells'][key]) != PILOT[key] for key in PILOT):
         raise ValueError('Changed pilot bbox must be reviewed in both config and code')
     if fetch and inputs is not None:
