@@ -1,0 +1,175 @@
+{
+  "study": "KEP-OBS-002",
+  "stage": "PREREGISTRATION_BEFORE_GENERATOR_EVALUATOR_PILOT_OR_HOLDOUT",
+  "source_snapshot": "f8ec7cf2767c68a016452f7080db3a5f27fa67e2",
+  "issue": "KEP-GATE-001 Test Değeri Kapısı, https://github.com/ziyabeey/kep/issues/39",
+  "governing_adr": "docs/adr/0030-observable-audit-outage-signals.md",
+  "question": "On a NEW synthetic generator that varies raw-observation delivery loss, upstream syndication between the telemetry pair and mid-outage source drift, and that charges telemetry overhead, does the UNCHANGED OBS-001 unlabelled-disagreement selector avoid a distinct important mistaken action versus BOTH fixed VOI and conservative CORE-003?",
+  "decision_before_results": {
+    "GO_FOR_FURTHER_RESEARCH_ONLY": "All hard gates pass. Consequence: the hypothesis may be written up as a separately reviewed OPTIONAL module design issue that requires real (non-synthetic) validation before any code enters Core. No module, test suite or CI job is merged by this study.",
+    "NO_GO": "Any hard gate fails. Consequence: abandon the disagreement-switch selector as a Core candidate. Do not retune thresholds, seed, regimes, costs or gates on this exposed holdout. Keep only protocol, aggregate report, doc and ADR on main.",
+    "NO_GO_NOT_DISCRIMINATING": "Pilot shows the candidate makes the same proposal as BOTH audit_age_only and conservative on every pilot case of every regime. Consequence: the holdout is cancelled (issue #39 item 5) and NO_GO is recorded.",
+    "options_considered": ["apply (only as later optional-module design)", "simplify", "postpone", "abandon"]
+  },
+  "data_scope": "STRICTLY_SYNTHETIC_NO_REAL_SOURCE_RETRIEVAL_NO_MODEL_CALLS",
+  "independence_from_obs_001": {
+    "new_generator_module": true,
+    "reuses_core_002_or_core_003_case_generators": false,
+    "reuses_only": [
+      "kepcore.budgeted_verify.plan_research (fixed_voi policy, unchanged)",
+      "kepcore.adaptive_trust.plan_adaptive (conservative policy, unchanged)",
+      "kepcore.temporal_pipeline Signal/run_pipeline (Core gates, unchanged)",
+      "benchmarks.budgeted_core_eval View/Trial/_check_options/_case_value accounting",
+      "benchmarks.adaptive_trust_eval.execute_preplanned executor"
+    ],
+    "new_mechanisms": [
+      "raw publisher vote delivery loss and delay (available_at > observed_at) during review outage",
+      "upstream syndication: deep_root copies origin for a fraction of entities, in background telemetry AND current-case probes",
+      "drift beginning in the middle of an outage, after conservative has lost its audit history",
+      "per-decision telemetry overhead charged to the candidate whenever it reads pair telemetry",
+      "test-case shared upstream rumor during a stable outage",
+      "always-abstain control (never)"
+    ]
+  },
+  "frozen_holdout": {
+    "seed": 202610180615,
+    "cases_per_regime": 240,
+    "case_spacing_hours": 1,
+    "run_count_allowed": 1,
+    "run_only_after": "independent audit of evaluator completed and evaluator source commit recorded",
+    "seed_derivation_note": "Wall-clock prereg timestamp 2026-10-18 06:15, chosen before any code; distinct from 202610121015 (OBS-001), 2026101204 (CORE-004A), 20261015 (CORE-003)."
+  },
+  "pilot": {
+    "seed": 202610180001,
+    "cases_per_regime": 60,
+    "purpose": "Crash, leakage and discriminability check only (issue #39 item 5).",
+    "allowed_changes_after_pilot": "Bug fixes that make code match THIS protocol, each logged in the report. NEVER thresholds, seed, regimes, costs, quality tables, gates.",
+    "pilot_results_are_not_evidence": true
+  },
+  "generator": {
+    "start_time_utc": "2026-11-02T08:00:00+00:00",
+    "warmup_hours_before_first_case": 96,
+    "test_truth_rate": 0.68,
+    "prior": 0.70,
+    "budget": 0.15,
+    "max_wait_minutes": 20,
+    "test_case_signals": {
+      "origin_claim": "always one origin observation 90 minutes before query, drawn from current origin quality",
+      "origin_reposts": "0-3 extra same-root reposts, uniform",
+      "pre_existing_second_root": "balanced_root observation with probability 0.08 (current balanced quality)",
+      "pre_existing_negative": "cheap_root negative claim with probability 0.04, independent of truth"
+    },
+    "probe_answers": "cheap/balanced/deep answers drawn from CURRENT root quality; mirror/unlicensed forbidden probes carry truth but are never selectable",
+    "background_stream": {
+      "entities_per_hour": 4,
+      "background_truth_rate": 0.55,
+      "per_root_observation_probability": 0.9,
+      "normal_delivery_delay_minutes_uniform": [0, 60],
+      "audit_adjudication_delay_hours_when_healthy": 3,
+      "audits_only_for_delivered_votes": true,
+      "audits_during_outage": "none (adjudicated_at beyond horizon)"
+    },
+    "quality_stable": {
+      "origin": [0.86, 0.84],
+      "cheap_root": [0.76, 0.70],
+      "balanced_root": [0.90, 0.85],
+      "deep_root": [0.96, 0.94]
+    },
+    "quality_degraded": {
+      "origin": [0.60, 0.55],
+      "cheap_root": [0.56, 0.52],
+      "balanced_root": [0.58, 0.55],
+      "deep_root": [0.62, 0.57]
+    },
+    "drift_ramp_hours": 30,
+    "quality_format": "[sensitivity, specificity]; linear interpolation over ramp from onset",
+    "regimes": {
+      "outage_stable": {
+        "outage_start_step": 24, "drift_onset_step": null, "raw_loss": false, "pair_syndication": 0.0, "test_rumor": 0.0
+      },
+      "outage_midstream_drift": {
+        "outage_start_step": 24, "drift_onset_step": 150, "raw_loss": false, "pair_syndication": 0.0, "test_rumor": 0.0
+      },
+      "outage_syndicated_drift": {
+        "outage_start_step": 24, "drift_onset_step": 150, "raw_loss": false, "pair_syndication": 0.8, "test_rumor": 0.0
+      },
+      "outage_raw_loss_drift": {
+        "outage_start_step": 24, "drift_onset_step": 150, "raw_loss": true, "pair_syndication": 0.0, "test_rumor": 0.0
+      },
+      "healthy_midstream_drift": {
+        "outage_start_step": null, "drift_onset_step": 150, "raw_loss": false, "pair_syndication": 0.0, "test_rumor": 0.0
+      },
+      "outage_shared_rumor": {
+        "outage_start_step": 24, "drift_onset_step": null, "raw_loss": false, "pair_syndication": 0.0, "test_rumor": 0.30
+      }
+    },
+    "raw_loss_definition": "From outage start: each raw background vote dropped with probability 0.6; surviving votes delayed uniformly 4-20 hours (available_at = observed_at + delay).",
+    "pair_syndication_definition": "With the given probability per entity (background AND current-case deep probe), deep_root's vote copies origin's vote instead of an independent draw.",
+    "test_rumor_definition": "For a false current case, with the given probability the origin claim and all three approved probe answers are True (one shared upstream rumor)."
+  },
+  "policies": ["never", "conservative", "fixed_voi", "audit_age_only", "unlabelled_disagreement"],
+  "candidate_rule_unchanged_from_obs_001": {
+    "primary_method": "unlabelled_disagreement",
+    "pair_of_publisher_roots": ["origin", "deep_root"],
+    "observed_vote_lookback_hours": 12,
+    "min_distinct_entities": 18,
+    "disagreement_cutoff_fraction": 0.35,
+    "max_last_completed_review_age_hours": 8,
+    "rule": "If no completed review exists or its age <=8h: conservative. Else if >=18 distinct background entities have DELIVERED votes from both roots observed within the last 12h and disagreement <=0.35: fixed_voi. Else conservative.",
+    "audit_age_only_control": "If completed review age >8h: fixed_voi; else conservative.",
+    "vote_visibility": "A raw vote is policy-visible only if observed_at in [as_of-12h, as_of] AND available_at <= as_of. Latest observed vote per (root, entity). Votes carry no truth field.",
+    "review_pulse_visibility": "Only the latest adjudicated_at <= as_of. Reviewer outcomes never visible to the selector.",
+    "current_case_excluded_from_telemetry": true
+  },
+  "accounting": {
+    "utility": "(+1 correct assertion, -4 false assertion, 0 abstain) - normalized check cost - telemetry cost",
+    "false_assertion_penalty": 4,
+    "telemetry_cost_per_decision_reading_pairs": 0.004,
+    "telemetry_cost_note": "Charged to unlabelled_disagreement on every decision where review age >8h (it reads pair telemetry), regardless of outcome. Real cost UNKNOWN; break-even cost is reported descriptively, not gated.",
+    "audit_timestamp_cost": 0,
+    "paired_bootstrap_draws": 400,
+    "bootstrap_seed_offset": 9100,
+    "rounding": "Decimal, 6 places, ROUND_HALF_EVEN"
+  },
+  "hard_gates_all_required": {
+    "G1_primary_beats_both": "outage_midstream_drift: utility(candidate) - utility(fixed_voi) >= 0.025 AND utility(candidate) - utility(conservative) >= 0.025, net of telemetry cost.",
+    "G2_primary_paired_interval": "outage_midstream_drift: paired bootstrap 95% lower bound > 0 for candidate minus fixed_voi AND for candidate minus conservative.",
+    "G3_distinct_mistakes_avoided": "outage_midstream_drift: false_assertions(candidate) < false_assertions(fixed_voi) AND missed_true(candidate) < missed_true(conservative).",
+    "G4_stable_recovery": "outage_stable: utility(candidate) - utility(conservative) >= 0.025 net of telemetry AND false_assertions(candidate) <= false_assertions(fixed_voi).",
+    "G5_raw_loss_safe_fallback": "outage_raw_loss_drift: utility(conservative) - utility(candidate) <= 0.01 AND false_assertions(candidate) <= false_assertions(conservative).",
+    "G6_syndication_harm_cap": "outage_syndicated_drift: utility(conservative) - utility(candidate) <= 0.05 (same per-case degraded regret cap as OBS-001).",
+    "G7_healthy_no_change": "healthy_midstream_drift: candidate proposals identical to conservative on every case.",
+    "G8_rumor_no_net_harm": "outage_shared_rumor: utility(candidate) >= utility(conservative) AND false_assertions(candidate) <= false_assertions(fixed_voi).",
+    "G9_alarm_recall": "outage_midstream_drift, steps >= 180: fraction of decisions with alarm (disagreement >0.35) >= 0.5.",
+    "G10_stable_false_alarm": "outage_stable, steps >= 48: fraction of decisions with alarm <= 0.25."
+  },
+  "reported_not_gated": [
+    "extra false assertions of candidate vs conservative in every regime",
+    "break-even telemetry cost per regime",
+    "decisions with insufficient pairs per regime",
+    "never control utility",
+    "learning ledger: observed result -> engineering decision -> research time -> open question"
+  ],
+  "cost_and_expected_value_before_run": {
+    "estimated_engineering_time": "one working session (design, evaluator, independent audit, report)",
+    "estimated_runtime": "under 10 minutes per interpreter, offline",
+    "probability_result_changes_decision": "UNKNOWN; not invented",
+    "why_uncertainty_remains": "OBS-001 used one simulator family with raw votes always delivered, independent pair roots and zero telemetry cost; its stable-outage gain equalled audit-age-only."
+  },
+  "leakage_rules": [
+    "Policy-visible View has no truth and no hidden probe answers.",
+    "Selector inputs: ObservedVote(root, entity, observed_at, available_at, supports) and the latest completed adjudication timestamp only.",
+    "Background entities never equal current case entities.",
+    "Audits enter conservative only when adjudicated_at <= as_of.",
+    "Votes with available_at > as_of must be invisible even if observed earlier."
+  ],
+  "audit_requirements": {
+    "independent_auditor_not_designer": true,
+    "leakage_review": true,
+    "mutant_tests": "Each of these injected faults must be caught by the OBS-002 targeted tests: truth exposed in ObservedVote; available_at filter removed; current case entity included in telemetry; reviewer outcome visible to selector; telemetry cost not charged; threshold altered.",
+    "audit_runs_on_pilot_seed_only": true
+  },
+  "disposition_rule": "Regardless of verdict, the experimental evaluator and its targeted tests are preserved in a branch commit for replay and removed from the final tree, following ADR-0028/0029/0030. Main receives protocol, aggregate report, doc and ADR-0031.",
+  "no_threshold_tuning_after_results": true,
+  "original_main_untouched": true
+}
