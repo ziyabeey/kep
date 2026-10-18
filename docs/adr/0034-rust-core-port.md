@@ -77,6 +77,10 @@ Bu Rust kararı yalnız KEP içindir; başka projelere emsal oluşturmaz.
 - **İstanbul saatleri:** Python aynı `tzinfo`'yu paylaşan iki zamanı duvar saatine göre karşılaştırır ve çıkarır, DST boşluğundaki naif saati de olduğu gibi tutar. Rust `IstDateTime` aynı kuralı izler (2016 öncesi geçiş anları dahil); başka bölgelerle karşılaştırmada Python'un `utcoffset()` değeri kullanılır.
 - **Sorgu tipleri:** Python `Query` tip kontrolü yapmaz (ör. `limit: true` geçer); Rust yanlış tipli alanları `TypeError` ile reddeder.
 
+## Faz 2 durumu
+
+`model_boundary.py` ve `scheduler.py` taşındı (`kep-core::{model_boundary, scheduler}`). Model bağlamı (anahtar sırası ve `snapshot_hash` dahil), yapılandırılmış yanıt doğrulaması ve `due_sources` sıralaması Python vektörleriyle birebir. `SourceClock` alanlarında Rust, `Query`'deki gibi yanlış tipleri `TypeError` ile reddeder: Python tip denetlemediği için `approved: 1`, `elapsed_hours: true` ya da sayısal `source_id` orada planlanır, Rust'ta reddedilir (kapalı başarısız). `calls_today` ve `daily_cap` f64 tutulur; 2^53 üstündeki iki farklı tamsayı eşit görünür ve Rust kaynağı atlar, bu da güvenli yöndedir ve pratikte ulaşılamaz. `store.py` (SQLite outbox) ve `radar.py` politika kapısı ayrı PR'larla gelecek.
+
 ## Faz geçiş ölçütü
 
 Bir faz ancak şu koşullarla tamam sayılır: vektörlerin %100'ü eşleşir, Python testlerinin tamamı yeşil kalır, Rust `clippy -D warnings` temiz, ve Python modülünde hiçbir davranış değişmemiştir.
