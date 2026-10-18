@@ -83,9 +83,10 @@ def extract(out_dir: Path) -> dict:
             'phones', 'freeform', 'update_times', 'datasets', 'district', 'district_id']
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / f'overture_istanbul_places_{release}.jsonl.gz'
-    with gzip.open(path, 'wt', encoding='utf-8') as fh:
+    # mtime=0 so the same release gives the same SHA-256 on every run
+    with path.open('wb') as raw, gzip.GzipFile(fileobj=raw, mode='wb', mtime=0, filename='') as fh:
         for row in rows:
-            fh.write(json.dumps(dict(zip(cols, row)), ensure_ascii=False, sort_keys=True) + '\n')
+            fh.write((json.dumps(dict(zip(cols, row)), ensure_ascii=False, sort_keys=True) + '\n').encode('utf-8'))
     receipt = {
         'study': protocol['study'], 'release': release, 'protocol_sha256': protocol_sha256(),
         'code_commit': git_head(), 'extracted_at_utc': datetime.now(timezone.utc).isoformat(),
