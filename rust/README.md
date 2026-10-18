@@ -8,6 +8,7 @@ KEP Core's product kernel, ported module by module from the Python lab in
 |---|---|---|
 | `kep-canon` | Canonical JSON and SHA-256, byte-identical to `stable_hash` | `kepcore/core.py` |
 | `kep-core` | `model_boundary` (model context and structured reply check), `scheduler` (`due_sources`) | `kepcore/model_boundary.py`, `kepcore/scheduler.py` |
+| `kep-core` | `radar` (KEP-SRC-001 policy gate: source registry, URL check, one controlled poll through a caller-supplied transport; no HTTP client) | `kepcore/radar.py` |
 | `kep-store` | `Store`: SQLite objects, observations, outbox, push queue and decision log (bundled SQLite via `rusqlite`) | `kepcore/store.py` |
 | `kep-core` | `availability` (opening hours, field freshness), `isotime` | `kepcore/availability.py` |
 | `kep-core` | `catalog`, `query`, `decision` (gates, `decide`, `reconcile_claims`, model guard), `distance` (georust `geo::Haversine`), `text` | `kepcore/core.py` |
@@ -28,7 +29,7 @@ copied binary needs `--lab-root path/to/labs/core` or `KEP_LAB_ROOT`.
 ## Parity vectors
 
 `parity/export_vectors.py` runs the Python reference on a fixed input set and
-writes `parity/availability.json`, `parity/core.json`, `parity/boundary.json` and `parity/store.json`. The Rust tests must reproduce every case.
+writes `parity/availability.json`, `parity/core.json`, `parity/boundary.json`, `parity/store.json` and `parity/radar.json`. The Rust tests must reproduce every case.
 Cases where Rust is deliberately stricter are listed in `KNOWN_GAPS` in
 `crates/kep-core/tests/parity.rs`, each with its reason.
 

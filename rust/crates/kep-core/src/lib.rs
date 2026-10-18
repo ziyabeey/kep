@@ -15,6 +15,7 @@ pub mod isotime;
 pub mod model_boundary;
 pub mod pyval;
 pub mod query;
+pub mod radar;
 pub mod scheduler;
 pub mod text;
 
