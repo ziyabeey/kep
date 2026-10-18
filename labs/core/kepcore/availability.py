@@ -14,7 +14,10 @@ import json
 
 
 def minute(text: str, *, end: bool = False) -> int:
-    if not isinstance(text, str) or len(text) != 5 or text[2] != ':':
+    # Exactly two ASCII digits on each side; int() alone would also accept
+    # ' 9', '+9' or non-Latin digits such as '٠٩'.
+    if (not isinstance(text, str) or len(text) != 5 or text[2] != ':'
+            or not all(c in '0123456789' for c in text[:2] + text[3:])):
         raise ValueError('Expected HH:MM')
     h, m = int(text[:2]), int(text[3:])
     if end and h == 24 and m == 0:
@@ -87,15 +90,20 @@ def field_is_fresh(record: dict, field: str, at: datetime, max_hours: float) -> 
             return False
     if not isinstance(proof, dict) or not proof.get('origin_live_verified'):
         return False
-    if proof.get('status') in {'disputed', 'unknown', 'retracted'}:
+    status = proof.get('status')
+    # A malformed (non-string) status is not evidence of a clean field.
+    if status is not None and (not isinstance(status, str) or status in {'disputed', 'unknown', 'retracted'}):
         return False
     try:
-        stamp = datetime.fromisoformat(proof['observed_at'].replace('Z', '+00:00'))
+        observed = proof['observed_at']
+        if not isinstance(observed, str): return False
+        stamp = datetime.fromisoformat(observed.replace('Z', '+00:00'))
         if stamp.tzinfo is None: return False
         age = (at - stamp).total_seconds() / 3600
         if not (math.isfinite(age) and 0 <= age <= max_hours): return False
         until = proof.get('valid_until')
         if until:
+            if not isinstance(until, str): return False
             deadline = datetime.fromisoformat(until.replace('Z', '+00:00'))
             if deadline.tzinfo is None or at >= deadline: return False
         return True
