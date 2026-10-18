@@ -62,10 +62,12 @@ def synthetic_third(first: list[dict], second: list[dict]) -> list[dict]:
     return sorted(rows, key=lambda r: r['overture_id'])
 
 
-def write_places_dir(target: Path, rows: list[dict], *, prev_href: str = PREV,
-                     schema_version: str | None = None,
-                     publisher_schema_version: str = 'v2.0.0') -> None:
-    places = target / 'places'
+def write_places_bundle(places: Path, rows: list[dict], *, synthetic: bool = True) -> tuple[str, str]:
+    """The normalized Places bundle a capture leaves behind (synthetic rows).
+
+    synthetic=False only drops the manifest's synthetic flag, for tests that
+    stand in for the real overturemaps download inside run_places.
+    """
     places.mkdir(parents=True)
     data = canonical({'dataset': 'KEP-DATA-001', 'release': RELEASE, 'study_only': True,
                       'records': rows})
@@ -87,13 +89,24 @@ def write_places_dir(target: Path, rows: list[dict], *, prev_href: str = PREV,
                 'audit': {'rows_read': len(rows) + 3, 'accepted': len(rows),
                           'duplicate_identical_ids': 0, 'rejected': {'outside_sampling_cell': 3}},
                 'human_verified_labels': 0, 'no_automatic_entity_merge': True}
+    if not synthetic:
+        del manifest['acquisition']['synthetic_rehearsal']
     (places / 'manifest.json').write_bytes(canonical(manifest))
+    return normalized, population
+
+
+def write_places_dir(target: Path, rows: list[dict], *, prev_href: str = PREV,
+                     schema_version: str | None = None,
+                     publisher_schema_version: str = 'v2.0.0') -> None:
+    normalized, population = write_places_bundle(target / 'places', rows)
     root, cat = stac_pair(prev_href=prev_href, schema_version=schema_version)
     (target / 'stac_root.json').write_bytes(root)
     (target / 'stac_release.json').write_bytes(cat)
-    from kepcore.overture_third_release import load_protocol, verify_release_chain
+    from kepcore.overture_third_release import (PROTOCOL_SHA256, load_protocol,
+                                                verify_release_chain)
     chain = verify_release_chain(root, cat, release=RELEASE, protocol=load_protocol())
     receipt = {'study': 'KEP-DATA-018', 'release': RELEASE, 'origin': 'synthetic_rehearsal',
+               'protocol_sha256': PROTOCOL_SHA256, 'code_commit': None,
                'chain': chain, 'rows_accepted': len(rows), 'normalized_sha256': normalized,
                'publisher_schema_version': publisher_schema_version,
                'stac_schema_version': schema_version,
@@ -119,16 +132,18 @@ def write_gers_dir(target: Path, second: list[dict], third: list[dict], *, compl
     events = sorted(added + removed + [outside], key=lambda e: (e['change_type'], e['id']))
     raw = canonical(events)
     (target / 'gers_regional_events.json').write_bytes(raw)
-    from kepcore.overture_third_release import load_protocol, verify_release_chain
+    from kepcore.overture_third_release import (PROTOCOL_SHA256, load_protocol,
+                                                verify_release_chain)
     root, cat = stac_pair(prev_href=prev_href)
     chain = verify_release_chain(root, cat, release=RELEASE, protocol=load_protocol())
     receipt = {'study': 'KEP-DATA-018', 'release': RELEASE, 'origin': 'synthetic_rehearsal',
+               'protocol_sha256': PROTOCOL_SHA256, 'code_commit': None,
                'chain': chain,
                'status': ('REGIONAL_ROWS_CAPTURED_NOT_COMPLETE_ID_UNION' if complete
                           else 'INCOMPLETE_EVENT_CAPTURE'),
                'events_sha256': sha256(raw).hexdigest(), 'scanned_rows': len(events),
                'regional_rows': len(events), 'event_body_bytes': 0, 'event_requests': 0,
-               'footer_body_bytes': 0, 'failure_type': None}
+               'footer_body_bytes': 0, 'failure_type': None, 'failure_detail': None}
     (target / 'gers_receipt.json').write_bytes(canonical(receipt))
 
 

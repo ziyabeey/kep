@@ -112,6 +112,8 @@ class FakeS3Capture(unittest.TestCase):
         self.assertEqual({e['change_type'] for e in events}, {'added', 'removed'})
         self.assertLessEqual(receipt['event_body_bytes'], 16 * 1024 * 1024)
         self.assertEqual(receipt['chain']['status'], 'CONSECUTIVE_PAIR')
+        from kepcore.overture_third_release import PROTOCOL_SHA256
+        self.assertEqual(receipt['protocol_sha256'], PROTOCOL_SHA256)
 
     def test_wrong_stac_latest_stops_before_any_s3_read(self):
         from scripts.capture_third_release import run_gers

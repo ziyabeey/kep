@@ -15,6 +15,7 @@ import argparse
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
+import os
 from pathlib import Path
 import sys
 from time import perf_counter
@@ -27,8 +28,9 @@ sys.path.insert(0, str(ROOT))
 from kepcore.gers_region_probe import RangeBudget
 from kepcore.overture_places import PILOT, canonical
 from kepcore.overture_third_release import (
-    STUDY, check_candidate_release, load_protocol, regional_membership_reconciliation,
-    select_regional_groups, three_release_trajectories, verify_release_chain,
+    PROTOCOL_SHA256, STUDY, check_candidate_release, load_protocol,
+    regional_membership_reconciliation, select_regional_groups, three_release_trajectories,
+    verify_release_chain,
 )
 
 S3 = 'https://overturemaps-us-west-2.s3.us-west-2.amazonaws.com/'
@@ -38,6 +40,11 @@ ORIGINS = {'captured_overture_cli': 'REAL_OVERTURE_CAPTURE',
            'synthetic_rehearsal': 'SYNTHETIC_REHEARSAL_NOT_A_REAL_RELEASE'}
 GERS_ORIGIN_FOR = {'captured_overture_cli': 'captured_public_GERS_rows',
                    'synthetic_rehearsal': 'synthetic_rehearsal'}
+
+
+def _provenance() -> dict:
+    """Which frozen protocol and which code commit produced a capture."""
+    return {'protocol_sha256': PROTOCOL_SHA256, 'code_commit': os.environ.get('GITHUB_SHA')}
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -107,7 +114,7 @@ def run_places(release: str, output: Path, *, publisher_schema_version: str) -> 
                'normalized_sha256': manifest['normalized_sha256'],
                'population_sha256': manifest['population_sha256'],
                'downloaded_at_utc': manifest['acquisition']['downloaded_at_utc'],
-               'consumer_publish': False, 'human_verified_labels': 0}
+               'consumer_publish': False, 'human_verified_labels': 0, **_provenance()}
     (out / 'places_receipt.json').write_bytes(canonical(receipt))
     return receipt
 
@@ -159,6 +166,7 @@ def run_gers(release: str, output: Path) -> dict:
     import pyarrow.parquet as pq
     if pa.__version__ != ARROW_VERSION:
         raise ValueError('Pinned optional Arrow version required')
+    from kepcore.gers_access_cost import BodyBudget
     from scripts.gers_footer_study import Reader, decode_footer
     from scripts.probe_gers_region import RemoteFile, source_item
     protocol = load_protocol()
@@ -171,8 +179,10 @@ def run_gers(release: str, output: Path) -> dict:
                'captured_change_types': gers['captured_change_types'],
                'scope': gers['scope'], 'complete_for_all_union_ids': False,
                'consumer_publish': False, 'physical_business_openings': None,
-               'physical_business_closures': None, 'independent_human_labels': 0}
+               'physical_business_closures': None, 'independent_human_labels': 0,
+               **_provenance()}
     footer_reader = Reader()
+    footer_reader.budget = BodyBudget(gers['max_footer_body_bytes'])
     events_reader = _event_reader(release, protocol)
     began = perf_counter()
     rows_read = 0
@@ -276,8 +286,8 @@ def normalization_audit(manifest: dict, accepted: int) -> dict:
             'in_cell_rejections': sum(in_cell.values()), 'in_cell_rejection_reasons': in_cell}
 
 
-def _regional_abstain(reason: str) -> dict:
-    return {'study': STUDY, 'status': 'ABSTAIN_GERS_CAPTURE_INVALID', 'reason': reason[:300],
+def _regional_abstain(reason: str, status: str = 'ABSTAIN_GERS_CAPTURE_INVALID') -> dict:
+    return {'study': STUDY, 'status': status, 'reason': reason[:300],
             'M6_regional_membership_agreement': None, 'added_agreement': None,
             'removed_agreement': None, 'physical_business_openings': None,
             'physical_business_closures': None, 'consumer_publish': False}
@@ -286,6 +296,10 @@ def _regional_abstain(reason: str) -> dict:
 def _regional(gers_dir: Path, *, release: str, receipt: dict, chain: dict,
               second: list[dict], third: list[dict]) -> dict:
     g, _ = _read_json(gers_dir / 'gers_receipt.json', 200_000)
+    if not isinstance(g, dict):
+        raise ValueError('Malformed GERS receipt')
+    if g.get('protocol_sha256') != PROTOCOL_SHA256:
+        raise ValueError('GERS capture was made under another protocol version')
     events, events_raw = _read_json(gers_dir / 'gers_regional_events.json', 16_000_000)
     if g.get('release') != release or g.get('events_sha256') != sha256(events_raw).hexdigest():
         raise ValueError('GERS capture does not belong to this release or was altered')
@@ -303,7 +317,7 @@ def _regional(gers_dir: Path, *, release: str, receipt: dict, chain: dict,
                                                 capture_complete=complete)
     result['capture'] = {k: g.get(k) for k in (
         'status', 'scanned_rows', 'regional_rows', 'event_body_bytes', 'event_requests',
-        'footer_body_bytes', 'failure_type')}
+        'footer_body_bytes', 'failure_type', 'failure_detail', 'code_commit')}
     return result
 
 
@@ -314,9 +328,13 @@ def compare(places_dir: Path, *, gers_dir: Path | None,
     from kepcore.overture_delta import load_operator_research_bundle
     protocol = load_protocol()
     receipt, _ = _read_json(places_dir / 'places_receipt.json', 200_000)
+    if not isinstance(receipt, dict):
+        raise ValueError('Malformed Places receipt')
     release = check_candidate_release(receipt['release'], protocol)
     if receipt.get('origin') not in ORIGINS:
         raise ValueError('Unknown third-release origin')
+    if receipt.get('protocol_sha256') != PROTOCOL_SHA256:
+        raise ValueError('Places capture was made under another protocol version')
     chain = receipt['chain']
     root_raw = _read_bytes(places_dir / 'stac_root.json', 200_000)
     release_raw = _read_bytes(places_dir / 'stac_release.json', 200_000)
@@ -337,6 +355,9 @@ def compare(places_dir: Path, *, gers_dir: Path | None,
                                           expected_normalized_sha256=receipt['normalized_sha256'],
                                           expected_observed_at=receipt['downloaded_at_utc'])
     manifest, _ = _read_json(places_dir / 'places' / 'manifest.json', 1_000_000)
+    synthetic = (manifest.get('acquisition') or {}).get('synthetic_rehearsal') is True
+    if synthetic != (receipt['origin'] == 'synthetic_rehearsal'):
+        raise ValueError('Receipt origin contradicts the acquisition manifest')
     audit = normalization_audit(manifest, len(third.records))
     first, second = load_pinned_pair()
     report = {'study': STUDY, 'release': release, 'chain': chain,
@@ -347,6 +368,10 @@ def compare(places_dir: Path, *, gers_dir: Path | None,
               'third_population_n': len(third.records),
               'third_population_sha256': third.population_sha256,
               'third_hash_source': 'SAME_RUN_RECEIPT_NOT_INDEPENDENT',
+              'protocol_sha256': PROTOCOL_SHA256,
+              'capture_code_commit': receipt.get('code_commit'),
+              # None outside GitHub Actions: an offline re-run is visible as one.
+              'compare_code_commit': os.environ.get('GITHUB_SHA'),
               'preregistration_note': protocol['preregistration_note'],
               'third_normalization_audit': audit,
               'status': 'COMPARED', 'trajectories': None,
@@ -357,14 +382,20 @@ def compare(places_dir: Path, *, gers_dir: Path | None,
     report['trajectories'] = three_release_trajectories(
         list(first.records), list(second.records), list(third.records),
         schema_comparable=schema_ok, protocol=protocol)
-    if gers_dir is not None:
-        # A bad GERS capture must not cost the one-shot M1-M5 report.
-        try:
-            report['regional_gers'] = _regional(gers_dir, release=release, receipt=receipt,
-                                                chain=chain, second=list(second.records),
-                                                third=list(third.records))
-        except (ValueError, KeyError, TypeError) as exc:
-            report['regional_gers'] = _regional_abstain(f'{type(exc).__name__}: {exc}')
+    # A missing or bad GERS capture must not cost the one-shot M1-M5 report,
+    # and M6 must never be silently empty: it always carries a status.
+    receipt_path = None if gers_dir is None else gers_dir / 'gers_receipt.json'
+    if receipt_path is None or not (receipt_path.is_file() or receipt_path.is_symlink()):
+        report['regional_gers'] = _regional_abstain(
+            'No GERS capture receipt (step skipped or failed before writing one)',
+            status='ABSTAIN_GERS_CAPTURE_MISSING')
+        return report
+    try:
+        report['regional_gers'] = _regional(gers_dir, release=release, receipt=receipt,
+                                            chain=chain, second=list(second.records),
+                                            third=list(third.records))
+    except (ValueError, KeyError, TypeError, RecursionError, ArithmeticError) as exc:
+        report['regional_gers'] = _regional_abstain(f'{type(exc).__name__}: {exc}')
     return report
 
 
@@ -383,7 +414,8 @@ def main() -> None:
                            help='From the release notes, e.g. v2.0.0; recorded in the receipt')
     c = sub.add_parser('compare')
     c.add_argument('--places-dir', type=Path, required=True)
-    c.add_argument('--gers-dir', type=Path)
+    c.add_argument('--gers-dir', type=Path,
+                   help='GERS capture directory; if absent, M6 abstains as ABSTAIN_GERS_CAPTURE_MISSING')
     c.add_argument('--publisher-schema-version',
                    help='Optional; must equal the value recorded at capture time')
     c.add_argument('--output', type=Path, help='New file for the aggregate report')

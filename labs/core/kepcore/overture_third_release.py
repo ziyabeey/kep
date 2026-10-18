@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PROTOCOL_PATH = ROOT / 'sources/overture_third_release.json'
 # Frozen 2026-10-18, before the third release existed. Editing the protocol
 # after seeing data must fail loudly, not silently change the study.
-PROTOCOL_SHA256 = '254e38761aebc1744f710888cbc3bc23dc21129f11b20e5da280786f1350f7e4'
+PROTOCOL_SHA256 = '759cb0bbdd1447bbe39388033f593b190d28155a8877681fb57a7c21d69ffe60'
 STAC_BASE = 'https://stac.overturemaps.org/'
 MAX_CATALOG_BYTES = 200_000
 CATEGORY_FIELDS = frozenset({'basic_category', 'taxonomy_primary'})
@@ -40,6 +40,9 @@ KNOWN_CHANGE_FIELDS = frozenset({'name', 'address', 'basic_category', 'taxonomy_
                                  'operating_status', 'locality', 'country',
                                  'source_provenance', 'geometry', 'cell'})
 CONFIDENCE_STEP = 0.05
+CONFIDENCE_ROUNDING = 9  # protocol M5: a decimal move of exactly 0.05 never counts
+MAX_REGIONAL_ROWS = 1_000_000
+CHANGELOG_PREFIX = 'changelog/{release}/theme=places/type=place/change_type={kind}/'
 _CATALOG_HREF = re.compile(r'^https://stac\.overturemaps\.org/([0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]+)/catalog\.json$')
 
 
@@ -61,7 +64,33 @@ def load_protocol(path: str | Path = PROTOCOL_PATH, *,
     if (not isinstance(fields, list) or not fields or len(set(fields)) != len(fields)
             or not set(fields) <= KNOWN_CHANGE_FIELDS - CATEGORY_FIELDS):
         raise ValueError('M4 factual fields must be known, non-category change fields')
+    _check_bound_constants(protocol)
     return protocol
+
+
+def _check_bound_constants(protocol: dict) -> None:
+    """Protocol values that other modules enforce must equal those modules' values.
+
+    Otherwise the frozen number would be decorative: editing it (or the shared
+    constant) would change nothing the study tests can see.
+    """
+    from . import gers_access_cost, gers_region_probe
+    from .gers_reconciliation import NEW, OLD
+    from .overture_places import MAX_FEATURES
+    pilot = json.loads((ROOT / 'sources/overture_places_pilot.json').read_bytes())
+    gers = protocol['gers']
+    if (protocol['reference_releases'] != [OLD, NEW] or protocol['expected_predecessor'] != NEW
+            or protocol['max_records_total'] != pilot['max_records_total']
+            or not 0 < protocol['max_records_total'] <= MAX_FEATURES
+            or gers['max_footer_body_bytes'] != gers_access_cost.MAX_BODY
+            or not 0 < gers['max_event_body_bytes'] <= gers_region_probe.BUDGET_BYTES
+            or not 0 < gers['max_event_requests'] <= gers_region_probe.MAX_REQUESTS
+            or gers['captured_change_types'] != ['added', 'removed']
+            or gers['projected_columns'] != ['id', 'bbox', 'columns_changed']
+            # scripts/probe_gers_region.RemoteRanges.read pins this path shape
+            or gers['changelog_prefix_template'] != CHANGELOG_PREFIX
+            or gers['max_event_rows_scanned'] != MAX_REGIONAL_ROWS):
+        raise ValueError('Protocol value and enforcing code constant disagree')
 
 
 def check_candidate_release(release: str, protocol: dict) -> str:
@@ -183,7 +212,8 @@ def three_release_trajectories(first: list[dict], second: list[dict], third: lis
         if None in (c1, c2, c3):
             reversal['missing_confidence'] += 1
             continue
-        d1, d2 = c2 - c1, c3 - c2
+        d1 = round(c2 - c1, CONFIDENCE_ROUNDING)
+        d2 = round(c3 - c2, CONFIDENCE_ROUNDING)
         if abs(d1) > CONFIDENCE_STEP:
             reversal['large_first_hop'] += 1
             if abs(d2) > CONFIDENCE_STEP and (d1 > 0) != (d2 > 0):
@@ -251,7 +281,7 @@ def regional_membership_reconciliation(second: list[dict], third: list[dict],
     scanned = 0
     for kind, row in events:
         scanned += 1
-        if scanned > 1_000_000:
+        if scanned > MAX_REGIONAL_ROWS:
             raise ValueError('Unbounded regional observation set')
         if kind not in official:
             raise ValueError('Only added/removed rows belong to M6')
@@ -266,21 +296,25 @@ def regional_membership_reconciliation(second: list[dict], third: list[dict],
               else 'REGIONAL_SCOPE_RECONCILED')
     added_ok = len(local_added & official['added'])
     removed_ok = len(local_removed & official['removed'])
-    counts = {
-        'local_newly_listed': len(local_added),
-        'local_no_longer_listed': len(local_removed),
-        'official_regional_added': len(official['added']),
-        'official_regional_removed': len(official['removed']),
-        'conflicting_official_ids': len(both),
-        'added_confirmed': added_ok,
-        'removed_confirmed': removed_ok,
+    reconciled = status == 'REGIONAL_SCOPE_RECONCILED'
+    cross = {
+        'added_matched_official_row': added_ok,
+        'removed_matched_official_row': removed_ok,
         'local_added_without_official_event': len(local_added - official['added']),
         'local_removed_without_official_event': len(local_removed - official['removed']),
         'official_added_missing_from_third_snapshot': len(official['added'] - new.keys()),
         'official_removed_still_in_third_snapshot': len(official['removed'] & new.keys()),
         'official_added_already_in_second_snapshot': len(official['added'] & old.keys()),
     }
-    reconciled = status == 'REGIONAL_SCOPE_RECONCILED'
+    counts = {
+        'local_newly_listed': len(local_added),
+        'local_no_longer_listed': len(local_removed),
+        'official_regional_added': len(official['added']),
+        'official_regional_removed': len(official['removed']),
+        'conflicting_official_ids': len(both),
+        # An abstaining M6 must not leave numbers a reader could turn back into it.
+        **{k: (v if reconciled else None) for k, v in cross.items()},
+    }
     total = len(local_added) + len(local_removed)
     return {
         'study': STUDY,

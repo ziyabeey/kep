@@ -4,6 +4,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -11,14 +12,16 @@ import sys
 import unittest
 
 from benchmarks.third_release_rehearsal import (PREV, RELEASE, stac_pair, synthetic_third,
-                                                write_gers_dir, write_places_dir)
+                                                write_gers_dir, write_places_bundle,
+                                                write_places_dir)
 from kepcore.gers_reconciliation import load_pinned_pair
 from kepcore.overture_places import PILOT, canonical
 from kepcore.overture_third_release import (
-    PROTOCOL_PATH, check_candidate_release, load_protocol, regional_membership_reconciliation,
-    select_regional_groups, three_release_trajectories, verify_release_chain, wilson,
+    PROTOCOL_PATH, PROTOCOL_SHA256, check_candidate_release, load_protocol,
+    regional_membership_reconciliation, select_regional_groups, three_release_trajectories,
+    verify_release_chain, wilson,
 )
-from scripts.capture_third_release import compare, fetch_catalog, parse_listing
+from scripts.capture_third_release import _event_reader, compare, fetch_catalog, parse_listing
 
 ROOT = Path(__file__).resolve().parents[1]
 UUID_RE = re.compile(rb'[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
@@ -69,10 +72,40 @@ class ProtocolFreeze(unittest.TestCase):
             with self.assertRaises(ValueError):
                 load_protocol(copy, expected_sha256=sha256(bad).hexdigest())
 
+    def test_values_enforced_elsewhere_are_bound_to_the_protocol(self):
+        # A frozen number that no code reads would be decorative: with a
+        # re-pinned hash, any drift from the enforcing constant must still fail.
+        doc = json.loads(PROTOCOL_PATH.read_bytes())
+        self.assertEqual(doc['decision_gate']['type'], 'NONE_DESCRIPTIVE_SOURCE_STUDY')
+        self.assertIsNone(doc['decision_gate']['primary_metric'])
+        edits = {
+            'footer_bytes': lambda d: d['gers'].update(max_footer_body_bytes=1024 * 1024),
+            'max_records': lambda d: d.update(max_records_total=5),
+            'references': lambda d: d.update(reference_releases=['2026-08-19.0', '2026-09-23.0']),
+            'event_bytes': lambda d: d['gers'].update(max_event_body_bytes=64 * 1024 * 1024),
+            'event_requests': lambda d: d['gers'].update(max_event_requests=512),
+            'columns': lambda d: d['gers'].update(projected_columns=['id', 'bbox']),
+            'predecessor': lambda d: d.update(expected_predecessor='2026-09-23.0'),
+            'change_types': lambda d: d['gers'].update(captured_change_types=['added']),
+            'prefix': lambda d: d['gers'].update(
+                changelog_prefix_template='changelog/{release}/theme=places/type=place/kind={kind}/'),
+            'rows_scanned': lambda d: d['gers'].update(max_event_rows_scanned=2_000_000),
+        }
+        with TemporaryDirectory() as tmp:
+            copy = Path(tmp) / 'p.json'
+            for name, edit in edits.items():
+                with self.subTest(name=name):
+                    d = json.loads(PROTOCOL_PATH.read_bytes())
+                    edit(d)
+                    raw = json.dumps(d).encode()
+                    copy.write_bytes(raw)
+                    with self.assertRaises(ValueError):
+                        load_protocol(copy, expected_sha256=sha256(raw).hexdigest())
+
     def test_release_window(self):
         p = load_protocol()
-        self.assertEqual(check_candidate_release('2026-10-21.0', p), '2026-10-21.0')
-        self.assertEqual(check_candidate_release('2026-10-28.1', p), '2026-10-28.1')
+        for good in ('2026-10-21.0', '2026-10-28.1', '2026-10-14.0', '2026-11-17.0'):
+            self.assertEqual(check_candidate_release(good, p), good)
         for bad in ('2026-11-18.0', '2026-09-23.1', '2026-10-21', 'latest', '2026-10-13.0'):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 check_candidate_release(bad, p)
@@ -90,10 +123,12 @@ class ReleaseChain(unittest.TestCase):
         self.assertFalse(chain['changelog_build_baseline_publisher_attested'])
 
     def test_intermediate_release_blocks_reconciliation(self):
-        root, cat = stac_pair(prev_href='https://stac.overturemaps.org/2026-10-14.0/catalog.json')
-        chain = verify_release_chain(root, cat, release=RELEASE, protocol=self.p)
-        self.assertEqual(chain['status'], 'REQUIRES_INTERMEDIATE_RELEASE')
-        self.assertFalse(chain['regional_reconciliation_allowed'])
+        for prev in ('2026-10-14.0', '2026-09-23.0', '2026-08-19.0'):
+            with self.subTest(prev=prev):
+                root, cat = stac_pair(prev_href=f'https://stac.overturemaps.org/{prev}/catalog.json')
+                chain = verify_release_chain(root, cat, release=RELEASE, protocol=self.p)
+                self.assertEqual(chain['status'], 'REQUIRES_INTERMEDIATE_RELEASE')
+                self.assertFalse(chain['regional_reconciliation_allowed'])
 
     def test_stac_latest_must_match_requested_release(self):
         root, _ = stac_pair(release='2026-10-28.0')
@@ -131,19 +166,47 @@ class Trajectories(unittest.TestCase):
 
     def test_schema_change_excludes_category_fields(self):
         a, b = Shared.pair()
+        for field in ('basic_category', 'taxonomy_primary'):
+            with self.subTest(field=field):
+                c = [dict(x, **{field: 'changed'}) for x in b]
+                r = three_release_trajectories(a, b, c, schema_comparable=False)
+                delta = r['M3_consecutive_source_delta']
+                self.assertNotIn(field, delta['field_change_counts'])
+                self.assertEqual(delta['category_fields_excluded_technical_schema_review'][field], len(b))
+                # Category-only changes must not count as revisions at the ID level either.
+                self.assertEqual(delta['field_or_geometry_revised_ids'], 0)
+                self.assertEqual(delta['unchanged_ids'], delta['retained_ids'])
         c = [dict(x, basic_category='changed') for x in b]
-        r = three_release_trajectories(a, b, c, schema_comparable=False)
-        delta = r['M3_consecutive_source_delta']
-        self.assertNotIn('basic_category', delta['field_change_counts'])
-        self.assertEqual(delta['category_fields_excluded_technical_schema_review']['basic_category'], len(b))
-        # Category-only changes must not count as revisions at the ID level either.
-        self.assertEqual(delta['field_or_geometry_revised_ids'], 0)
-        self.assertEqual(delta['unchanged_ids'], delta['retained_ids'])
         mixed = [dict(x, basic_category='changed', confidence=None) for x in b]
         delta = three_release_trajectories(a, b, mixed, schema_comparable=False)['M3_consecutive_source_delta']
         self.assertEqual(delta['confidence_only_revised_ids'], len(b))
         comparable = three_release_trajectories(a, b, c, schema_comparable=True)['M3_consecutive_source_delta']
         self.assertEqual(comparable['field_or_geometry_revised_ids'], len(b))
+
+    def test_m4_and_m5_numerators_follow_the_protocol_text(self):
+        _, b = Shared.pair()
+        base = [dict(r) for r in sorted(b, key=lambda r: r['overture_id'])[:7]]
+        # (first, second, third) confidence; name changes per hop (hop1, hop2).
+        plan = [((0.5, 0.6, 0.5), (True, True)),     # large, reversed; M4 persisted
+                ((0.5, 0.6, 0.7), (True, False)),    # large, same direction
+                ((0.5, 0.6, 0.58), (False, True)),   # large, small opposite move
+                ((0.77, 0.72, 0.77), (False, False)),  # exactly 0.05 in decimal: not large
+                ((0.85, 0.9, 0.85), (False, False)),   # exactly 0.05 the other way
+                ((0.5, 0.8, 0.75), (False, False)),    # large, then exactly 0.05 back: not reversed
+                ((0.8, 0.6, 0.65), (False, False))]    # same with opposite signs
+        first, second, third = [], [], []
+        for row, ((c1, c2, c3), (h1, h2)) in zip(base, plan):
+            n1 = row['name'] or 'x'
+            n2 = n1 + ' 2' if h1 else n1
+            n3 = n2 + ' 3' if h2 else n2
+            first.append(dict(row, confidence=c1, name=n1))
+            second.append(dict(row, confidence=c2, name=n2))
+            third.append(dict(row, confidence=c3, name=n3))
+        r = three_release_trajectories(first, second, third, schema_comparable=True)
+        m5, m4 = r['M5_confidence_reversal'], r['M4_revision_persistence']
+        self.assertEqual((m5['k'], m5['n']), (1, 5))
+        after, without = m4['after_first_hop_revision'], m4['without_first_hop_revision']
+        self.assertEqual((after['k'], after['n'], without['k'], without['n']), (1, 2, 1, 5))
 
     def test_repeated_ids_and_foreign_cells_rejected(self):
         a, b = Shared.pair()
@@ -196,6 +259,27 @@ class RegionalReconciliation(unittest.TestCase):
         self.assertEqual(r['status'], 'ABSTAIN_INCOMPLETE_CAPTURE')
         self.assertIsNone(r['M6_regional_membership_agreement'])
 
+    def test_no_cross_counts_survive_any_abstention(self):
+        cross = ('added_matched_official_row', 'removed_matched_official_row',
+                 'local_added_without_official_event', 'local_removed_without_official_event',
+                 'official_added_missing_from_third_snapshot',
+                 'official_removed_still_in_third_snapshot',
+                 'official_added_already_in_second_snapshot')
+        _, row = self.events[0]
+        cases = {'intermediate': (self.events, dict(self.chain, regional_reconciliation_allowed=False), True),
+                 'incomplete': (self.events, self.chain, False),
+                 'conflicting': (self.events + [('removed', row)], self.chain, True)}
+        for name, (events, chain, complete) in cases.items():
+            with self.subTest(name=name):
+                r = regional_membership_reconciliation(self.b, self.c, events, chain=chain,
+                                                       capture_complete=complete)
+                self.assertTrue(r['status'].startswith('ABSTAIN_'))
+                self.assertEqual({k: r['counts'][k] for k in cross}, dict.fromkeys(cross))
+                self.assertEqual(r['counts']['local_newly_listed'], len(self.events))
+        ok = regional_membership_reconciliation(self.b, self.c, self.events, chain=self.chain,
+                                                capture_complete=True)
+        self.assertTrue(all(type(ok['counts'][k]) is int for k in cross))
+
     def test_conflicting_official_rows_abstain(self):
         kind, row = self.events[0]
         r = regional_membership_reconciliation(self.b, self.c, self.events + [('removed', row)],
@@ -222,8 +306,8 @@ class RegionalReconciliation(unittest.TestCase):
         r = regional_membership_reconciliation(self.b, self.c, events, chain=self.chain,
                                                capture_complete=True)
         self.assertEqual(r['status'], 'REGIONAL_SCOPE_RECONCILED')
-        self.assertEqual(r['counts']['added_confirmed'], len(added) - 5)
-        self.assertEqual(r['counts']['removed_confirmed'], len(gone) - 4)
+        self.assertEqual(r['counts']['added_matched_official_row'], len(added) - 5)
+        self.assertEqual(r['counts']['removed_matched_official_row'], len(gone) - 4)
         self.assertEqual((r['removed_agreement']['k'], r['removed_agreement']['n']), (len(gone) - 4, len(gone)))
         m6 = r['M6_regional_membership_agreement']
         self.assertEqual((m6['k'], m6['n']), (len(added) + len(gone) - 9, len(added) + len(gone)))
@@ -263,6 +347,7 @@ def _object(kind, boxes, release=RELEASE, name='a'):
 
 
 INSIDE = (28.97, 41.02, 28.98, 41.03)
+WIDE = (20.0, 36.0, 35.0, 42.0)  # a real changelog row group spans far beyond the cells
 FAR = (10.0, 50.0, 11.0, 51.0)
 UNKNOWN = (None, None, None, None)
 
@@ -278,6 +363,9 @@ class RegionalPlan(unittest.TestCase):
         self.assertEqual(plan['excluded_row_groups'], 2)
         self.assertEqual(sum(x['metadata_statistics_unknown'] for x in plan['selected']), 1)
         self.assertFalse(plan['complete_id_union_scan'])
+        wide = select_regional_groups([_object('added', [WIDE, FAR]), _object('removed', [WIDE])],
+                                      release=RELEASE, protocol=self.p)
+        self.assertEqual((wide['selected_row_groups'], wide['excluded_row_groups']), (2, 1))
 
     def test_missing_partition_other_release_or_over_budget_stop(self):
         with self.assertRaises(ValueError):
@@ -290,6 +378,61 @@ class RegionalPlan(unittest.TestCase):
         with self.assertRaises(ValueError):
             select_regional_groups([_object('added', [INSIDE]), _object('removed', [INSIDE])],
                                    release=RELEASE, protocol=tight)
+        few_rows = json.loads(json.dumps(self.p)); few_rows['gers']['max_event_rows_scanned'] = 15
+        with self.assertRaises(ValueError):
+            select_regional_groups([_object('added', [INSIDE]), _object('removed', [INSIDE])],
+                                   release=RELEASE, protocol=few_rows)
+
+
+class _Response:
+    def __init__(self, req, item):
+        start, end = map(int, req.get_header('Range').split('=')[1].split('-'))
+        self.status, self.length = 206, end - start + 1
+        self.headers = {'Content-Length': str(self.length), 'ETag': item['etag'],
+                        'Content-Range': f'bytes {start}-{end}/{item["size"]}'}
+
+    def read(self, n):
+        return b'x' * min(n, self.length)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+class EventReadBudget(unittest.TestCase):
+    """The runtime GERS read budget is the protocol's, and it is really charged."""
+    def setUp(self):
+        self.p = load_protocol()
+        self.item = {'key': f'changelog/{RELEASE}/theme=places/type=place/change_type=added/part-0.parquet',
+                     'size': 64 * 1024 * 1024, 'etag': '"e"'}
+
+    def reader(self):
+        r = _event_reader(RELEASE, self.p)
+        self.assertEqual((r.budget.limit, r.budget.request_limit),
+                         (self.p['gers']['max_event_body_bytes'], self.p['gers']['max_event_requests']))
+        calls = []
+        r.opener.open = lambda req, timeout: calls.append(1) or _Response(req, self.item)
+        return r, calls
+
+    def test_request_cap_stops_before_the_next_request(self):
+        r, calls = self.reader()
+        cap = self.p['gers']['max_event_requests']
+        for i in range(cap):
+            r.read(self.item, i, i)
+        with self.assertRaises(ValueError):
+            r.read(self.item, cap, cap)
+        self.assertEqual(len(calls), cap)
+
+    def test_byte_cap_stops_before_the_oversized_request(self):
+        r, calls = self.reader()
+        r.read(self.item, 0, 12 * 1024 * 1024 - 1)
+        with self.assertRaises(ValueError):
+            r.read(self.item, 12 * 1024 * 1024, 17 * 1024 * 1024)
+        self.assertEqual(len(calls), 1)
+        self.assertLessEqual(r.budget.bytes_reserved, self.p['gers']['max_event_body_bytes'])
+
 
 
 LISTING = ('<?xml version="1.0" encoding="UTF-8"?><ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">'
@@ -335,8 +478,16 @@ class OfflineRehearsal(unittest.TestCase):
         self.assertIn('committed together', r['preregistration_note'])
         m1, m2 = r['trajectories']['M1_relisting_after_removal'], r['trajectories']['M2_transient_additions']
         self.assertEqual((m1['k'], m1['n'], m2['k'], m2['n']), (23, 69, 4, 222))
-        self.assertEqual(r['trajectories']['M4_revision_persistence']['field_list_source'],
-                         'protocol.m4_factual_fields')
+        m4 = r['trajectories']['M4_revision_persistence']
+        self.assertEqual(m4['field_list_source'], 'protocol.m4_factual_fields')
+        self.assertEqual([(m4[k]['k'], m4[k]['n']) for k in ('after_first_hop_revision',
+                                                              'without_first_hop_revision')],
+                         [(7, 158), (81, 4306)])
+        m5 = r['trajectories']['M5_confidence_reversal']
+        self.assertEqual((m5['k'], m5['n'], m5['threshold']), (19, 249, 0.05))
+        self.assertEqual(r['protocol_sha256'], PROTOCOL_SHA256)
+        self.assertIsNone(r['capture_code_commit'])
+        self.assertEqual(r['compare_code_commit'], os.environ.get('GITHUB_SHA'))
         m6 = r['regional_gers']['M6_regional_membership_agreement']
         self.assertEqual((m6['k'], m6['n']), (169, 174))
         self.assertEqual(r['third_normalization_audit']['in_cell_rejections'], 0)
@@ -358,6 +509,20 @@ class OfflineRehearsal(unittest.TestCase):
             m.write_bytes(m.read_bytes().replace(b'Sentetik yer 1', b'Sentetik yer X', 1))
             with self.assertRaises(ValueError):
                 compare(run, gers_dir=gers)
+        relabels = {
+            # A synthetic bundle cannot be passed off as a real capture.
+            'real_origin': lambda r: dict(r, origin='captured_overture_cli'),
+            # A capture made under another protocol version is rejected.
+            'other_protocol': lambda r: dict(r, protocol_sha256='0' * 64),
+            'no_protocol': lambda r: {k: v for k, v in r.items() if k != 'protocol_sha256'},
+        }
+        for name, mutate in relabels.items():
+            with self.subTest(name=name), TemporaryDirectory() as t:
+                run, gers = self.build(Path(t))
+                r = json.loads((run / 'places_receipt.json').read_bytes())
+                (run / 'places_receipt.json').write_bytes(canonical(mutate(r)))
+                with self.assertRaises(ValueError):
+                    compare(run, gers_dir=gers)
 
     def test_bad_gers_capture_abstains_but_keeps_m1_to_m5(self):
         def tamper_events(gers):
@@ -377,13 +542,32 @@ class OfflineRehearsal(unittest.TestCase):
             (gers / 'gers_regional_events.json').write_bytes(raw)
             receipt(lambda g: dict(g, events_sha256=sha256(raw).hexdigest()))(gers)
 
+        def deep_events(gers):
+            raw = b'[' * 50_000 + b']' * 50_000
+            (gers / 'gers_regional_events.json').write_bytes(raw)
+            receipt(lambda g: dict(g, events_sha256=sha256(raw).hexdigest()))(gers)
+
+        def event_edit(mutate):
+            def apply(gers):
+                events = json.loads((gers / 'gers_regional_events.json').read_bytes())
+                mutate(events[0])
+                raw = canonical(events)
+                (gers / 'gers_regional_events.json').write_bytes(raw)
+                receipt(lambda g: dict(g, events_sha256=sha256(raw).hexdigest()))(gers)
+            return apply
+
         cases = {
             'events_altered': tamper_events,
             'release': receipt(lambda g: dict(g, release='2026-10-28.1')),
             'origin': receipt(lambda g: dict(g, origin='captured_public_GERS_rows')),
             'predecessor': receipt(lambda g: dict(g, chain=dict(g['chain'], observed_predecessor='2026-10-14.0'))),
+            'other_protocol': receipt(lambda g: dict(g, protocol_sha256='0' * 64)),
+            'no_protocol': receipt(lambda g: {k: v for k, v in g.items() if k != 'protocol_sha256'}),
+            'unhashable_kind': event_edit(lambda e: e.update(change_type=['added'])),
+            'huge_bbox': event_edit(lambda e: e['bbox'].update(xmin=10 ** 400)),
+            'receipt_is_list': lambda gers: (gers / 'gers_receipt.json').write_bytes(canonical([1])),
+            'deeply_nested_events': deep_events,
             'noncanonical_uuid': bad_uuid,
-            'missing_receipt': lambda gers: (gers / 'gers_receipt.json').unlink(),
         }
         for name, mutate in cases.items():
             with self.subTest(name=name), TemporaryDirectory() as t:
@@ -391,6 +575,20 @@ class OfflineRehearsal(unittest.TestCase):
                 mutate(gers)
                 r = compare(run, gers_dir=gers)
                 self.assertEqual(r['regional_gers']['status'], 'ABSTAIN_GERS_CAPTURE_INVALID')
+                self.assertIsNone(r['regional_gers']['M6_regional_membership_agreement'])
+                self.assertEqual(r['trajectories']['M1_relisting_after_removal']['n'], 69)
+
+    def test_missing_gers_capture_still_reports_an_m6_status(self):
+        # A skipped or early-failed GERS step must not leave M6 silently empty.
+        for name, gers_dir in (('no_dir_given', lambda g: None), ('no_receipt', lambda g: g),
+                               ('dir_missing', lambda g: g / 'nope')):
+            with self.subTest(name=name), TemporaryDirectory() as t:
+                run, gers = self.build(Path(t))
+                (gers / 'gers_receipt.json').unlink()
+                r = compare(run, gers_dir=gers_dir(gers))
+                self.assertEqual(r['status'], 'COMPARED')
+                self.assertEqual(r['regional_gers']['status'], 'ABSTAIN_GERS_CAPTURE_MISSING')
+                self.assertIn('receipt', r['regional_gers']['reason'])
                 self.assertIsNone(r['regional_gers']['M6_regional_membership_agreement'])
                 self.assertEqual(r['trajectories']['M1_relisting_after_removal']['n'], 69)
 
@@ -458,6 +656,72 @@ class OfflineRehearsal(unittest.TestCase):
                 compare(run, gers_dir=gers)
 
 
+class PlacesCapture(unittest.TestCase):
+    """run_places with STAC and the overturemaps download stubbed: no network."""
+    def run_places(self, tmp, *, operator, stac_schema='2.0.0'):
+        from scripts import capture_third_release as cap
+        root, cat = stac_pair(schema_version=stac_schema)
+        downloads = []
+
+        def fake_execute(*, output, inputs, fetch, seed_file, release):
+            self.assertEqual((fetch, release), (True, RELEASE))
+            downloads.append(output)
+            a, b = Shared.pair()
+            rows = synthetic_third(a, b)
+            write_places_bundle(output, rows, synthetic=False)
+            return {'rows_accepted': len(rows)}
+
+        catalogs = {cap.STAC_ROOT: root,
+                    f'https://stac.overturemaps.org/{RELEASE}/catalog.json': cat}
+        with patch.object(cap, 'fetch_catalog', side_effect=lambda url: catalogs[url]), \
+                patch('scripts.overture_istanbul.execute', side_effect=fake_execute), \
+                patch('urllib.request.OpenerDirector.open', side_effect=AssertionError('network')), \
+                patch.dict('os.environ', {'GITHUB_SHA': 'f' * 40}):
+            try:
+                return cap.run_places(RELEASE, tmp / 'run', publisher_schema_version=operator), downloads
+            except ValueError as exc:
+                return exc, downloads
+
+    def test_contradicting_operator_schema_stops_before_places_read(self):
+        with TemporaryDirectory() as t:
+            result, downloads = self.run_places(Path(t), operator='v2.1.0')
+        self.assertIsInstance(result, ValueError)
+        self.assertEqual(downloads, [])
+
+    def test_receipt_records_schema_protocol_and_commit_then_compares(self):
+        with TemporaryDirectory() as t:
+            receipt, downloads = self.run_places(Path(t), operator='v2.0.0')
+            self.assertEqual(len(downloads), 1)
+            self.assertEqual((receipt['publisher_schema_version'], receipt['stac_schema_version']),
+                             ('v2.0.0', '2.0.0'))
+            self.assertEqual((receipt['protocol_sha256'], receipt['code_commit']),
+                             (PROTOCOL_SHA256, 'f' * 40))
+            r = compare(Path(t) / 'run', gers_dir=None)
+        self.assertEqual((r['status'], r['third_origin']), ('COMPARED', 'REAL_OVERTURE_CAPTURE'))
+        self.assertEqual(r['capture_code_commit'], 'f' * 40)
+        self.assertEqual(r['regional_gers']['status'], 'ABSTAIN_GERS_CAPTURE_MISSING')
+
+    def test_operator_schema_recorded_when_stac_is_silent(self):
+        # The pinned 2026-09-23.1 catalog has no schema:version, so only the
+        # operator's value can trigger the category exclusion.
+        with TemporaryDirectory() as t:
+            receipt, _ = self.run_places(Path(t), operator='v2.1.0', stac_schema=None)
+            self.assertEqual((receipt['publisher_schema_version'], receipt['stac_schema_version']),
+                             ('v2.1.0', None))
+            r = compare(Path(t) / 'run', gers_dir=None)
+        self.assertFalse(r['category_semantics_comparable'])
+        self.assertIn('category_fields_excluded_technical_schema_review',
+                      r['trajectories']['M3_consecutive_source_delta'])
+
+    def test_real_manifest_with_synthetic_receipt_rejected(self):
+        with TemporaryDirectory() as t:
+            receipt, _ = self.run_places(Path(t), operator='v2.0.0')
+            path = Path(t) / 'run' / 'places_receipt.json'
+            path.write_bytes(canonical(dict(receipt, origin='synthetic_rehearsal')))
+            with self.assertRaises(ValueError):
+                compare(Path(t) / 'run', gers_dir=None)
+
+
 class CliSafety(unittest.TestCase):
     def test_default_run_is_offline(self):
         out = subprocess.run([sys.executable, 'scripts/capture_third_release.py'], cwd=ROOT,
@@ -483,8 +747,11 @@ class CliSafety(unittest.TestCase):
 
     def test_places_override_still_requires_exact_release(self):
         from scripts.overture_istanbul import execute
-        with TemporaryDirectory() as t, self.assertRaises(ValueError):
-            execute(output=Path(t) / 'o', inputs=None, fetch=True, seed_file=None, release='latest')
+        with TemporaryDirectory() as t, patch('urllib.request.OpenerDirector.open',
+                                              side_effect=AssertionError('network')):
+            with self.assertRaises(ValueError):
+                execute(output=Path(t) / 'o', inputs=None, fetch=True, seed_file=None, release='latest')
+            self.assertFalse((Path(t) / 'o').exists())
 
 
 if __name__ == '__main__':

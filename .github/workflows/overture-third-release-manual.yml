@@ -79,22 +79,28 @@ jobs:
             --research-confirmation REGIONAL_MEMBERSHIP_16MIB --release "$RELEASE" --output "$RUN_DIR/gers"
       - name: Offline three-release comparison (aggregate only)
         run: |
-          GERS_ARGS=()
-          if [ -f "$RUN_DIR/gers/gers_receipt.json" ]; then GERS_ARGS=(--gers-dir "$RUN_DIR/gers"); fi
+          # Always pass the GERS directory: a skipped or failed GERS step then
+          # shows up as an M6 status with its reason, never as a silent null.
           python scripts/capture_third_release.py compare --places-dir "$RUN_DIR/run" \
-            "${GERS_ARGS[@]}" --output "$RUN_DIR/third_release_report.json" > /dev/null
+            --gers-dir "$RUN_DIR/gers" --output "$RUN_DIR/third_release_report.json" > /dev/null
           python - <<'PY'
           import json, os, pathlib
           r = json.loads((pathlib.Path(os.environ['RUN_DIR']) / 'third_release_report.json').read_bytes())
           assert r['third_origin'] == 'REAL_OVERTURE_CAPTURE' and r['consumer_publish'] is False
+          assert r['capture_code_commit'] == r['compare_code_commit'] == os.environ['GITHUB_SHA']
           print('release', r['release'], 'chain', r['chain']['status'], 'n', r['third_population_n'])
+          print('protocol sha256', r['protocol_sha256'], '| code commit', r['capture_code_commit'])
           print('normalization', r['third_normalization_audit'])
           print('status', r['status'], '| regional GERS', (r['regional_gers'] or {}).get('status'))
           if r['status'] != 'COMPARED':
               print('::warning::' + r['status'] + ' - see docs/OVERTURE_THIRD_RELEASE.md before the next release')
           g = r['regional_gers'] or {}
-          if g.get('status') == 'ABSTAIN_GERS_CAPTURE_INVALID':
-              print('::warning::M6 abstained: ' + g.get('reason', ''))
+          if r['status'] == 'COMPARED' and g.get('status') != 'REGIONAL_SCOPE_RECONCILED':
+              cap = g.get('capture') or {}
+              why = g.get('reason') or ' '.join(str(cap.get(k) or '') for k in ('failure_type', 'failure_detail'))
+              why = ' '.join(why.split())  # one annotation line
+              print('::warning::M6 ' + str(g.get('status')) + (': ' + why if why else '')
+                    + ' - M1-M5 still stand; see docs/OVERTURE_THIRD_RELEASE.md')
           PY
       - name: Upload research capture (7 days; pin in a follow-up PR)
         if: always()
