@@ -98,13 +98,20 @@ pub fn python_json_float(value: f64) -> String {
     }
 }
 
-/// Python's `repr(float)` for finite values: shortest round-trip digits,
-/// fixed notation when the decimal exponent is in -4..16, otherwise
-/// scientific with a signed exponent of at least two digits.
+/// Python's `repr(float)` for finite values: the shortest decimal that
+/// round-trips (closest to the exact value among equally short ones), fixed
+/// notation when the decimal exponent is in -4..16, otherwise scientific with
+/// a signed exponent of at least two digits.
+///
+/// Rust's own shortest formatting (`{}` / `{:e}`) can pick a different digit
+/// string of the same length (999999999987524.2 prints as ...524.3), so the
+/// digits come from exact, correctly rounded `{:.p$e}` at increasing precision.
 pub fn python_float_repr(value: f64) -> String {
     debug_assert!(value.is_finite());
-    // Rust's `{:e}` already yields the shortest round-trip digits, e.g. "-1.5e-7".
-    let sci = format!("{value:e}");
+    let sci = (0..17)
+        .map(|p| format!("{value:.p$e}"))
+        .find(|s| s.parse::<f64>().ok() == Some(value))
+        .unwrap_or_else(|| format!("{value:.16e}"));
     let (mantissa, exp) = sci.split_once('e').expect("{:e} always has an exponent");
     let exp: i32 = exp.parse().expect("integer exponent");
     let (sign, mantissa) = match mantissa.strip_prefix('-') {
@@ -112,15 +119,19 @@ pub fn python_float_repr(value: f64) -> String {
         None => ("", mantissa),
     };
     let digits: String = mantissa.chars().filter(|c| *c != '.').collect();
+    let digits = match digits.trim_end_matches('0') {
+        "" => "0",
+        d => d,
+    };
     let mut out = String::from(sign);
     if (-4..16).contains(&exp) {
         let point = exp + 1; // digits before the decimal point
         if point <= 0 {
             out.push_str("0.");
             out.extend(std::iter::repeat_n('0', (-point) as usize));
-            out.push_str(&digits);
+            out.push_str(digits);
         } else if point as usize >= digits.len() {
-            out.push_str(&digits);
+            out.push_str(digits);
             out.extend(std::iter::repeat_n('0', point as usize - digits.len()));
             out.push_str(".0");
         } else {
@@ -178,6 +189,7 @@ mod tests {
             (1.5e300, "1.5e+300"),
             (5e-324, "5e-324"),
             (123456.789, "123456.789"),
+            (999999999987524.2, "999999999987524.2"),
         ] {
             assert_eq!(python_float_repr(value), text, "{value:?}");
         }

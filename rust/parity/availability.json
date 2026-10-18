@@ -171,66 +171,90 @@
   },
   {
    "name": "canon_28",
+   "value": 999999999987524.2,
+   "canonical": "999999999987524.2",
+   "sha256": "3116086db31f513d5e62b3977e4a0e62f679874d5f6b6f0cdd7a1d1d8077f186"
+  },
+  {
+   "name": "canon_29",
+   "value": 2.2250738585072014e-308,
+   "canonical": "2.2250738585072014e-308",
+   "sha256": "8d51a73768cb59d15302f6b0a4c7147a04b0cce9df743b5bf50e31ab87b2d807"
+  },
+  {
+   "name": "canon_30",
+   "value": 1.7976931348623157e+308,
+   "canonical": "1.7976931348623157e+308",
+   "sha256": "c2784e1abd6317452708f3fbf9641c16b959561bc621a1d408c23a20aa2cb585"
+  },
+  {
+   "name": "canon_31",
+   "value": 9007199254740992.0,
+   "canonical": "9007199254740992.0",
+   "sha256": "0ad10bbdda8db20784fb3edc08722b255b8da67f2a12bb58ec32994ba4a3596e"
+  },
+  {
+   "name": "canon_32",
    "value": "",
    "canonical": "\"\"",
    "sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
   },
   {
-   "name": "canon_29",
+   "name": "canon_33",
    "value": "İstanbul",
    "canonical": "\"İstanbul\"",
    "sha256": "33769c4d83bafd3af33cf9dd052fd83e32e1805a0fc4a10621f4f47e74ccf35c"
   },
   {
-   "name": "canon_30",
+   "name": "canon_34",
    "value": "ışık ğüş",
    "canonical": "\"ışık ğüş\"",
    "sha256": "f8b996047271a0c0c7e38810e0a928aef18642adcd81af8e3c7cf2853bae9b9c"
   },
   {
-   "name": "canon_31",
+   "name": "canon_35",
    "value": "quote \" back \\ slash",
    "canonical": "\"quote \\\" back \\\\ slash\"",
    "sha256": "2d90fd84271b1bc8ab2a6cdb8b24444f8c8a7ab99c21c2f55c738ec07d9e5786"
   },
   {
-   "name": "canon_32",
+   "name": "canon_36",
    "value": "tab\tnl\ncr\r",
    "canonical": "\"tab\\tnl\\ncr\\r\"",
    "sha256": "b1f63ff95665a6ab4e5041f0aca336b5f944edc31b0e33a95a604cb2d35e27f9"
   },
   {
-   "name": "canon_33",
+   "name": "canon_37",
    "value": "\b\f\u0000\u0001\u001f",
    "canonical": "\"\\b\\f\\u0000\\u0001\\u001f\"",
    "sha256": "6689296efd5f70e5cb714e5eea1bc69eab8d06a9476f1f0e5d75681a82948aae"
   },
   {
-   "name": "canon_34",
+   "name": "canon_38",
    "value": "  ",
    "canonical": "\"  \"",
    "sha256": "e3a0e2262ac7790f4df36b522a8fbdd4ee3370d568eb15dc25c5f1775f14ed6c"
   },
   {
-   "name": "canon_35",
+   "name": "canon_39",
    "value": "emoji 🎟️",
    "canonical": "\"emoji 🎟️\"",
    "sha256": "868a13e84eaff9e107763776c2cdca663f804de87c6373a55f21d7b891650ffa"
   },
   {
-   "name": "canon_36",
+   "name": "canon_40",
    "value": "é (NFC) vs é (NFD)",
    "canonical": "\"é (NFC) vs é (NFD)\"",
    "sha256": "5bf650198aebc0680a618d03a12ce39e77d28c5196e461f5ccc95170f088c98a"
   },
   {
-   "name": "canon_37",
+   "name": "canon_41",
    "value": [],
    "canonical": "[]",
    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
   },
   {
-   "name": "canon_38",
+   "name": "canon_42",
    "value": [
     1,
     "a",
@@ -240,13 +264,13 @@
    "sha256": "6f9c54658fdbc2f155e7105e0ad633c8c03e83b677a6b8a5dfb7541264b83622"
   },
   {
-   "name": "canon_39",
+   "name": "canon_43",
    "value": {},
    "canonical": "{}",
    "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
   },
   {
-   "name": "canon_40",
+   "name": "canon_44",
    "value": {
     "b": 1,
     "a": 2,
@@ -260,7 +284,7 @@
    "sha256": "878523320825b3dfb08dc244f6d8d75ac56a0381831038103f3e34de89130edd"
   },
   {
-   "name": "canon_41",
+   "name": "canon_45",
    "value": {
     "nested": {
      "z": [
@@ -277,7 +301,7 @@
    "sha256": "a9569c17ece99000e5988a8f9ac1f352f3d6287d0783620984d539978a9866fe"
   },
   {
-   "name": "canon_42",
+   "name": "canon_46",
    "value": [
     [
      "09:00",
@@ -288,7 +312,7 @@
    "sha256": "208ae4632b4f92af9ade2300472eb834f25ea50915fb839eeacabd2bba97fcb4"
   },
   {
-   "name": "canon_43",
+   "name": "canon_47",
    "value": {
     "timezone": "Europe/Istanbul",
     "weekly": {
@@ -552,6 +576,41 @@
   {
    "name": "iso_'2026-10-10T17:50:00+3:00'",
    "text": "2026-10-10T17:50:00+3:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+1€'",
+   "text": "2026-10-10T17:50:00+1€",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+€€'",
+   "text": "2026-10-10T17:50:00+€€",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:50:00+0€:00'",
+   "text": "2026-10-10T17:50:00+0€:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-10T17:5€+03:00'",
+   "text": "2026-10-10T17:5€+03:00",
+   "expect": {
+    "raises": "ValueError"
+   }
+  },
+  {
+   "name": "iso_'2026-10-1€T17:50:00+03:00'",
+   "text": "2026-10-1€T17:50:00+03:00",
    "expect": {
     "raises": "ValueError"
    }

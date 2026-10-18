@@ -135,6 +135,9 @@ fn parse_offset(s: &str) -> Option<FixedOffset> {
     if s == "Z" {
         return FixedOffset::east_opt(0);
     }
+    if !s.is_ascii() {
+        return None; // fixed-width slicing below assumes one byte per character
+    }
     let (sign, body) = match s.as_bytes().first()? {
         b'+' => (1, &s[1..]),
         b'-' => (-1, &s[1..]),
