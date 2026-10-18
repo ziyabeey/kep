@@ -350,7 +350,7 @@ def run_regime(cfg: dict, regime: str, seed: int, n: int, draws: int, boot_seed:
             out = execute_preplanned(trial, decision)
             out['telemetry_cost'] = TELEMETRY_COST if info.read else Decimal('0')
             outs[p].append(out)
-            proposals[p].append(decision.action)
+            proposals[p].append((decision.action, decision.probe_id))
             if p == CANDIDATE:
                 tele.append({'step': step, **info.__dict__})
     methods = {p: _summary(trials, outs[p], penalty) for p in POLICIES}
