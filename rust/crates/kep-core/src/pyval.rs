@@ -11,6 +11,10 @@ pub enum PyError {
     TypeError,
     AttributeError,
     KeyError,
+    /// Raised by the reference for unapproved source use or missing consent.
+    PermissionError,
+    /// `sqlite3.IntegrityError`, e.g. a NOT NULL column given `None`.
+    IntegrityError,
 }
 
 impl PyError {
@@ -20,6 +24,8 @@ impl PyError {
             PyError::TypeError => "TypeError",
             PyError::AttributeError => "AttributeError",
             PyError::KeyError => "KeyError",
+            PyError::PermissionError => "PermissionError",
+            PyError::IntegrityError => "IntegrityError",
         }
     }
 }

@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/kep-canon", "crates/kep-core", "crates/kep-cli"]
+members = ["crates/kep-canon", "crates/kep-core", "crates/kep-cli", "crates/kep-store"]
 
 [workspace.package]
 edition = "2024"
@@ -18,6 +18,8 @@ chrono-tz = "0.10"
 # georust: geographic primitives and distances (Ziya's choice for all geo work in KEP).
 geo = { version = "0.31", default-features = false }
 unicode-normalization = "0.1"
+# Bundled SQLite: same engine on every machine, no system library needed.
+rusqlite = { version = "0.37", features = ["bundled"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

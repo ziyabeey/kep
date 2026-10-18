@@ -32,6 +32,7 @@ from kepcore.core import (Query, check_model_selection, decide, dt, fold, havers
                           temporal_state)
 from kepcore.model_boundary import context_for_model, validate_structured_reply  # noqa: E402
 from kepcore.scheduler import SourceClock, due_sources  # noqa: E402
+from kepcore.store import Store  # noqa: E402
 
 AT = '2026-10-10T18:00:00+03:00'  # Saturday, as in tests/test_v03.py
 
@@ -636,8 +637,113 @@ def build_boundary():
     }
 
 
+STORE_TABLES = ('objects', 'observations', 'outbox', 'push_queue', 'decisions')
+
+
+def run_store(ops):
+    s = Store()
+    results = []
+    for op in ops:
+        kind = op['op']
+        if kind == 'ingest':
+            res = outcome(s.ingest, op['record'])
+        elif kind == 'get':
+            res = outcome(s.get, op['id'])
+        elif kind == 'queue_push':
+            res = outcome(lambda: s.queue_push(op['object_id'], op['user_key'], consent=op['consent']))
+        elif kind == 'preview':
+            res = outcome(lambda: s.preview_dispatch(op['push_id'], Query(**op['query'])))
+        elif kind == 'log':
+            res = outcome(s.log_decision, op['query'], op['decision'])
+        elif kind == 'counts':
+            res = outcome(s.counts)
+        else:
+            raise ValueError(kind)
+        results.append(res)
+    tables = {t: [list(row) for row in s.db.execute(f'SELECT * FROM {t} ORDER BY rowid')] for t in STORE_TABLES}
+    s.close()
+    return {'results': results, 'tables': tables}
+
+
+def store_scenarios(catalog):
+    event = next(r for r in catalog if r['id'] == 'izmir_event:6960')
+    place = next(r for r in catalog if r['id'] == 'wikidata:Q91274')
+    fresh = copy.deepcopy(event)
+    fresh.update(synthetic=True, synthetic_overlay='unit_test_only', origin_live_verified=True,
+                 source_observed_at='2026-08-19T18:00:00+03:00')
+
+    def variant(**kw):
+        r = copy.deepcopy(fresh); r.update(kw); return r
+
+    push_query = {'city': 'İzmir', 'kind': 'event', 'at': '2026-08-19T20:00:00+03:00', 'budget': 0,
+                  'proactive': True, 'push_opt_in': True}
+    push_id = lambda r, rev, user: stable_hash([r['id'], rev, user])  # noqa: E731
+    ingest = lambda r: {'op': 'ingest', 'record': r}  # noqa: E731
+    counts = {'op': 'counts'}
+    get = lambda i: {'op': 'get', 'id': i}  # noqa: E731
+    queue = lambda r, user='synthetic-user', consent=True: {  # noqa: E731
+        'op': 'queue_push', 'object_id': r['id'], 'user_key': user, 'consent': consent}
+    preview = lambda pid, q=push_query: {'op': 'preview', 'push_id': pid, 'query': q}  # noqa: E731
+    p1 = push_id(fresh, 1, 'synthetic-user')
+    weird = variant(id='yer:İstanbul–🎟', name='Çay “ocağı” \\ 🎟', price=12.5)
+    no_ts = copy.deepcopy(fresh); del no_ts['source_observed_at']
+    no_url = copy.deepcopy(place); del no_url['source_url']
+    return {
+        'catalog_twice': [*map(ingest, catalog), *map(ingest, catalog), counts, get(place['id'])],
+        'older_ignored': [ingest(fresh), ingest(variant(source_observed_at='2026-08-19T17:00:00+03:00', price=100)),
+                          get(fresh['id'])],
+        'same_timestamp_conflict': [ingest(fresh), ingest(variant(price=100)), counts],
+        'same_instant_other_offset': [ingest(fresh), ingest(variant(source_observed_at='2026-08-19T15:00:00Z',
+                                                                     price=100))],
+        'source_change': [ingest(fresh), ingest(variant(source_id='copied_blog',
+                                                        source_observed_at='2026-08-19T19:00:00+03:00'))],
+        'cancel_invalidates_push': [
+            ingest(fresh), queue(fresh), preview(p1),
+            ingest(variant(lifecycle='cancelled', source_observed_at='2026-08-19T19:00:00+03:00')),
+            preview(p1), queue(fresh), counts],
+        'newer_update_supersedes_push': [
+            ingest(fresh), queue(fresh), ingest(variant(price=5, source_observed_at='2026-08-19T19:00:00+03:00')),
+            preview(p1), queue(fresh), preview(push_id(fresh, 2, 'synthetic-user')), get(fresh['id'])],
+        'duplicate_push': [ingest(fresh), queue(fresh, 'x'), queue(fresh, 'x'), counts],
+        'no_consent': [ingest(fresh), queue(fresh, consent=False)],
+        'stale_snapshot': [ingest(event), queue(event, 'x'), preview(push_id(event, 1, 'x'))],
+        'preview_needs_consenting_query': [ingest(fresh), queue(fresh),
+                                           preview(p1, {**push_query, 'push_opt_in': False}),
+                                           preview(p1, {**push_query, 'proactive': False})],
+        'unknown_ids': [queue(fresh), preview('0' * 64), get('nothing')],
+        'queue_cancelled': [ingest(variant(lifecycle='cancelled')), queue(fresh)],
+        'rights_block': [ingest({**place, 'rights_scope': 'pending'}),
+                         ingest({k: v for k, v in place.items() if k != 'rights_scope'}), counts],
+        'underscore_keys_and_round_trip': [ingest({**fresh, '_note': 'drop me', '_revision': 9}), get(fresh['id']),
+                                           {'op': 'ingest', 'record': {**fresh, '_revision': 1}}],
+        'missing_new_timestamp': [ingest(fresh), ingest(variant(source_observed_at=None, price=1)),
+                                  ingest({k: v for k, v in variant(price=2).items() if k != 'source_observed_at'})],
+        'timestamp_added_later': [ingest(no_ts), ingest(variant(price=3))],
+        'bad_new_timestamp': [ingest(fresh), ingest(variant(source_observed_at='soon', price=4)),
+                              ingest(variant(source_observed_at=7, price=4))],
+        'missing_or_null_fields': [ingest(no_url), ingest({**place, 'source_url': None}),
+                                   ingest({k: v for k, v in place.items() if k != 'id'}), counts],
+        'not_object': [ingest([fresh])],
+        'non_ascii_text': [ingest(weird), get(weird['id'])],
+        'log_decision': [
+            {'op': 'log', 'query': {'city': 'İzmir', 'budget': 12.5, 'lat': None},
+             'decision': {'action': 'ABSTAIN', 'selected': [], 'reasons': ['NO_ELIGIBLE_RECORD'], 'ratio': 1e-05}},
+            {'op': 'log', 'query': {'city': 'İzmir', 'budget': 12.5, 'lat': None},
+             'decision': {'action': 'ABSTAIN', 'selected': [], 'reasons': ['NO_ELIGIBLE_RECORD'], 'ratio': 1e-05}},
+            {'op': 'log', 'query': {'z': 1, 'a': [True, 'ğ']}, 'decision': {}}, counts],
+    }
+
+
+def build_store():
+    catalog = load_catalog()
+    return {
+        'reference': 'labs/core/kepcore/store.py (Python); see docs/adr/0034-rust-core-port.md',
+        'scenarios': [{'name': k, 'ops': ops, 'expect': run_store(ops)} for k, ops in store_scenarios(catalog).items()],
+    }
+
+
 OUTPUTS = {'availability.json': build_availability, 'core.json': build_core,
-           'boundary.json': build_boundary}
+           'boundary.json': build_boundary, 'store.json': build_store}
 
 
 def render(data):

@@ -16,9 +16,38 @@ use std::fmt::Write as _;
 /// Python-compatible canonical JSON text for `value`.
 pub fn canonical_json(value: &Value) -> String {
     let mut out = String::new();
-    write_value(&mut out, value);
+    write_value(&mut out, value, &CANONICAL);
     out
 }
+
+/// `json.dumps(value, sort_keys=..., ensure_ascii=...)` with Python's default
+/// separators (`", "` and `": "`). Without `sort_keys`, keys keep insertion order.
+pub fn python_json_dumps(value: &Value, sort_keys: bool, ensure_ascii: bool) -> String {
+    let style = Style {
+        item_sep: ", ",
+        key_sep: ": ",
+        sort_keys,
+        ensure_ascii,
+    };
+    let mut out = String::new();
+    write_value(&mut out, value, &style);
+    out
+}
+
+/// How `json.dumps` was called.
+struct Style {
+    item_sep: &'static str,
+    key_sep: &'static str,
+    sort_keys: bool,
+    ensure_ascii: bool,
+}
+
+const CANONICAL: Style = Style {
+    item_sep: ",",
+    key_sep: ":",
+    sort_keys: true,
+    ensure_ascii: false,
+};
 
 /// `sha256(canonical_json(value))` as lowercase hex; Python's `stable_hash`.
 pub fn stable_hash(value: &Value) -> String {
@@ -68,46 +97,48 @@ fn write_pretty(out: &mut String, value: &Value, indent: usize, depth: usize) {
                     out.push(',');
                 }
                 pad(out, depth + 1);
-                write_string(out, key);
+                write_string(out, key, false);
                 out.push_str(": ");
                 write_pretty(out, item, indent, depth + 1);
             }
             pad(out, depth);
             out.push('}');
         }
-        other => write_value(out, other),
+        other => write_value(out, other, &CANONICAL),
     }
 }
 
-fn write_value(out: &mut String, value: &Value) {
+fn write_value(out: &mut String, value: &Value, style: &Style) {
     match value {
         Value::Null => out.push_str("null"),
         Value::Bool(true) => out.push_str("true"),
         Value::Bool(false) => out.push_str("false"),
         Value::Number(n) => write_number(out, n),
-        Value::String(s) => write_string(out, s),
+        Value::String(s) => write_string(out, s, style.ensure_ascii),
         Value::Array(items) => {
             out.push('[');
             for (i, item) in items.iter().enumerate() {
                 if i > 0 {
-                    out.push(',');
+                    out.push_str(style.item_sep);
                 }
-                write_value(out, item);
+                write_value(out, item, style);
             }
             out.push(']');
         }
         Value::Object(map) => {
-            // Rust's str ordering is UTF-8 byte order, which equals code point order.
             let mut keys: Vec<&String> = map.keys().collect();
-            keys.sort();
+            if style.sort_keys {
+                // Rust's str ordering is UTF-8 byte order, which equals code point order.
+                keys.sort();
+            }
             out.push('{');
             for (i, key) in keys.into_iter().enumerate() {
                 if i > 0 {
-                    out.push(',');
+                    out.push_str(style.item_sep);
                 }
-                write_string(out, key);
-                out.push(':');
-                write_value(out, &map[key]);
+                write_string(out, key, style.ensure_ascii);
+                out.push_str(style.key_sep);
+                write_value(out, &map[key], style);
             }
             out.push('}');
         }
@@ -195,7 +226,7 @@ pub fn python_float_repr(value: f64) -> String {
     out
 }
 
-fn write_string(out: &mut String, s: &str) {
+fn write_string(out: &mut String, s: &str, ensure_ascii: bool) {
     out.push('"');
     for c in s.chars() {
         match c {
@@ -208,6 +239,14 @@ fn write_string(out: &mut String, s: &str) {
             '\u{0c}' => out.push_str("\\f"),
             c if (c as u32) < 0x20 => {
                 let _ = write!(out, "\\u{:04x}", c as u32);
+            }
+            // ensure_ascii escapes everything outside ' '..='~', astral
+            // characters as a UTF-16 surrogate pair.
+            c if ensure_ascii && (c as u32) > 0x7e => {
+                let mut units = [0u16; 2];
+                for unit in c.encode_utf16(&mut units) {
+                    let _ = write!(out, "\\u{unit:04x}");
+                }
             }
             c => out.push(c),
         }

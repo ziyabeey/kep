@@ -79,7 +79,7 @@ Bu Rust kararı yalnız KEP içindir; başka projelere emsal oluşturmaz.
 
 ## Faz 2 durumu
 
-`model_boundary.py` ve `scheduler.py` taşındı (`kep-core::{model_boundary, scheduler}`). Model bağlamı (anahtar sırası ve `snapshot_hash` dahil), yapılandırılmış yanıt doğrulaması ve `due_sources` sıralaması Python vektörleriyle birebir. `SourceClock` alanlarında Rust, `Query`'deki gibi yanlış tipleri `TypeError` ile reddeder. `store.py` (SQLite outbox) ve `radar.py` politika kapısı ayrı PR'larla gelecek.
+`model_boundary.py` ve `scheduler.py` taşındı (`kep-core::{model_boundary, scheduler}`). Model bağlamı (anahtar sırası ve `snapshot_hash` dahil), yapılandırılmış yanıt doğrulaması ve `due_sources` sıralaması Python vektörleriyle birebir. `SourceClock` alanlarında Rust, `Query`'deki gibi yanlış tipleri `TypeError` ile reddeder. `store.py` de `kep-store` olarak taşındı (paketli SQLite, `rusqlite`). Şema birebir aynı, bu yüzden iki taraf birbirinin dosyasını açabilir; 22 senaryoda her işlemin sonucu ve tabloların son içeriği (saklanan JSON metni dahil) bayt bayt Python'la aynı. Rust `id` alanında yalnız metin, `source_*` alanlarında metin veya null kabul eder; Python'un sqlite3 bağlaması başka skalerleri metin olarak saklardı. `radar.py` politika kapısı ayrı PR'la gelecek.
 
 ## Faz geçiş ölçütü
 
