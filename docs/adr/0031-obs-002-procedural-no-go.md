@@ -22,7 +22,7 @@ This NO-GO is **procedural**. The pilot ended at step 60, before conservative lo
 
 - Future discriminability pilots must target the mechanism, define "proposal", and test against the nearest control.
 - A fired stop rule is final for its study.
-- No real data, labels, model calls or publishing were involved. Core and its 880-test CI are unchanged.
+- No real data, labels, model calls or publishing were involved. Core code and its CI are unchanged (880 tests at the time).
 
 Full record: `labs/core/docs/OBS_002_NO_GO.md`, `labs/core/reports/KEP_OBS_002_NO_GO.json`.
 

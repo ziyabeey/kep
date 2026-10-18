@@ -7,7 +7,7 @@
   "protocol": "labs/core/benchmarks/obs_003_protocol.json (draft r2, never frozen)",
   "owner_choice": {
     "option_id": "C_close_from_design_arithmetic",
-    "owner_account_id": "user_01QwfKZBhKAL9eisyCEkDSDC",
+    "owner_github_login": "ziyabeey",
     "utc_timestamp": "2026-10-18T11:17:52Z",
     "chosen_label_verbatim": "Hesapla kapat"
   },

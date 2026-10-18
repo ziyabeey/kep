@@ -41,7 +41,7 @@
     },
     "recorded_choice": {
       "option_id": "C_close_from_design_arithmetic",
-      "owner_account_id": "user_01QwfKZBhKAL9eisyCEkDSDC",
+      "owner_github_login": "ziyabeey",
       "owner_display_name": "Ziya",
       "utc_timestamp": "2026-10-18T11:17:52Z",
       "channel": "decision card tap in the KEP project thread (platform-verified tap from the owner client)",

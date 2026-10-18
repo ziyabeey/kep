@@ -53,7 +53,7 @@ Over steps 0–59 there is no drift, and conservative still has READY audits. Th
 
 ## Engineering disposition
 
-Following ADR-0028/0029/0030, the experimental evaluator `benchmarks/obs_002_eval.py` and its 20 targeted tests were removed from the final tree. They are preserved at `2a1877261020af62fce2be1a7511729842419e9a` (PR #46) for replay only. Main keeps this document, the protocol, the [aggregate report](../reports/KEP_OBS_002_NO_GO.json) and [ADR-0031](../../../docs/adr/0031-obs-002-procedural-no-go.md). The 880-test Core CI is unchanged.
+Following ADR-0028/0029/0030, the experimental evaluator `benchmarks/obs_002_eval.py` and its 20 targeted tests were removed from the final tree. They are preserved at `2a1877261020af62fce2be1a7511729842419e9a` (PR #46) for replay only. Main keeps this document, the protocol, the [aggregate report](../reports/KEP_OBS_002_NO_GO.json) and [ADR-0031](../../../docs/adr/0031-obs-002-procedural-no-go.md). Core CI is unchanged (880 tests at the time).
 
 Real Istanbul source accuracy: UNKNOWN. Real human labels: ZERO. Source downloads: ZERO. Model calls: ZERO. Consumer publishing: DISABLED.
 
