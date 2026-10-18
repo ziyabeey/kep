@@ -367,6 +367,11 @@ def run_regime(cfg: dict, regime: str, seed: int, n: int, draws: int, boot_seed:
                                                 penalty, boot_seed + 1, draws),
         'candidate_identical_to_conservative': proposals[CANDIDATE] == proposals['conservative'],
         'candidate_identical_to_audit_age_only': proposals[CANDIDATE] == proposals['audit_age_only'],
+        # D1 transparency: the pre-D1 (action-only) reading is reported too.
+        'action_only_identical_to_conservative': [a for a, _ in proposals[CANDIDATE]]
+            == [a for a, _ in proposals['conservative']],
+        'action_only_identical_to_audit_age_only': [a for a, _ in proposals[CANDIDATE]]
+            == [a for a, _ in proposals['audit_age_only']],
         'candidate_proposals_differ_from_conservative': sum(
             a != b for a, b in zip(proposals[CANDIDATE], proposals['conservative'])),
         'candidate_proposals_differ_from_audit_age_only': sum(
@@ -405,12 +410,17 @@ def gates(res: dict) -> dict:
         'G7_healthy_no_change': res[H]['candidate_identical_to_conservative'],
         'G8_rumor_no_net_harm': (u(R, C) >= u(R, 'conservative') - eps and
                                  m(R, C, 'false_assertions') <= m(R, 'fixed_voi', 'false_assertions')),
-        'G9_alarm_recall': (res[P]['alarm_rate_from_step_180'] or 0) >= 0.5,
-        'G10_stable_false_alarm': (res[S]['alarm_rate_from_step_48'] or 0) <= 0.25,
+        # D2: missing alarm data fails a gate instead of passing it.
+        'G9_alarm_recall': res[P]['alarm_rate_from_step_180'] is not None and
+                           res[P]['alarm_rate_from_step_180'] >= 0.5,
+        'G10_stable_false_alarm': res[S]['alarm_rate_from_step_48'] is not None and
+                                  res[S]['alarm_rate_from_step_48'] <= 0.25,
     }
 
 
-def run(stage: str, cfg: dict | None = None) -> dict:
+def run(stage: str, cfg: dict | None = None, *, _guarded: bool = False) -> dict:
+    if stage == 'holdout' and not _guarded:
+        raise PermissionError('Holdout runs only through the guarded CLI, once')
     cfg = load_protocol() if cfg is None else cfg
     block = cfg['frozen_holdout'] if stage == 'holdout' else cfg['pilot']
     if stage not in ('pilot', 'holdout'):
@@ -424,6 +434,11 @@ def run(stage: str, cfg: dict | None = None) -> dict:
     discriminating = not all(r['candidate_identical_to_conservative'] and
                              r['candidate_identical_to_audit_age_only']
                              for r in results.values())
+    discriminating_action_only = not all(r['action_only_identical_to_conservative'] and
+                                         r['action_only_identical_to_audit_age_only']
+                                         for r in results.values())
+    telemetry_changed_a_decision = not all(r['candidate_identical_to_audit_age_only']
+                                           for r in results.values())
     if stage == 'pilot':
         verdict = 'PILOT_ONLY_NOT_EVIDENCE' if discriminating else 'NO_GO_NOT_DISCRIMINATING'
     else:
@@ -431,13 +446,37 @@ def run(stage: str, cfg: dict | None = None) -> dict:
     return {
         'study': 'KEP-OBS-002', 'stage': stage, 'seed': seed, 'cases_per_regime': n,
         'protocol_sha256': PROTOCOL_SHA256, 'verdict': verdict,
-        'discriminating': discriminating, 'gates': g,
+        'discriminating': discriminating,
+        'discriminating_action_only_pre_d1': discriminating_action_only,
+        'telemetry_changed_any_decision_vs_audit_age_only': telemetry_changed_a_decision,
+        'gates': g,
         'gates_passed': sum(g.values()), 'gates_failed': len(g) - sum(g.values()),
         'results': results,
         'fail_safe_boundaries': {'real_human_reviews': 0, 'source_downloads': 0,
                                  'model_calls': 0, 'consumer_publish': False,
                                  'real_business_accuracy': None},
     }
+
+
+def source_hashes() -> dict:
+    files = ['benchmarks/obs_002_eval.py', 'benchmarks/obs_002_protocol.json',
+             'benchmarks/budgeted_core_eval.py', 'benchmarks/adaptive_trust_eval.py',
+             'kepcore/adaptive_trust.py', 'kepcore/budgeted_verify.py',
+             'kepcore/temporal_pipeline.py', 'kepcore/core.py', 'kepcore/evidence_lab.py',
+             'tests/test_obs_002_eval.py', 'tests/test_obs_002_audit.py']
+    return {f: sha256((ROOT/f).read_bytes()).hexdigest() for f in files}
+
+
+def _holdout_guard(commit: str, out_path: Path) -> None:
+    import subprocess
+    head = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=ROOT, check=True,
+                          capture_output=True, text=True).stdout.strip()
+    dirty = subprocess.run(['git', 'status', '--porcelain', '--', '.'], cwd=ROOT, check=True,
+                           capture_output=True, text=True).stdout.strip()
+    if commit != head or dirty:
+        sys.exit('Holdout refused: audited commit must equal a clean HEAD')
+    if out_path.exists():
+        sys.exit('Holdout refused: it has already been run once')
 
 
 if __name__ == '__main__':
@@ -448,7 +487,15 @@ if __name__ == '__main__':
     a = ap.parse_args()
     if a.stage == 'holdout' and not a.confirm_audited_evaluator_commit:
         sys.exit('Holdout runs once, only after the independent audit; pass the audited commit SHA')
-    out = run(a.stage)
-    if a.confirm_audited_evaluator_commit:
+    once = ROOT/'reports/KEP_OBS_002_HOLDOUT_FULL.json'
+    if a.stage == 'holdout':
+        _holdout_guard(a.confirm_audited_evaluator_commit, once)
+    out = run(a.stage, _guarded=a.stage == 'holdout')
+    out['source_sha256'] = source_hashes()
+    if a.stage == 'holdout':
         out['audited_evaluator_commit'] = a.confirm_audited_evaluator_commit
-    print(json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True, default=str))
+    text = json.dumps(out, ensure_ascii=False, indent=2, sort_keys=True)
+    if a.stage == 'holdout':
+        with open(once, 'x', encoding='utf-8') as fh:  # O_EXCL: a second run fails
+            fh.write(text + '\n')
+    print(text)
