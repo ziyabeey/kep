@@ -941,6 +941,94 @@
    }
   },
   {
+   "name": "source_approved_review_basic",
+   "raw": {
+    "id": "izmir_open_events",
+    "url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+    "city": "İzmir",
+    "format": "izmir_event_json",
+    "status": "approved",
+    "approved_uses": [
+     "research_ingest"
+    ],
+    "license": "CC-BY-4.0",
+    "rights_evidence_url": "https://acikveri.bizizmir.com/tr/license",
+    "rights_reviewed_at": "20261010",
+    "attribution": "İzmir Büyükşehir Belediyesi Açık Veri Portalı",
+    "min_poll_minutes": 360,
+    "max_poll_minutes": 1440,
+    "daily_request_cap": 4,
+    "max_response_bytes": 2000000
+   },
+   "expect": {
+    "ok": {
+     "id": "izmir_open_events",
+     "url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+     "city": "İzmir",
+     "format": "izmir_event_json",
+     "status": "approved",
+     "approved_uses": [
+      "research_ingest"
+     ],
+     "license": "CC-BY-4.0",
+     "rights_evidence_url": "https://acikveri.bizizmir.com/tr/license",
+     "rights_reviewed_at": "20261010",
+     "attribution": "İzmir Büyükşehir Belediyesi Açık Veri Portalı",
+     "min_poll_minutes": 360,
+     "max_poll_minutes": 1440,
+     "daily_request_cap": 4,
+     "max_response_bytes": 2000000,
+     "review_note": "",
+     "allows_research": true,
+     "allows_display": false
+    }
+   }
+  },
+  {
+   "name": "source_approved_review_week",
+   "raw": {
+    "id": "izmir_open_events",
+    "url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+    "city": "İzmir",
+    "format": "izmir_event_json",
+    "status": "approved",
+    "approved_uses": [
+     "research_ingest"
+    ],
+    "license": "CC-BY-4.0",
+    "rights_evidence_url": "https://acikveri.bizizmir.com/tr/license",
+    "rights_reviewed_at": "2026-W41-6",
+    "attribution": "İzmir Büyükşehir Belediyesi Açık Veri Portalı",
+    "min_poll_minutes": 360,
+    "max_poll_minutes": 1440,
+    "daily_request_cap": 4,
+    "max_response_bytes": 2000000
+   },
+   "expect": {
+    "ok": {
+     "id": "izmir_open_events",
+     "url": "https://openapi.izmir.bel.tr/api/ibb/kultursanat/etkinlikler",
+     "city": "İzmir",
+     "format": "izmir_event_json",
+     "status": "approved",
+     "approved_uses": [
+      "research_ingest"
+     ],
+     "license": "CC-BY-4.0",
+     "rights_evidence_url": "https://acikveri.bizizmir.com/tr/license",
+     "rights_reviewed_at": "2026-W41-6",
+     "attribution": "İzmir Büyükşehir Belediyesi Açık Veri Portalı",
+     "min_poll_minutes": 360,
+     "max_poll_minutes": 1440,
+     "daily_request_cap": 4,
+     "max_response_bytes": 2000000,
+     "review_note": "",
+     "allows_research": true,
+     "allows_display": false
+    }
+   }
+  },
+  {
    "name": "source_adapter_without_note",
    "raw": {
     "id": "zorlu_psm_events",

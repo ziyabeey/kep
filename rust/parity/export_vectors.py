@@ -789,6 +789,9 @@ def source_cases():
         'approved_http_evidence': {**izmir, 'rights_evidence_url': 'http://acikveri.bizizmir.com/'},
         'approved_bad_review_date': {**izmir, 'rights_reviewed_at': '10/10/2026'},
         'approved_review_datetime': {**izmir, 'rights_reviewed_at': '2026-10-10T09:00:00+03:00'},
+        # Known gaps: Python accepts these, Rust rejects them (radar_parity.rs KNOWN_GAPS).
+        'approved_review_basic': {**izmir, 'rights_reviewed_at': '20261010'},
+        'approved_review_week': {**izmir, 'rights_reviewed_at': '2026-W41-6'},
         'adapter_without_note': {**pending, 'format': 'izmir_event_json', 'review_note': ''},
         'adapter_with_note': {**pending, 'format': 'izmir_event_json'},
         'website_without_note': {**pending, 'review_note': ''},

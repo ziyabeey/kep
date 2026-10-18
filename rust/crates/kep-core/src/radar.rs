@@ -7,6 +7,9 @@
 //! - A bracketed host (`https://[...]/`) is rejected. Python rejects most of
 //!   these too, but 3.12+ accepts an IPvFuture form such as `[v1.fe]`.
 //! - Registry fields must have their declared JSON types (`TypeError`).
+//! - `rights_reviewed_at` must be an extended ISO date; Python's
+//!   `fromisoformat` also accepts basic (`20261010`) and week (`2026-W41-6`)
+//!   dates. Such a source fails the whole registry load.
 //! - A response body must be UTF-8 (a UTF-8 BOM is allowed). Python would also
 //!   decode UTF-16/32 bodies and accept `NaN` or lone surrogates in the JSON;
 //!   Rust pauses those for schema review instead.
@@ -690,4 +693,50 @@ pub fn poll(
         envelope: Some(envelope),
         reason: None,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// `Source` fields are public, so a caller can skip `validate()`. `allows`
+    /// must still refuse a non-approved source that lists uses.
+    #[test]
+    fn unvalidated_pending_source_is_denied() {
+        let source = Source {
+            id: "x".into(),
+            url: "https://example.org/feed".into(),
+            city: "İzmir".into(),
+            format: "izmir_event_json".into(),
+            status: "pending".into(),
+            approved_uses: vec!["research_ingest".into()],
+            license: String::new(),
+            rights_evidence_url: String::new(),
+            rights_reviewed_at: String::new(),
+            attribution: String::new(),
+            min_poll_minutes: 360,
+            max_poll_minutes: 1440,
+            daily_request_cap: 4,
+            max_response_bytes: 2_000_000,
+            review_note: String::new(),
+        };
+        assert!(!source.allows("research_ingest"));
+        let now = DateTime::parse_from_rfc3339("2026-10-11T12:00:00+00:00").unwrap();
+        let mut transport =
+            |_: &str, _: &[(String, String)], _: i64| -> Result<FetchResponse, TransportError> {
+                panic!("a denied source must not reach the transport")
+            };
+        let r = poll(
+            &source,
+            &now,
+            &PollState::default(),
+            &mut transport,
+            "research_ingest",
+        )
+        .unwrap();
+        assert_eq!(
+            (r.status, r.reason.as_deref()),
+            ("denied", Some("SOURCE_RIGHTS_NOT_APPROVED"))
+        );
+    }
 }

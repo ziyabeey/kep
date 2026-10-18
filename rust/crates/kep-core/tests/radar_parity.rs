@@ -28,6 +28,14 @@ fn outcome(r: Result<Value, PyError>) -> Value {
     }
 }
 
+/// Cases where Rust deliberately differs from Python, with what Rust returns.
+/// Each is stricter, so the source is rejected instead of trusted.
+const KNOWN_GAPS: &[(&str, &str)] = &[
+    // `fromisoformat` accepts basic and ISO week dates; `parse_iso` does not.
+    ("source_approved_review_basic", "ValueError"),
+    ("source_approved_review_week", "ValueError"),
+];
+
 fn check(section: &str, actual: impl Fn(&Value) -> Value) {
     let cases = vectors()[section].as_array().expect("section");
     assert!(!cases.is_empty(), "{section} has no cases");
@@ -35,9 +43,13 @@ fn check(section: &str, actual: impl Fn(&Value) -> Value) {
         .iter()
         .filter_map(|case| {
             let got = actual(case);
-            let expected = &case["expect"];
-            (canonical_json(&got) != canonical_json(expected))
-                .then(|| format!("{}: expected {expected}, got {got}", case["name"]))
+            let name = case["name"].as_str().unwrap_or_default();
+            let expected = match KNOWN_GAPS.iter().find(|(n, _)| *n == name) {
+                Some((_, raises)) => json!({ "raises": raises }),
+                None => case["expect"].clone(),
+            };
+            (canonical_json(&got) != canonical_json(&expected))
+                .then(|| format!("{name}: expected {expected}, got {got}"))
         })
         .collect();
     assert!(
@@ -160,4 +172,16 @@ fn poll_matches() {
         }
         json!(out)
     });
+}
+
+#[test]
+fn known_gaps_are_present() {
+    let names: Vec<&str> = ["public_https", "source", "registry", "poll"]
+        .iter()
+        .flat_map(|s| vectors()[*s].as_array().unwrap())
+        .filter_map(|c| c["name"].as_str())
+        .collect();
+    for (gap, _) in KNOWN_GAPS {
+        assert!(names.contains(gap), "{gap} is listed but has no vector");
+    }
 }
