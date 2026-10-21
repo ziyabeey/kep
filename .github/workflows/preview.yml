@@ -1,0 +1,46 @@
+name: KEP Connected Preview
+
+on:
+  pull_request:
+    paths:
+      - 'apps/kep_preview/**'
+      - 'labs/core/kepcore/**'
+      - 'labs/core/data/raw/**'
+      - '.github/workflows/preview.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/kep_preview/**'
+      - 'labs/core/kepcore/**'
+      - 'labs/core/data/raw/**'
+      - '.github/workflows/preview.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  connected-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Preview contracts and real localhost HTTP flow
+        run: python -m unittest discover -s apps/kep_preview/tests -t . -v
+      - name: Browser JavaScript syntax
+        run: node --check apps/kep_preview/static/app.js
+      - name: Frontend state and stale plan response regressions
+        run: node apps/kep_preview/tests/frontend_state.test.js

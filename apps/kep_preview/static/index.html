@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7f4">
+  <title>Kep — Etrafında ne oluyor?</title>
+  <meta name="description" content="Kep Core'a bağlı yerel keşif ve gün taslağı önizlemesi.">
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Kep ana sayfa">kep<span class="brand-dot"></span></a>
+    <div class="location-heading"><span class="location-dot"></span><strong>İstanbul</strong></div>
+    <button class="day-button" id="open-plan"><span class="calendar-glyph" aria-hidden="true">▦</span> Günüm <span class="day-count">4</span></button>
+  </header>
+
+  <main class="workspace" id="workspace">
+    <aside class="explore-panel" aria-label="Keşif ve sonuçlar">
+      <div class="intro">
+        <p class="eyebrow">ETRAFINDA NE OLUYOR?</p>
+        <h1>Yakınında<br>bir dünya var<span>.</span></h1>
+        <p class="intro-copy">Şehrin bir sonraki hikâyesini bul.</p>
+      </div>
+      <nav class="category-band" id="category-band" aria-label="Harita kategorileri">
+        <button class="category active" data-category="discover" aria-pressed="true"><span aria-hidden="true">◈</span>Keşif</button>
+        <button class="category" data-category="food" aria-pressed="false"><span aria-hidden="true">♧</span>Yemek</button>
+        <button class="category" data-category="events" aria-pressed="false"><span aria-hidden="true">✧</span>Etkinlik</button>
+        <button class="category" data-category="services" aria-pressed="false"><span aria-hidden="true">⌘</span>Hizmet</button>
+      </nav>
+      <form class="filters" id="filter-form">
+        <label class="filter-select"><span class="sr-only">Galata merkezinden arama yarıçapı</span><select id="radius" name="radius"><option value="1">Galata · 1 km</option><option value="3">Galata · 3 km</option><option value="5">Galata · 5 km</option></select></label>
+        <label class="filter-check"><input id="open-now" type="checkbox"><span>Şimdi açık</span></label>
+        <button class="filter-more" type="button" id="open-filters" aria-label="Bütçe ve sakinlik filtreleri">Filtreler <span aria-hidden="true">≡</span></button>
+      </form>
+      <section class="results-area" aria-labelledby="results-title">
+        <div class="results-heading"><h2 id="results-title">Yakınındaki yerler</h2><span id="result-count">…</span></div>
+        <p class="result-context" id="result-context">Kaynak kayıtları yükleniyor.</p>
+        <div class="results-list" id="results-list" aria-live="polite" aria-busy="true"><div class="loading-card">Kep çevrene bakıyor…</div></div>
+      </section>
+      <div class="sidebar-footer"><span class="tiny-dot"></span> Araştırma önizlemesi<br><span>Güncel durum teyitli değil.</span></div>
+    </aside>
+
+    <section class="map-panel" aria-label="İstanbul haritası">
+      <div class="map-canvas" id="map-canvas" tabindex="0" role="group" aria-label="İstanbul haritası. Ok tuşlarıyla hareket ettirin, artı ve eksi düğmeleriyle yakınlaştırın. Keşif araması Galata merkezlidir.">
+        <div class="map-grid" aria-hidden="true"></div>
+        <div class="tile-layer" id="tile-layer" aria-hidden="true"></div>
+        <div class="search-radius" id="search-radius" aria-hidden="true"></div>
+        <div class="origin-marker" id="origin-marker" aria-hidden="true"><span></span></div>
+        <div class="marker-layer" id="marker-layer"></div>
+        <span class="coordinate-label" id="coordinate-label" aria-hidden="true"></span>
+      </div>
+      <div class="map-top"><div class="map-caption"><span class="tiny-dot"></span><span id="map-mode">İstanbul haritası</span><small id="catalog-status">Galata'dan arama · 7 örnek kayıt</small><small class="verification-note">Araştırma önizlemesi · Güncel durum teyitli değil</small></div><button id="toggle-streets" class="street-button" aria-pressed="true">Haritayı gizle</button></div>
+      <div class="map-feedback" id="map-feedback" role="status" hidden><span id="map-status-text"></span><button id="retry-streets" type="button" hidden>Haritayı tekrar yükle</button></div>
+      <div class="map-controls"><button id="recenter" class="map-scope" aria-label="İstanbul'un tamamını göster" title="İstanbul'un tamamını göster">İstanbul</button><button id="focus-discovery" class="map-scope" aria-label="Galata çevresindeki sonuçları yakınlaştır" title="Galata çevresindeki sonuçları yakınlaştır">Galata</button><div class="zoom-controls"><button id="zoom-in" aria-label="Haritayı yakınlaştır">+</button><button id="zoom-out" aria-label="Haritayı uzaklaştır">−</button></div></div>
+      <div class="map-bottom"><span id="scale-label">Keşif merkezi: Galata · Mesafeler kuş uçuşu</span><a id="osm-attribution" href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors</a></div>
+    </section>
+
+    <div class="kep-dock">
+      <button class="avatar-button" id="avatar" aria-label="Kep sohbetini aç. Profil için basılı tutup yukarı çek."><span id="avatar-initial">Z</span><span class="avatar-orbit" aria-hidden="true"></span></button>
+      <button class="ask-button" id="open-chat"><strong>Kep’e sor</strong><span>Şehir, senin ritminde.</span></button>
+      <div class="dock-divider"></div>
+      <button class="profile-button" id="open-profile">Profilim <span aria-hidden="true">↗</span></button>
+      <span class="hold-hint" id="hold-hint" role="status">Profil için yukarı çek</span>
+    </div>
+  </main>
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <dialog id="chat-dialog" class="sheet chat-sheet" aria-labelledby="chat-title">
+    <div class="sheet-header"><div><p class="eyebrow">SANA YAKIN</p><h2 id="chat-title">Kep’le keşfet<span class="inline-dot"></span></h2></div><button class="close-button" data-close>Kapat <span aria-hidden="true">×</span></button></div>
+    <div class="chat-log" id="chat-log" aria-live="polite" aria-label="Kep konuşması"><div class="chat-message assistant"><span class="message-avatar" aria-hidden="true">k</span><p>Galata çevresindeki yerleri bulabilirim. Mesafe, bütçe ve açık olma koşulunu da birlikte kontrol edelim.</p></div></div>
+    <div class="chat-suggestions"><button data-prompt="Galata çevresinde yer bul">Galata çevresinde yer bul ↗</button><button data-prompt="1 km içinde açık yerler">1 km içinde açık yerler ↗</button><button data-prompt="500 TL altında açık yerler">500 TL altında açık yerler ↗</button></div>
+    <form id="chat-form" class="chat-form"><label class="sr-only" for="chat-input">Kep’e yaz</label><input id="chat-input" autocomplete="off" maxlength="500" placeholder="Kep, yakınlarda ne var?" required><button type="submit" id="chat-send" aria-label="Mesajı gönder">↑</button></form>
+    <p class="sheet-footnote">Sınırlı komutlarla keşif önizlemesi · Canlı model bağlantısı yok.</p>
+  </dialog>
+
+  <dialog id="profile-dialog" class="sheet profile-sheet" aria-labelledby="profile-title">
+    <div class="sheet-header"><div><p class="eyebrow">SENİN KEP’İN</p><h2 id="profile-title">Profilim</h2></div><button class="close-button" data-close>Kapat <span aria-hidden="true">×</span></button></div>
+    <form id="profile-form">
+      <div class="profile-identity"><span class="profile-avatar" id="profile-initial">Z</span><div><strong>Şehirde kendi ritmin.</strong><p>Bu önizlemedeki seçimlerin bu tarayıcıda tutulur.</p></div></div>
+      <label class="field-label" for="profile-name">Sana nasıl seslenelim?</label><input class="text-input" id="profile-name" maxlength="40" autocomplete="given-name" value="Ziya" required>
+      <fieldset class="mode-fieldset"><legend>Kullanım modun</legend><div class="mode-grid"><label><input type="radio" name="mode" value="balanced" checked><span>Dengeli<small>Günlük ritmim</small></span></label><label><input type="radio" name="mode" value="roam"><span>Gezinti<small>Keşfe açığım</small></span></label><label><input type="radio" name="mode" value="work"><span>İş<small>Odağım işlerimde</small></span></label><label><input type="radio" name="mode" value="silent"><span>Sessiz<small>Ben sorunca</small></span></label></div></fieldset>
+      <p class="inline-note">Bunlar senin seçtiğin tercihler. Henüz öğrenilmiş bir alışkanlık profili veya doğrulanmış üyelik oluşturulmuyor.</p>
+      <button class="primary-button" type="submit">Tercihlerimi kaydet</button><button class="quiet-button" id="reset-local" type="button">Bu tarayıcıdaki kayıtları temizle</button>
+    </form>
+  </dialog>
+
+  <dialog id="filters-dialog" class="sheet small-sheet" aria-labelledby="filters-title">
+    <div class="sheet-header"><h2 id="filters-title">Keşfini daralt</h2><button class="close-button" data-close>Kapat <span aria-hidden="true">×</span></button></div>
+    <form id="advanced-filter-form"><label class="field-label" for="budget">En fazla bütçe <span>TL</span></label><input class="text-input" id="budget" inputmode="decimal" type="number" min="0" max="1000000" step="1" placeholder="Sınır yok"><label class="toggle-row"><span><strong>Daha sakin yerler</strong><small>Güncel kalabalık bilgisi gerektirir.</small></span><input id="quiet" type="checkbox"></label><p class="inline-note">Fiyatı veya kalabalığı bilinmeyen bir yeri bu koşula uyuyor diye göstermeyiz.</p><button class="primary-button" type="submit">Filtreleri uygula</button><button type="button" class="quiet-button" id="reset-filters">Filtreleri temizle</button></form>
+  </dialog>
+
+  <dialog id="detail-dialog" class="sheet detail-sheet" aria-labelledby="detail-title">
+    <div class="sheet-header"><div><p class="eyebrow">KAYNAĞIYLA KEŞFET</p><h2 id="detail-title">Yer bilgisi</h2></div><button class="close-button" data-close>Kapat <span aria-hidden="true">×</span></button></div><div id="detail-content"></div>
+  </dialog>
+
+  <dialog id="plan-dialog" class="sheet plan-sheet" aria-labelledby="plan-title">
+    <div class="sheet-header"><div><p class="eyebrow">GÜNÜN BİR ARADA</p><h2 id="plan-title">Gün taslağım</h2></div><button class="close-button" data-close>Kapat <span aria-hidden="true">×</span></button></div>
+    <p class="plan-intro">Saatleri sabit tut, aradaki zamanı birlikte kontrol edelim.</p>
+    <div class="plan-basis"><span class="tiny-dot"></span> Yol sürelerini sen giriyorsun · Canlı trafik bağlı değil.</div>
+    <form id="plan-form">
+      <div class="plan-settings"><label class="field-label">Tarih<input class="text-input" id="plan-date" type="date" required></label><label class="field-label">Varış payı <span>dk</span><input class="text-input" id="plan-buffer" type="number" min="0" max="120" value="15" required></label></div>
+      <div id="plan-stops" class="plan-stops"></div>
+      <button class="primary-button" type="submit" id="calculate-plan">Zamanı kontrol et</button>
+    </form>
+    <section id="plan-result" class="plan-result" aria-live="polite" hidden></section>
+    <p class="sheet-footnote">Taslağın bu tarayıcıda otomatik saklanır. Rezervasyon veya bildirim oluşturmaz.</p>
+  </dialog>
+</body>
+</html>
