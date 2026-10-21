@@ -4,6 +4,28 @@
 
 KEP, etkinlik, yemek, mekân ve yerel hizmet keşfi için araştırma aşamasındaki **native iOS/Android uygulama** fikridir. Kullanıcı sohbeti MiMo, veriler ve kanıtlar KEP Core, onaylı veri kaynakları Radar, değerlendirmeler LAB şeklinde planlanmaktadır. Bu depo **şu an bir mobil uygulama veya çalışan çevrim içi servis içermiyor**.
 
+## Çekirdeğe bağlı yerel önizleme
+
+Harita/kategori, yazılı keşif isteği, profil ve günlük plan hesabını tarayıcıda
+incelemek için depo kökünde çalıştırın:
+
+```bash
+python3 -m apps.kep_preview.server
+```
+
+Ardından `http://127.0.0.1:4180/` adresini açın. [Önizleme rehberi](apps/kep_preview/README.md)
+ve [ADR-0036](docs/adr/0036-connected-local-preview.md) kapsamı açıklar.
+Keşif istekleri mevcut Python Core'a gider; güncel işletme, fiyat veya açık olma
+iddiası üretilmez. Yazılı komutlar sınırlı bir ayrıştırıcıyla anlaşılır; gerçek
+MiMo, ses veya canlı trafik bağlantısı yoktur. Gün planı yalnız kullanıcının girdiği yol
+süreleriyle hesaplanır. Native ürün hedefi sürer.
+
+Önizlemenin 2B İstanbul haritası için tarayıcı görünür alanın OSM görüntülerini
+internetten yükler. Asıl 3B hedef, Kadıköy/Beyoğlu/Beşiktaş bina geometrisini
+Kep'in kendi tasarımında kullanmaktır; [İBB 3B veri araştırması ve erişim
+taslağı](docs/architecture/ISTANBUL_3D_DATA.md) doğrulananları ve eksik bilgileri
+ayırır. İBB modeli henüz temin edilmedi.
+
 ## Geliştirmeye nereden başlayalım?
 
 - [Çalışan KEP Core v0.3 araştırma laboratuvarı](labs/core/README.md)
