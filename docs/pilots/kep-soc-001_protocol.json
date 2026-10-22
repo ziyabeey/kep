@@ -1,0 +1,73 @@
+{
+  "study": "KEP-SOC-001",
+  "adr": "ADR-0037",
+  "status": "draft_pending_owner_approval",
+  "frozen": false,
+  "freeze_rule": "Ziya eşikleri onaylayınca status=frozen yapılır ve tek başına bir commit olarak girer; uygulama kodu bu commit'ten sonra yazılır. Donmuştan sonra herhangi bir eşik, pencere veya tanım değişikliği yeni deneydir (KEP-SOC-002).",
+  "decision_question": "Kadıköy/Moda'da gerçek insanlar KEP'te ücretsiz buluşma kartı açıp paylaşıyor, bu kartlar gerçekten gerçekleşiyor ve kart açanlar tekrar açıyor mu?",
+  "decision_if_go": "S1 (uygulamada kart + sohbet + süreli konum) için ADR ve protokol açılır.",
+  "decision_if_no_go": "S1 kurulmaz; sosyal hat yeniden tasarlanır. Esnaf hattı etkilenmez.",
+  "comparator": "Yok (ilk pilot). Referans: toplulukların bugünkü WhatsApp/Instagram duyuruları; pilot onların yerine geçmeyi değil, yanına eklenmeyi ölçer.",
+  "region": "Kadıköy, öncelik Moda",
+  "scope": ["kart_ac", "link_paylas", "katil", "haritada_gor"],
+  "out_of_scope": ["sohbet", "ani", "canli_konum", "odeme", "ticari_kart_siralamasi"],
+  "window": {
+    "start": "yayın öncesi kapısı geçildikten sonra ilk topluluk linkinin paylaşıldığı gün",
+    "length_days": 28,
+    "extension_allowed": false
+  },
+  "population": {
+    "seed_communities_min": 2,
+    "seed_communities_source": "Ziya'nın bağlantısı olan gerçek Moda toplulukları",
+    "excluded_from_counts": "Ziya ve geliştirme ekibinin açtığı kartlar ve hesapları (ayrı satırda raporlanır)",
+    "identity": "telefon OTP ile bir kişi bir hesap; numara başka kullanıcıya gösterilmez",
+    "age": "18+"
+  },
+  "definitions": {
+    "real_card": "Ekip dışı bir hesabın açtığı, gelecekte bir zaman ve kamuya açık bir buluşma noktası olan, açıldıktan sonra 1 saat içinde silinmeyen kart",
+    "reached_two": "Kart saatinde açan hariç en az 2 katılımcısı olan gerçek kart",
+    "happened": "Kart saatinden sonraki 24 saat içinde açan ve en az bir katılımcının ayrı ayrı 'gerçekleşti' dediği gerçek kart",
+    "repeat_opener": "İlk gerçek kartından sonra pencere içinde ikinci bir gerçek kart açan kişi"
+  },
+  "primary_metric": "happened_cards: pencere içinde gerçekleşen kart sayısı",
+  "secondary_metrics": [
+    "real_cards",
+    "distinct_openers",
+    "reached_two_rate = reached_two / real_cards",
+    "happened_rate = happened / real_cards",
+    "repeat_opener_rate = repeat_opener / distinct_openers"
+  ],
+  "thresholds_proposed": {
+    "_note": "ÖNERİ. Ziya onaylayana kadar bağlayıcı değil.",
+    "go": {
+      "happened_cards_min": 12,
+      "distinct_openers_min": 8,
+      "reached_two_rate_min": 0.5,
+      "repeat_opener_rate_min": 0.3
+    },
+    "no_go": {
+      "happened_cards_below": 6,
+      "or_repeat_opener_rate_below": 0.15
+    },
+    "between": "GO'nun hepsi tutmuyor ve NO-GO tetiklenmiyorsa sonuç BELİRSİZ yazılır; pencere uzatılmaz, devam etmek yeni protokol ister."
+  },
+  "safety_stop": "Doğrulanmış taciz, tehdit veya reşit olmayan kullanıcı olayı pilotu eşiklerden bağımsız durdurur; sonuç NO-GO (güvenlik).",
+  "interim_looks": "Operasyon için günlük sayılar görülebilir; ara sonuca göre eşik, pencere veya tanım değiştirilmez.",
+  "data_retention": {
+    "raw_user_data_delete_after_days": 90,
+    "report_contains": "yalnız toplu sayılar; isim, numara, konum veya kart metni rapora girmez"
+  },
+  "lab_boundary": "Pilot verisi labs/core'a girmez; lab varsayılanları (consumer_publish=false, real_human_labels=0, source_fetches=0) değişmez.",
+  "prelaunch_gate": [
+    "KVKK aydınlatma metni + açık rıza ekranı",
+    "18+ beyanı ve doğum yılı kontrolü",
+    "kart ve profil şikâyeti, kullanıcı engelleme, 24 saatte gözden geçirme",
+    "telefon numarası ve açanın konumu gizli; buluşma noktası kamuya açık yer",
+    "profilde fotoğraf, takipçi, beğeni yok",
+    "kullanıcı kendi hesabını ve kartlarını silebilir"
+  ],
+  "report_must_include": [
+    "protokol dondurma commit SHA'sı",
+    "gözlenen sonuç → değişen mühendislik kararı → harcanan süre → belirsiz kalan soru"
+  ]
+}
