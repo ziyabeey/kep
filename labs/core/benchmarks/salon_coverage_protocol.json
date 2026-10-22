@@ -1,0 +1,112 @@
+{
+  "study": "KEP-DATA-019",
+  "title": "Faz 0: Overture Places salon coverage of Randevu salons in one Istanbul district",
+  "stage": "PREREGISTRATION_BEFORE_MATCHER_CODE_AND_BEFORE_RANDEVU_LIST_IS_SEEN",
+  "frozen_at_utc": "2026-10-18T23:00:00Z",
+  "requested_by": "Ziya, project thread 'Kep Harita + Randevu MVP', Faz 0 only",
+  "decision_question": "Does Overture Places list enough of the salons that already use Randevu, in one Istanbul district, to build the Faz 1 map (Kep salons as open pins, every other salon as a closed pin) on Overture alone?",
+  "data_scope": "REAL_OPEN_DATA_PLUS_PRIVATE_RANDEVU_EXPORT_NO_GOOGLE_NO_SYNTHETIC",
+  "explicit_user_authorization": "Ziya asked in the thread root (2026-10-18T22:25Z) to pull Overture Turkey Places with DuckDB and match it to the Randevu salon list. This overrides the default source_fetches=0 only for this study.",
+  "blindness_basis": [
+    "This file is committed before any matcher code exists.",
+    "The Randevu salon list has not been seen by the author when this file is committed.",
+    "Before freezing, the author read only the Overture schema, the category taxonomy in a Berlin bbox (not Istanbul) and the Kadikoy division_area row (id, area); no Istanbul place was counted."
+  ],
+  "overture": {
+    "release": "2026-09-23.1",
+    "release_reason": "Latest prefix under s3://overturemaps-us-west-2/release/ on 2026-10-18; 2026-10-21.0 is not published yet. A run on any other release is a new receipt and must say so; it does not replace this one.",
+    "access": "DuckDB read_parquet on the public S3 bucket, anonymous, region us-west-2",
+    "licence": "CDLA-Permissive-2.0 for Overture; per-source licences in sources[].license are kept in the private extract",
+    "district_boundary": {
+      "theme": "divisions/type=division_area",
+      "filter": "country='TR' AND region='TR-34' AND subtype='county' AND names.primary='Kadıköy' AND is_land",
+      "expected_id": "f1be975f-ba35-4e17-9ce4-ecfbdd2524a0",
+      "rule": "Exactly one row must match. Zero or several rows: status ABSTAIN_DISTRICT_BOUNDARY, nothing is computed."
+    },
+    "salon_categories": {
+      "rule": "A place is a salon when taxonomy.primary OR any taxonomy.alternates value is in the list.",
+      "list": [
+        "hair_salon", "hair_stylist", "barber", "beauty_salon", "nail_salon",
+        "personal_or_beauty_service", "skin_care_and_makeup", "makeup_artist",
+        "esthetician", "permanent_makeup", "eyelash_service", "eyebrow_service",
+        "hair_removal", "waxing", "sugaring", "laser_hair_removal",
+        "hair_extensions"
+      ],
+      "excluded_on_purpose": "spa, day_spa, health_spa, medical_spa, tattoo_and_piercing, life_coach, stores and suppliers"
+    },
+    "freshness_filter": {
+      "operating_status": "Drop 'permanently_closed' and 'temporarily_closed'. NULL and 'open' stay.",
+      "min_confidence": 0.7,
+      "min_latest_source_update_time": "2025-09-23",
+      "update_time_rule": "Latest parse-able sources[].update_time across all sources of the record must be on or after the date above (12 months before the release). A record with no parse-able update_time is not fresh.",
+      "caveat": "Overture confidence is the publisher's existence score, not verification (CLAUDE.md)."
+    },
+    "funnel_reported": [
+      "salon places inside the district polygon (no filter)",
+      "after operating_status",
+      "after min_confidence",
+      "after freshness (= the filtered universe Y_universe)"
+    ]
+  },
+  "randevu": {
+    "input": "CSV export from the hosted Randevu database, delivered by Ziya. Never committed; stored under labs/core/.local/data019/.",
+    "columns": ["business_id", "name", "address_text", "public_phone", "latitude", "longitude", "location_source", "created_at"],
+    "exclusions": [
+      "name or slug matching (?i)(test|demo|deneme|ornek|örnek|staging|kepgbp|kepfe) is a test business",
+      "empty address_text and no usable coordinate"
+    ],
+    "district_assignment": "Turkish-folded address_text contains the district name as a whole word (e.g. 'kadikoy').",
+    "coordinate_policy": {
+      "usable_in_primary": ["manual"],
+      "not_usable_in_primary": ["places", "google"],
+      "reason": "'places' and 'google' coordinates come from Google Places / Google Business Profile. The roadmap forbids Google Maps Platform data, so the primary metric never reads them.",
+      "sensitivity": "If, and only if, Ziya says in the thread that Google-derived coordinates may be read for this internal measurement, a second number with them is reported as SENSITIVITY_GOOGLE_COORDS. It never replaces the primary metric and never changes the gate."
+    }
+  },
+  "district_choice": {
+    "primary": "Kadıköy",
+    "fallback_rule": "Decided from Randevu counts alone, before any matching: if Kadıköy has fewer than min_eligible_salons eligible Randevu salons, use the Istanbul district with the most eligible salons (ties: alphabetical). If no district reaches the minimum, status ABSTAIN_SMALL_N and no coverage gate is applied.",
+    "fallback_boundary": "Same division_area filter with that district's names.primary; must also match exactly one row."
+  },
+  "matching": {
+    "name_normalisation": [
+      "Turkish casefold: 'İ'->'i', 'I'->'ı', then lower()",
+      "fold ç->c ğ->g ı->i ö->o ş->s ü->u, strip other diacritics (NFKD)",
+      "replace every non [a-z0-9] run with one space",
+      "drop generic tokens: kuafor kuaforu berber barber barbershop salon salonu guzellik merkezi merkez hair beauty studio studyo atelier by design club nail nails art center centre ve and bayan erkek bay kadin unisex ltd sti",
+      "if nothing is left, keep the tokens before the generic drop"
+    ],
+    "name_similarity": "1.0 if the shorter distinctive token set (>=4 characters in total) is a subset of the other; else difflib.SequenceMatcher ratio of the two sorted-token strings",
+    "phone_normalisation": "digits only, last 10 digits; a phone shorter than 10 digits is ignored",
+    "found_if_any": [
+      "PHONE: some Overture phone equals the Randevu phone",
+      "NAME_DISTANCE: name_similarity >= 0.80 and haversine distance <= 150 m (only with a usable coordinate)",
+      "NAME_STREET: no usable coordinate, name_similarity >= 0.80 and one Overture addresses[].freeform shares the street token (the folded word before cad/cd/sok/sk/bulvari/blv) with address_text",
+      "NAME_UNIQUE: no usable coordinate, Overture record has no freeform address, name_similarity >= 0.90 and it is the only filtered candidate in the district with similarity >= 0.80"
+    ],
+    "candidate_pool_primary": "the filtered universe (after freshness), inside the district polygon",
+    "one_to_one": "A Overture record can satisfy only one Randevu salon; ties go to the higher name similarity, then the smaller distance, then business_id order.",
+    "manual_review": "Every match and every near miss (0.60 <= similarity < 0.80) is listed in the private output for Ziya. A manual verdict is reported as a separate number and never edits the primary metric."
+  },
+  "metrics": {
+    "primary": "Z = found / eligible Randevu salons in the chosen district, candidate pool = filtered universe",
+    "interval": "Wilson 95% interval for Z",
+    "secondary": [
+      "Z_unfiltered: same matching against every Overture place in the district, any category, no freshness filter (shows what the category and freshness filters lose)",
+      "Y_universe: count of filtered Overture salons in the district",
+      "match_kind counts (PHONE, NAME_DISTANCE, NAME_STREET, NAME_UNIQUE)"
+    ]
+  },
+  "gate": {
+    "min_eligible_salons": 15,
+    "GO_FAZ1": "Z >= 0.70 and Wilson lower bound >= 0.50",
+    "NO_GO_CHANGE_DISTRICT_OR_SECTOR": "Z < 0.50",
+    "GRAY_EXTEND": "anything else: coverage undecided; the next step is a new protocol (new study id) with a second district, not a re-read of this one",
+    "ABSTAIN_SMALL_N": "fewer than min_eligible_salons eligible salons after the fallback rule"
+  },
+  "outputs": {
+    "committed": "aggregate report only: release, district id, funnel counts, X, Y, Z, interval, match_kind counts, input SHA-256 values, protocol commit SHA, status",
+    "private": "Overture extract (parquet), Randevu export, per-salon match table: labs/core/.local/data019/"
+  },
+  "no_tuning_after_results": "Any change to categories, thresholds, district or matching after the first Randevu match output is seen is a new study with a new id."
+}
