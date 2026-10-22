@@ -26,6 +26,8 @@ Kategoriler: beauty_salon 419, hair_salon 200, barber 127, nail_salon 71, diğer
 
 Gözlem: bu sürümde İstanbul salonlarında `operating_status` hep boş ve bütün `update_time` değerleri 2026. Yani "taze olmayanı ayıkla" adımında fiilen yalnız confidence eşiği iş görüyor; güncelleme tarihi kapanmış dükkânı ayırt etmiyor. Confidence de doğrulama değildir.
 
+Ekim sürümü (`2026-10-21.0`, 22 Ekim'de yalnız betimleyici olarak okundu): Kadıköy'de 876 salon kaydı, confidence ≥ 0,70 olan 588. `operating_status` yine hepsinde boş. Daha önemlisi, her iki sürümde de bütün salon kayıtlarının `update_time` değeri tek bir damga: Eylül'de `2026-09-17T22:52:12Z`, Ekim'de `2026-10-15T18:00:21Z`. Bu, kaydın sahada güncellendiği tarih değil, yayıncının sürümü derlediği andır. Tazelik filtresi bu yüzden İstanbul salonlarında hiçbir şey ayıklamıyor. Ön kayıt Eylül sürümünde sabit kalıyor; Ekim'le yapılacak bir koşu ayrı makbuz olur ve bunun yerine geçmez.
+
 Bu sayılar İstanbul'daki gerçek salon sayısı değildir; Overture'ün listelediği kayıt sayısıdır.
 
 ## Sonraki adım
