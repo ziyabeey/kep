@@ -26,7 +26,8 @@ karar gerekiyor.
 ## Karar
 
 1. **S0 web pilotu internete açılır, ama lab'ın dışında.** Uygulama kodu ayrı bir ürün
-   reposunda yaşar (repo ve hosting seçimi bu ADR'nin açık sorusu, aşağıda).
+   reposunda yaşar. Karar (2026-10-22, Ziya): yeni, özel bir repo; veritabanı ve
+   kimlik doğrulama Supabase (Randevu ile aynı organizasyon), ön yüz Vercel.
    `labs/core`'daki hiçbir varsayılan değişmez: lab `consumer_publish=false`,
    `source_fetches=0`, `real_human_labels=0` olarak kalır ve pilot verisine erişmez.
    Bu ADR ve ön kayıt protokolü bu repoda (`docs/`) durur, çünkü KEP'in karar
@@ -68,8 +69,6 @@ karar gerekiyor.
 
 ## Açık soru
 
-- Uygulama kodunun reposu ve hosting (öneri: yeni repo + Supabase + Vercel/Cloudflare
-  Pages; Randevu ile aynı Supabase organizasyonu). Ziya'nın seçimi bu bölüme yazılır.
 - 5651 (yer sağlayıcı) ve KVKK için kısa bir hukukçu görüşü yayından önce alınmalı mı,
   yoksa pilot ölçeğinde aydınlatma metni yeterli mi?
 
